@@ -1,15 +1,15 @@
-package com.tubes.purry.ui.home
+package com.tubes.purry.ui.library
 
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import com.tubes.purry.databinding.FragmentHomeBinding
+import com.tubes.purry.databinding.FragmentLibraryBinding
 
-class HomeFragment : Fragment() {
+class LibraryFragment : Fragment() {
 
-    private var _binding: FragmentHomeBinding? = null
+    private var _binding: FragmentLibraryBinding? = null
     private val binding get() = _binding!!
 
     override fun onCreateView(
@@ -17,7 +17,7 @@ class HomeFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentHomeBinding.inflate(inflater, container, false)
+        _binding = FragmentLibraryBinding.inflate(inflater, container, false)
         return binding.root
     }
 
