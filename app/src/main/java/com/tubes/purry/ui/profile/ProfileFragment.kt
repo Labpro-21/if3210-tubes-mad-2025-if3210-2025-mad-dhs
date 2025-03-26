@@ -71,15 +71,6 @@ class ProfileFragment : Fragment() {
         }
     }
 
-//    private fun loadProfileData() {
-//        val token = sessionManager.fetchAuthToken()
-//        if (token != null) {
-//            viewModel.getProfileData("Bearer $token")
-//        } else {
-//            navigateToLogin()
-//        }
-//    }
-
     private fun observeViewModel() {
         viewModel.profileData.observe(viewLifecycleOwner) { profile ->
             binding.apply {

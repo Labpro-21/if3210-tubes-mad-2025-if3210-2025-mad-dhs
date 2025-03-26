@@ -21,7 +21,7 @@ class SessionManager(context: Context) {
     fun saveAuthToken(token: String) {
         val editor = prefs.edit()
         editor.putString(USER_TOKEN, token)
-        val result = editor.commit() // Use commit() instead of apply() to ensure immediate write
+        val result = editor.commit()
         Log.d("SessionManager", "Token saved result: $result")
     }
 
@@ -34,7 +34,7 @@ class SessionManager(context: Context) {
     fun saveRefreshToken(token: String) {
         val editor = prefs.edit()
         editor.putString(REFRESH_TOKEN, token)
-        val result = editor.commit() // Use commit() instead of apply()
+        val result = editor.commit()
         Log.d("SessionManager", "Refresh token saved result: $result")
     }
 

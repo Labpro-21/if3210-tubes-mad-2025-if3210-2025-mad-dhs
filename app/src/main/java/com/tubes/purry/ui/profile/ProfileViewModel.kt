@@ -23,24 +23,6 @@ class ProfileViewModel : ViewModel() {
     private val _loading = MutableLiveData<Boolean>()
     val loading: LiveData<Boolean> = _loading
 
-//    fun getProfileData(token: String) {
-//        _loading.value = true
-//        viewModelScope.launch {
-//            try {
-//                val response = repository.getProfile(token)
-//                if (response.isSuccessful && response.body() != null) {
-//                    _profileData.value = response.body()!!
-//                } else {
-//                    _errorMessage.value = "Failed to fetch profile: ${response.message()}"
-//                }
-//            } catch (e: Exception) {
-//                _errorMessage.value = "Error: ${e.message}"
-//            } finally {
-//                _loading.value = false
-//            }
-//        }
-//    }
-
     fun getProfileData(token: String) {
         _loading.value = true
         viewModelScope.launch {

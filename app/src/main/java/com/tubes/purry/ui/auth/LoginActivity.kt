@@ -46,34 +46,12 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-//    private fun login(email: String, password: String) {
-//        CoroutineScope(Dispatchers.IO).launch {
-//            try {
-//                val response = authRepository.login(LoginRequest(email, password))
-//                withContext(Dispatchers.Main) {
-//                    if (response.isSuccessful && response.body() != null) {
-//                        // Save token to preferences
-//                        response.body()?.token?.let { sessionManager.saveAuthToken(it) }
-//                        response.body()?.refreshToken?.let { sessionManager.saveRefreshToken(it) }
-//                        navigateToMainActivity()
-//                    } else {
-//                        Toast.makeText(this@LoginActivity, "Login failed: ${response.message()}", Toast.LENGTH_SHORT).show()
-//                    }
-//                }
-//            } catch (e: Exception) {
-//                withContext(Dispatchers.Main) {
-//                    Toast.makeText(this@LoginActivity, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
-//                }
-//            }
-//        }
-//    }
     private fun login(email: String, password: String) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val response = authRepository.login(LoginRequest(email, password))
                 withContext(Dispatchers.Main) {
                     if (response.isSuccessful && response.body() != null) {
-                        // Save token to preferences - use accessToken instead of token
                         response.body()?.accessToken?.let {
                             sessionManager.saveAuthToken(it)
                             Log.d("LoginActivity", "AccessToken saved: ${it.take(10)}...")
