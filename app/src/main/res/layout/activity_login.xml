@@ -4,24 +4,48 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/black"
     tools:context=".ui.auth.LoginActivity">
 
+    <!-- Background Image -->
+    <ImageView
+        android:id="@+id/backgroundImage"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        android:src="@drawable/bg_login"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Gradient Overlay -->
+    <View
+        android:id="@+id/gradientOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/bg_gradient_overlay"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Logo -->
     <ImageView
         android:id="@+id/logo"
         android:layout_width="100dp"
         android:layout_height="100dp"
-        android:layout_marginBottom="16dp"
-        android:src="@drawable/ic_logo"
+        android:src="@drawable/logo"
         app:layout_constraintBottom_toTopOf="@+id/txtTitle"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.8" />
 
+    <!-- Title Text -->
     <TextView
         android:id="@+id/txtTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
         android:text="Millions of Songs."
         android:textColor="@color/white"
         android:textSize="24sp"
@@ -30,11 +54,12 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
+    <!-- Subtitle Text -->
     <TextView
         android:id="@+id/txtSubtitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="48dp"
+        android:layout_marginBottom="80dp"
         android:text="Only on Purrytify."
         android:textColor="@color/white"
         android:textSize="24sp"
@@ -43,6 +68,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
+    <!-- Email Label -->
     <TextView
         android:id="@+id/txtEmail"
         android:layout_width="wrap_content"
@@ -54,6 +80,7 @@
         app:layout_constraintBottom_toTopOf="@+id/etEmail"
         app:layout_constraintStart_toStartOf="parent" />
 
+    <!-- Email Input -->
     <EditText
         android:id="@+id/etEmail"
         android:layout_width="0dp"
@@ -64,13 +91,14 @@
         android:background="@drawable/edit_text_background"
         android:hint="Email"
         android:inputType="textEmailAddress"
-        android:padding="12dp"
+        android:padding="16dp"
         android:textColor="@color/white"
-        android:textColorHint="@color/gray"
+        android:textColorHint="#80FFFFFF"
         app:layout_constraintBottom_toTopOf="@+id/txtPassword"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
+    <!-- Password Label -->
     <TextView
         android:id="@+id/txtPassword"
         android:layout_width="wrap_content"
@@ -82,31 +110,34 @@
         app:layout_constraintBottom_toTopOf="@+id/etPassword"
         app:layout_constraintStart_toStartOf="parent" />
 
+    <!-- Password Input -->
     <EditText
         android:id="@+id/etPassword"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
         android:layout_marginEnd="24dp"
-        android:layout_marginBottom="48dp"
+        android:layout_marginBottom="32dp"
         android:background="@drawable/edit_text_background"
         android:hint="Password"
         android:inputType="textPassword"
-        android:padding="12dp"
+        android:padding="16dp"
         android:textColor="@color/white"
-        android:textColorHint="@color/gray"
+        android:textColorHint="#80FFFFFF"
         app:layout_constraintBottom_toTopOf="@+id/btnLogin"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
+
+    <!-- Login Button -->
     <Button
         android:id="@+id/btnLogin"
         android:layout_width="0dp"
         android:layout_height="56dp"
         android:layout_marginStart="24dp"
         android:layout_marginEnd="24dp"
-        android:layout_marginBottom="100dp"
-        android:background="@drawable/button_background"
+        android:layout_marginBottom="80dp"
+        android:background="@drawable/green_button_background"
         android:text="Log In"
         android:textAllCaps="false"
         android:textColor="@color/white"
