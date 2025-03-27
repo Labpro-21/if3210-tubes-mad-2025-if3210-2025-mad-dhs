@@ -14,4 +14,7 @@
         <!-- Background color. -->
         <item name="android:windowBackground">@color/black</item>
     </style>
+    <style name="CustomButton" parent="Widget.Material3.Button">
+        <item name="backgroundTint">@color/your_custom_color</item>
+    </style>
 </resources>

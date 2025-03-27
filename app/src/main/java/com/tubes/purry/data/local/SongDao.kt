@@ -1,0 +1,23 @@
+package com.tubes.purry.data.local
+
+import androidx.room.*
+import com.tubes.purry.data.model.Song
+import kotlinx.coroutines.flow.Flow
+
+@Dao
+interface SongDao {
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(song: Song)
+
+    @Update
+    suspend fun update(song: Song)
+
+    @Delete
+    suspend fun delete(song: Song)
+
+    @Query("SELECT * FROM songs WHERE isLocal = 1 ORDER BY id DESC LIMIT 10")
+    fun getNewSongs(): Flow<List<Song>>
+
+    @Query("SELECT * FROM songs ORDER BY lastPlayedAt DESC LIMIT 10")
+    fun getRecentlyPlayed(): Flow<List<Song>>
+}

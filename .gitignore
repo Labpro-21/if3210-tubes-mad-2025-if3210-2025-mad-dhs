@@ -7,7 +7,7 @@
 /local.properties
 
 # IDE
-.idea/
+#.idea/
 *.iml
 
 
