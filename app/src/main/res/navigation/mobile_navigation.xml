@@ -5,9 +5,26 @@
     android:id="@+id/mobile_navigation"
     app:startDestination="@+id/navigation_home">
 
+    <action
+        android:id="@+id/action_global_nowPlayingFragment"
+        app:destination="@id/nowPlayingFragment"
+        app:launchSingleTop="true" />
+
+    <fragment
+        android:id="@+id/nowPlayingFragment"
+        android:name="com.tubes.purry.ui.player.MiniPlayerFragment"
+        android:label="Now Playing"
+        tools:layout="@layout/fragment_mini_player" />
+
+    <fragment
+        android:id="@+id/addSongFragment"
+        android:name="com.tubes.purry.ui.library.AddSongFragment"
+        android:label="Add Song"
+        tools:layout="@layout/fragment_add_song" />
+
     <fragment
         android:id="@+id/navigation_home"
-        android:name="com.tubes.purry.ui.home.HomeFragment"
+        android:name="com.tubes.purry.ui.library.HomeFragment"
         android:label="@string/title_home"
         tools:layout="@layout/fragment_home" />
 
@@ -15,7 +32,11 @@
         android:id="@+id/navigation_library"
         android:name="com.tubes.purry.ui.library.LibraryFragment"
         android:label="@string/title_library"
-        tools:layout="@layout/fragment_library" />
+        tools:layout="@layout/fragment_library">
+        <action
+            android:id="@+id/action_libraryFragment_to_addSongFragment"
+            app:destination="@id/addSongFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/navigation_profile"

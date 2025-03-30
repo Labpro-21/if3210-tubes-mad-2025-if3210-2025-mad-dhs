@@ -23,8 +23,10 @@ object NetworkUtil {
                         capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR))
     }
 
+
     fun startNetworkCallback(context: Context) {
         val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
         val networkCallback = object : ConnectivityManager.NetworkCallback() {
             override fun onAvailable(network: Network) {
                 networkStatus.postValue(true)
@@ -35,10 +37,12 @@ object NetworkUtil {
             }
         }
 
-        val networkRequest = NetworkRequest.Builder()
+        val request = NetworkRequest.Builder()
             .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
             .build()
 
-        connectivityManager.registerNetworkCallback(networkRequest, networkCallback)
+        connectivityManager.registerNetworkCallback(request, networkCallback)
+
+        networkStatus.postValue(isNetworkAvailable(context))
     }
 }

@@ -1,0 +1,36 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingEnd="12dp"
+    tools:ignore="RtlSymmetry">
+
+    <ImageView
+        android:id="@+id/imageCover"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:contentDescription="@string/item_new_song_album_cover"
+        android:scaleType="centerCrop"
+        android:src="@drawable/default_album" />
+
+    <TextView
+        android:id="@+id/textTitle"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:text="@string/item_new_song_title"
+        android:textColor="@android:color/white"
+        android:textSize="14sp"
+        android:maxLines="1"
+        android:ellipsize="end" />
+
+    <TextView
+        android:id="@+id/textArtist"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:text="@string/item_new_song_artist_name"
+        android:textColor="@android:color/darker_gray"
+        android:textSize="12sp"
+        android:maxLines="1"
+        android:ellipsize="end" />
+</LinearLayout>
