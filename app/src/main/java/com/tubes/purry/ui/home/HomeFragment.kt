@@ -1,15 +1,25 @@
-package com.tubes.purry.ui.library
+package com.tubes.purry.ui.home
 
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
+import android.widget.FrameLayout
+// import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.lifecycle.ViewModelProvider
+import com.tubes.purry.R
+import com.tubes.purry.ui.library.SongViewModel
+import com.tubes.purry.ui.library.SongViewModelFactory
+import com.tubes.purry.ui.library.SongCardAdapter
+import com.tubes.purry.ui.library.SongListAdapter
+import com.tubes.purry.ui.player.NowPlayingViewModel
 import com.tubes.purry.databinding.FragmentHomeBinding
 import com.tubes.purry.data.model.Song
+import com.tubes.purry.ui.player.MiniPlayerFragment
+
 
 class HomeFragment : Fragment() {
 
@@ -21,6 +31,8 @@ class HomeFragment : Fragment() {
     private lateinit var newSongsAdapter: SongCardAdapter
     private lateinit var recentSongsAdapter: SongListAdapter
 
+    private lateinit var nowPlayingViewModel: NowPlayingViewModel
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -31,6 +43,8 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        nowPlayingViewModel = ViewModelProvider(requireActivity())[NowPlayingViewModel::class.java]
 
         setupAdapters()
         observeSongs()
@@ -67,10 +81,20 @@ class HomeFragment : Fragment() {
     }
 
     private fun onSongClicked(song: Song) {
-        // TODO: arahin ke player atau tampilkan mini player
-        Toast.makeText(requireContext(), "Play: ${song.title}", Toast.LENGTH_SHORT).show()
+        nowPlayingViewModel.playSong(song, requireContext())
+        viewModel.markAsPlayed(song) // Mark as recently played
 
-        // Tandai sebagai recently played
-        viewModel.markAsPlayed(song)
+        // Show the MiniPlayerFragment
+        val container = requireActivity().findViewById<FrameLayout>(R.id.miniPlayerContainer)
+
+        if (container.visibility != View.VISIBLE) {
+            container.alpha = 0f
+            container.visibility = View.VISIBLE
+            container.animate().alpha(1f).setDuration(250).start()
+        }
+
+        parentFragmentManager.beginTransaction()
+            .replace(R.id.miniPlayerContainer, MiniPlayerFragment())
+            .commit()
     }
 }

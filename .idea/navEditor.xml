@@ -30,8 +30,8 @@
                       <LayoutPositions>
                         <option name="myPosition">
                           <Point>
-                            <option name="x" value="20" />
-                            <option name="y" value="14" />
+                            <option name="x" value="453" />
+                            <option name="y" value="113" />
                           </Point>
                         </option>
                       </LayoutPositions>
@@ -42,9 +42,18 @@
                       <LayoutPositions>
                         <option name="myPosition">
                           <Point>
-                            <option name="x" value="12" />
-                            <option name="y" value="12" />
+                            <option name="x" value="38" />
+                            <option name="y" value="335" />
                           </Point>
+                        </option>
+                        <option name="myPositions">
+                          <map>
+                            <entry key="action_libraryFragment_to_addSongFragment">
+                              <value>
+                                <LayoutPositions />
+                              </value>
+                            </entry>
+                          </map>
                         </option>
                       </LayoutPositions>
                     </value>
@@ -54,8 +63,8 @@
                       <LayoutPositions>
                         <option name="myPosition">
                           <Point>
-                            <option name="x" value="256" />
-                            <option name="y" value="12" />
+                            <option name="x" value="451" />
+                            <option name="y" value="-300" />
                           </Point>
                         </option>
                       </LayoutPositions>
@@ -66,8 +75,8 @@
                       <LayoutPositions>
                         <option name="myPosition">
                           <Point>
-                            <option name="x" value="12" />
-                            <option name="y" value="12" />
+                            <option name="x" value="58" />
+                            <option name="y" value="3" />
                           </Point>
                         </option>
                       </LayoutPositions>

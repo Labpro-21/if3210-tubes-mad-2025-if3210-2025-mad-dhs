@@ -4,14 +4,16 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import android.util.Log
 import com.tubes.purry.data.model.Song
 import androidx.sqlite.db.SupportSQLiteDatabase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import com.tubes.purry.R
 
 
-@Database(entities = [Song::class], version = 1)
+@Database(entities = [Song::class], version = 2)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun songDao(): SongDao
 
@@ -25,21 +27,24 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "purritify.db"
                 )
-                    .addCallback(DatabaseCallback(context))
+                    .fallbackToDestructiveMigration()
+                    .addCallback(SeedDatabaseCallback())
                     .build()
-                INSTANCE = instance
+                    .also { INSTANCE = it }
+
                 instance
             }
         }
     }
 
-    private class DatabaseCallback(
-        private val context: Context
-    ) : Callback() {
+    private class SeedDatabaseCallback : Callback() {
         override fun onCreate(db: SupportSQLiteDatabase) {
             super.onCreate(db)
+            Log.d("AppDatabase", "onCreate triggered. Seeding data...")
+            // Launch coroutine to seed data
             CoroutineScope(Dispatchers.IO).launch {
-                getDatabase(context).songDao().insertAll(predefinedSongs())
+                INSTANCE?.songDao()?.insertAll(predefinedSongs())
+                Log.d("AppDatabase", "Seeding done.")
             }
         }
 
@@ -49,7 +54,8 @@ abstract class AppDatabase : RoomDatabase() {
                 title = "Katakan Saja",
                 artist = "Adikara",
                 coveredUrl = "https://i.ibb.co/rKzzzDv9/katakan-saja.jpg",
-                filePath = "katakan_saja",
+                filePath = null,
+                resId = R.raw.katakan_saja,
                 duration = 239,
                 isLiked = false,
                 isLocal = true,
@@ -60,7 +66,8 @@ abstract class AppDatabase : RoomDatabase() {
                 title = "Primadona",
                 artist = "Adikara",
                 coveredUrl = "https://i.ibb.co/prZxvjdP/primadona.jpg",
-                filePath = "primadona",
+                filePath = null,
+                resId = R.raw.primadona,
                 duration = 247,
                 isLiked = false,
                 isLocal = true,
@@ -71,7 +78,8 @@ abstract class AppDatabase : RoomDatabase() {
                 title = "Terlintas",
                 artist = "Bernadya",
                 coveredUrl = "https://i.ibb.co/whbHgzBc/terlintas.png",
-                filePath = "terlintas",
+                filePath = null,
+                resId = R.raw.terlintas,
                 duration = 235,
                 isLiked = false,
                 isLocal = true,

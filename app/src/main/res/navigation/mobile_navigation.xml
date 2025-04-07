@@ -24,7 +24,7 @@
 
     <fragment
         android:id="@+id/navigation_home"
-        android:name="com.tubes.purry.ui.library.HomeFragment"
+        android:name="com.tubes.purry.ui.home.HomeFragment"
         android:label="@string/title_home"
         tools:layout="@layout/fragment_home" />
 

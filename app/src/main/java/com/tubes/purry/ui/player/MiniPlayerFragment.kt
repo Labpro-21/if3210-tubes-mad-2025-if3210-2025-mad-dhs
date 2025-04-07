@@ -7,6 +7,8 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.tubes.purry.R
 import com.tubes.purry.databinding.FragmentMiniPlayerBinding
 
@@ -31,7 +33,12 @@ class MiniPlayerFragment : Fragment() {
             if (song != null) {
                 binding.textTitle.text = song.title
                 binding.textArtist.text = song.artist
-                // Load cover image tadi udah bisa cuman masi kureng
+
+                Glide.with(binding.root)
+                    .load(song.coveredUrl)
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .skipMemoryCache(false)
+                    .into(binding.imageCover)
             }
         }
 

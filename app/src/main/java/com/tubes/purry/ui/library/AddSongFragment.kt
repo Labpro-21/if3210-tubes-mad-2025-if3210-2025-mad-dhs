@@ -93,6 +93,7 @@ class AddSongFragment : Fragment() {
                 artist = artist,
                 coveredUrl = imageUri?.toString() ?: "",
                 filePath = filePath,
+                resId = null,
                 duration = duration,
                 isLiked = false,
                 isLocal = true

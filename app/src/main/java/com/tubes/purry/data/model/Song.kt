@@ -9,7 +9,8 @@ data class Song (
     val title: String,
     val artist: String,
     val coveredUrl: String,
-    val filePath: String,
+    val filePath: String?, // for user-uploaded songs
+    val resId : Int?, // for raw resource (seeded)
     val duration: Int,
     val isLiked: Boolean = false,
     val isLocal: Boolean = false,
