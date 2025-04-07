@@ -8,7 +8,7 @@ import com.tubes.purry.data.repository.SongRepository
 
 class SongViewModelFactory(context: Context) : ViewModelProvider.Factory {
     private val repository: SongRepository =
-        SongRepository(AppDatabase.getInstance(context).songDao())
+        SongRepository(AppDatabase.getDatabase(context).songDao())
 
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(SongViewModel::class.java)) {
