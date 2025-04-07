@@ -53,7 +53,7 @@ abstract class AppDatabase : RoomDatabase() {
                 duration = 239,
                 isLiked = false,
                 isLocal = true,
-                lastPlayedAt = System.currentTimeMillis()
+                lastPlayedAt = 0L
             ),
             Song(
                 id = "2",
@@ -64,7 +64,7 @@ abstract class AppDatabase : RoomDatabase() {
                 duration = 247,
                 isLiked = false,
                 isLocal = true,
-                lastPlayedAt = System.currentTimeMillis()
+                lastPlayedAt = 0L
             ),
             Song(
                 id = "3",
@@ -75,7 +75,7 @@ abstract class AppDatabase : RoomDatabase() {
                 duration = 235,
                 isLiked = false,
                 isLocal = true,
-                lastPlayedAt = System.currentTimeMillis()
+                lastPlayedAt = 0L
             )
         )
     }

@@ -21,6 +21,6 @@ interface SongDao {
     @Query("SELECT * FROM songs WHERE isLocal = 1 ORDER BY id DESC LIMIT 10")
     fun getNewSongs(): Flow<List<Song>>
 
-    @Query("SELECT * FROM songs ORDER BY lastPlayedAt DESC LIMIT 10")
+    @Query("SELECT * FROM songs WHERE lastPlayedAt > 0 ORDER BY lastPlayedAt DESC LIMIT 10")
     fun getRecentlyPlayed(): Flow<List<Song>>
 }
