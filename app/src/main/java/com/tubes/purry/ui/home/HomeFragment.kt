@@ -82,19 +82,24 @@ class HomeFragment : Fragment() {
 
     private fun onSongClicked(song: Song) {
         nowPlayingViewModel.playSong(song, requireContext())
-        viewModel.markAsPlayed(song) // Mark as recently played
+        viewModel.markAsPlayed(song)
 
-        // Show the MiniPlayerFragment
+        val fragmentManager = requireActivity().supportFragmentManager
+
+        // Check if MiniPlayerFragment is already attached
+        val existingFragment = fragmentManager.findFragmentById(R.id.miniPlayerContainer)
+        if (existingFragment == null) {
+            fragmentManager.beginTransaction()
+                .replace(R.id.miniPlayerContainer, MiniPlayerFragment())
+                .commit()
+        }
+
+        // Make the container visible with fade-in if it's not already
         val container = requireActivity().findViewById<FrameLayout>(R.id.miniPlayerContainer)
-
         if (container.visibility != View.VISIBLE) {
             container.alpha = 0f
             container.visibility = View.VISIBLE
             container.animate().alpha(1f).setDuration(250).start()
         }
-
-        parentFragmentManager.beginTransaction()
-            .replace(R.id.miniPlayerContainer, MiniPlayerFragment())
-            .commit()
     }
 }

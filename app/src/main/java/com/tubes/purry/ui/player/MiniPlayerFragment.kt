@@ -11,6 +11,7 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.tubes.purry.R
 import com.tubes.purry.databinding.FragmentMiniPlayerBinding
+import androidx.core.net.toUri
 
 class MiniPlayerFragment : Fragment() {
     private lateinit var viewModel: NowPlayingViewModel
@@ -34,11 +35,25 @@ class MiniPlayerFragment : Fragment() {
                 binding.textTitle.text = song.title
                 binding.textArtist.text = song.artist
 
-                Glide.with(binding.root)
-                    .load(song.coveredUrl)
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .skipMemoryCache(false)
-                    .into(binding.imageCover)
+                when {
+                    song.coverResId != null -> {
+                        Glide.with(binding.root)
+                            .load(song.coverResId)
+                            .diskCacheStrategy(DiskCacheStrategy.ALL)
+                            .into(binding.imageCover)
+                    }
+                    !song.coverPath.isNullOrEmpty() -> {
+                        Glide.with(binding.root)
+                            .load(song.coverPath.toUri())
+                            .diskCacheStrategy(DiskCacheStrategy.ALL)
+                            .into(binding.imageCover)
+                    }
+                    else -> {
+                        Glide.with(binding.root)
+                            .load(R.drawable.album_default) // 👈 fallback image
+                            .into(binding.imageCover)
+                    }
+                }
             }
         }
 

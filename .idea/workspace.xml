@@ -36,19 +36,16 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fb2d9b52-b320-4578-a27c-b77d399ccfa2" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/navEditor.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/navEditor.xml" afterDir="false" />
+    <list default="true" id="fb2d9b52-b320-4578-a27c-b77d399ccfa2" name="Changes" comment="fix: resolve media player bug, integrate mini player with homepage, and display cover image&#10;&#10;- Fixed media player playback issues and improved handling of play/pause logic&#10;- Integrated MiniPlayerFragment to show when a song is clicked from the home page&#10;- Added image cover loading for mini player using Glide with fallback and error handling">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/local/AppDatabase.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/local/AppDatabase.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/model/Song.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/model/Song.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/home/HomeFragment.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/home/HomeFragment.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/library/AddSongFragment.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/library/AddSongFragment.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/library/SongCardAdapter.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/library/SongCardAdapter.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/library/SongListAdapter.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/library/SongListAdapter.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/player/MiniPlayerFragment.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/player/MiniPlayerFragment.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/player/NowPlayingViewModel.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/player/NowPlayingViewModel.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/player/PlayerController.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/player/PlayerController.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/fragment_home.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/fragment_home.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/navigation/mobile_navigation.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/navigation/mobile_navigation.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/activity_main.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/activity_main.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -206,19 +203,32 @@
       <option name="presentableId" value="Default" />
       <updated>1743996095375</updated>
     </task>
+    <task id="LOCAL-00001" summary="fix: resolve media player bug, integrate mini player with homepage, and display cover image&#10;&#10;- Fixed media player playback issues and improved handling of play/pause logic&#10;- Integrated MiniPlayerFragment to show when a song is clicked from the home page&#10;- Added image cover loading for mini player using Glide with fallback and error handling">
+      <option name="closed" value="true" />
+      <created>1744039123686</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1744039123686</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="fix: resolve media player bug, integrate mini player with homepage, and display cover image&#10;&#10;- Fixed media player playback issues and improved handling of play/pause logic&#10;- Integrated MiniPlayerFragment to show when a song is clicked from the home page&#10;- Added image cover loading for mini player using Glide with fallback and error handling" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix: resolve media player bug, integrate mini player with homepage, and display cover image&#10;&#10;- Fixed media player playback issues and improved handling of play/pause logic&#10;- Integrated MiniPlayerFragment to show when a song is clicked from the home page&#10;- Added image cover loading for mini player using Glide with fallback and error handling" />
   </component>
   <component name="play_dynamic_filters_status">
     <option name="appIdToCheckInfo">
       <map>
         <entry key="com.tubes.purry">
           <value>
-            <CheckInfo lastCheckTimestamp="1743996948277" />
+            <CheckInfo lastCheckTimestamp="1744124468645" />
           </value>
         </entry>
         <entry key="com.tubes.purry.test">
           <value>
-            <CheckInfo lastCheckTimestamp="1743996948277" />
+            <CheckInfo lastCheckTimestamp="1744124468645" />
           </value>
         </entry>
       </map>

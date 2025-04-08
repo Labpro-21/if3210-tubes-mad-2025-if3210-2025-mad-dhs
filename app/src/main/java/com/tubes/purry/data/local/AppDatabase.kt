@@ -12,7 +12,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import com.tubes.purry.R
 
-
 @Database(entities = [Song::class], version = 2)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun songDao(): SongDao
@@ -41,7 +40,7 @@ abstract class AppDatabase : RoomDatabase() {
         override fun onCreate(db: SupportSQLiteDatabase) {
             super.onCreate(db)
             Log.d("AppDatabase", "onCreate triggered. Seeding data...")
-            // Launch coroutine to seed data
+
             CoroutineScope(Dispatchers.IO).launch {
                 INSTANCE?.songDao()?.insertAll(predefinedSongs())
                 Log.d("AppDatabase", "Seeding done.")
@@ -53,7 +52,8 @@ abstract class AppDatabase : RoomDatabase() {
                 id = "1",
                 title = "Katakan Saja",
                 artist = "Adikara",
-                coveredUrl = "https://i.ibb.co/rKzzzDv9/katakan-saja.jpg",
+                coverResId = R.drawable.katakan_saja,
+                coverPath = null,
                 filePath = null,
                 resId = R.raw.katakan_saja,
                 duration = 239,
@@ -65,7 +65,8 @@ abstract class AppDatabase : RoomDatabase() {
                 id = "2",
                 title = "Primadona",
                 artist = "Adikara",
-                coveredUrl = "https://i.ibb.co/prZxvjdP/primadona.jpg",
+                coverResId = R.drawable.primadona,
+                coverPath = null,
                 filePath = null,
                 resId = R.raw.primadona,
                 duration = 247,
@@ -77,7 +78,8 @@ abstract class AppDatabase : RoomDatabase() {
                 id = "3",
                 title = "Terlintas",
                 artist = "Bernadya",
-                coveredUrl = "https://i.ibb.co/whbHgzBc/terlintas.png",
+                coverResId = R.drawable.terlintas,
+                coverPath = null,
                 filePath = null,
                 resId = R.raw.terlintas,
                 duration = 235,

@@ -2,9 +2,11 @@ package com.tubes.purry.ui.library
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.net.toUri
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.tubes.purry.R
 import com.tubes.purry.databinding.ItemSongListBinding
 import com.tubes.purry.data.model.Song
 
@@ -26,11 +28,17 @@ class SongListAdapter(
             binding.tvTitle.text = song.title
             binding.tvArtist.text = song.artist
 
-            Glide.with(binding.root)
-                .load(song.coveredUrl)
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .skipMemoryCache(false)
-                .into(binding.imgCover)
+            when {
+                song.coverResId != null -> {
+                    Glide.with(binding.root).load(song.coverResId).into(binding.imgCover)
+                }
+                !song.coverPath.isNullOrBlank() -> {
+                    Glide.with(binding.root).load(song.coverPath.toUri()).into(binding.imgCover)
+                }
+                else -> {
+                    binding.imgCover.setImageResource(R.drawable.album_default)
+                }
+            }
 
             binding.root.setOnClickListener { onClick(song) }
         }

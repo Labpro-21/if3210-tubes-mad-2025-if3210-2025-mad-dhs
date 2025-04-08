@@ -4,8 +4,10 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.tubes.purry.R
 import com.tubes.purry.databinding.ItemSongCardBinding
 import com.tubes.purry.data.model.Song
+import androidx.core.net.toUri
 
 class SongCardAdapter(
     private val onClick: (Song) -> Unit
@@ -25,9 +27,17 @@ class SongCardAdapter(
             binding.tvTitle.text = song.title
             binding.tvArtist.text = song.artist
 
-            Glide.with(binding.root)
-                .load(song.coveredUrl)
-                .into(binding.imgCover)
+            when {
+                song.coverResId != null -> {
+                    Glide.with(binding.root).load(song.coverResId).into(binding.imgCover)
+                }
+                !song.coverPath.isNullOrBlank() -> {
+                    Glide.with(binding.root).load(song.coverPath.toUri()).into(binding.imgCover)
+                }
+                else -> {
+                    binding.imgCover.setImageResource(R.drawable.album_default)
+                }
+            }
 
             binding.root.setOnClickListener { onClick(song) }
         }

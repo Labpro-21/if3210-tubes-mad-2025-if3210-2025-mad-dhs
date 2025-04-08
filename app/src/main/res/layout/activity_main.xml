@@ -31,6 +31,18 @@
         app:layout_constraintTop_toBottomOf="@+id/networkErrorBanner"
         app:navGraph="@navigation/mobile_navigation" />
 
+    <!-- MiniPlayer Fragment container (moved here!) -->
+    <FrameLayout
+        android:id="@+id/miniPlayerContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:visibility="gone"
+        android:layout_marginBottom="56dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/navView"
         android:layout_width="match_parent"

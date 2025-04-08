@@ -91,9 +91,10 @@ class AddSongFragment : Fragment() {
                 id = UUID.randomUUID().toString(),
                 title = title,
                 artist = artist,
-                coveredUrl = imageUri?.toString() ?: "",
                 filePath = filePath,
                 resId = null,
+                coverResId = null,
+                coverPath = imageUri?.toString() ?: "",
                 duration = duration,
                 isLiked = false,
                 isLocal = true
