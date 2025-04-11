@@ -5,6 +5,11 @@
       <config />
     </shared>
     <layouts>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/activity_add_song_drawer.xml">
+        <config>
+          <theme>@style/Theme.Purrytify</theme>
+        </config>
+      </layout>
       <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/activity_login.xml">
         <config>
           <theme>@style/Theme.Purrytify</theme>
@@ -15,7 +20,22 @@
           <theme>@style/Theme.Purrytify</theme>
         </config>
       </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/activity_main_drawer.xml">
+        <config>
+          <theme>@style/Theme.Purrytify</theme>
+        </config>
+      </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/content_add_song.xml">
+        <config>
+          <theme>@style/Theme.Purrytify</theme>
+        </config>
+      </layout>
       <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/fragment_add_song.xml">
+        <config>
+          <theme>@style/Theme.Purrytify</theme>
+        </config>
+      </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/fragment_add_song_bottom_sheet.xml">
         <config>
           <theme>@style/Theme.Purrytify</theme>
         </config>
@@ -91,11 +111,20 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fb2d9b52-b320-4578-a27c-b77d399ccfa2" name="Changes" comment="fix: resolve image loading bug by removing dependency on third party link for image url">
-      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/model/User.kt" afterDir="false" />
+    <list default="true" id="fb2d9b52-b320-4578-a27c-b77d399ccfa2" name="Changes" comment="feat: profile stats">
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/library/AddSongBottomSheetFragment.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/profile/ProfileViewModelFactory.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_close.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_search.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/layout/fragment_add_song_bottom_sheet.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/PurrytifyApplication.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/PurrytifyApplication.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/remote/ApiClient.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/remote/ApiClient.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/local/AppDatabase.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/local/AppDatabase.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/local/SongDao.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/local/SongDao.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/repository/SongRepository.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/repository/SongRepository.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/library/LibraryFragment.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/library/LibraryFragment.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/profile/ProfileViewModel.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/profile/ProfileViewModel.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/fragment_library.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/fragment_library.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/values/strings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/values/strings.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -105,7 +134,7 @@
   <component name="ClangdSettings">
     <option name="formatViaClangd" value="false" />
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[DeviceId(pluginId=LocalEmulator, isTemplate=false, identifier=path=C:\Users\HP\.android\avd\Medium_Phone_API_Baklava.avd)]" />
+  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[DeviceId(pluginId=LocalEmulator, isTemplate=false, identifier=path=/Users/shazyataufik/.android/avd/Medium_Phone.avd)]" />
   <component name="ExternalProjectsData">
     <projectState path="$PROJECT_DIR$">
       <ProjectState />
@@ -131,11 +160,11 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
+        <option value="Kotlin File" />
+        <option value="Kotlin Data Class" />
         <option value="layoutResourceFile" />
         <option value="resourceFile" />
-        <option value="Kotlin File" />
         <option value="Kotlin Class" />
-        <option value="Kotlin Data Class" />
       </list>
     </option>
   </component>
@@ -175,7 +204,7 @@
     "RunOnceActivity.readMode.enableVisualFormatting": "true",
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
-    "git-widget-placeholder": "feat/library-and-playerxml",
+    "git-widget-placeholder": "feat/search",
     "ignore.virus.scanning.warn.message": "true",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "C:/Users/edarr/Downloads",
@@ -185,6 +214,9 @@
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="D:\College\Semester 6\Mobile\Tubes1\if3210-tubes-mad-2025-if3210-2025-mad-dhs\app\src\main\res\drawable" />
+    </key>
+    <key name="CopyKotlinDeclarationDialog.RECENTS_KEY">
+      <recent name="com.tubes.purry.ui.library" />
     </key>
   </component>
   <component name="RunManager">
@@ -310,7 +342,8 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="fix: resolve media player bug, integrate mini player with homepage, and display cover image&#10;&#10;- Fixed media player playback issues and improved handling of play/pause logic&#10;- Integrated MiniPlayerFragment to show when a song is clicked from the home page&#10;- Added image cover loading for mini player using Glide with fallback and error handling" />
     <MESSAGE value="fix: resolve image loading bug by removing dependency on third party link for image url" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix: resolve image loading bug by removing dependency on third party link for image url" />
+    <MESSAGE value="feat: profile stats" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat: profile stats" />
   </component>
   <component name="play_dynamic_filters_status">
     <option name="appIdToCheckInfo">

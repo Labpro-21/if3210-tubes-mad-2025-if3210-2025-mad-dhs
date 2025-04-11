@@ -27,4 +27,7 @@
     <string name="play_pause_song" />
     <string name="next_song" />
     <string name="previous_song" />
+    <string name="empty_library">Your library is empty. Add some songs to get started!</string>
+    <string name="no_search_results">No songs match your search</string>
+    <string name="no_liked_songs">You haven\'t liked any songs yet</string>
 </resources>
