@@ -30,8 +30,14 @@ class NowPlayingViewModel : ViewModel() {
     }
 
     fun togglePlayPause() {
-        if(_isPlaying.value == true) pauseSong() else resumeSong()
+        val currentlyPlaying = _isPlaying.value ?: false
+        if (currentlyPlaying) {
+            pauseSong()
+        } else {
+            resumeSong()
+        }
     }
+
 
     override fun onCleared() {
         super.onCleared()

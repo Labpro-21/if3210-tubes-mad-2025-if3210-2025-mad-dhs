@@ -57,7 +57,7 @@ abstract class AppDatabase : RoomDatabase() {
                 coverPath = null,
                 filePath = null,
                 resId = R.raw.katakan_saja,
-                duration = 239,
+                duration = 239000,
                 isLiked = false,
                 isLocal = true,
                 lastPlayedAt = 0L
@@ -70,7 +70,7 @@ abstract class AppDatabase : RoomDatabase() {
                 coverPath = null,
                 filePath = null,
                 resId = R.raw.primadona,
-                duration = 247,
+                duration = 247000,
                 isLiked = false,
                 isLocal = true,
                 lastPlayedAt = 0L
@@ -83,7 +83,7 @@ abstract class AppDatabase : RoomDatabase() {
                 coverPath = null,
                 filePath = null,
                 resId = terlintas,
-                duration = 235,
+                duration = 235000,
                 isLiked = false,
                 isLocal = true,
                 lastPlayedAt = 0L

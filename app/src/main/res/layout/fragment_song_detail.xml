@@ -34,10 +34,10 @@
     <!-- Title and Favorite -->
     <ImageView
         android:id="@+id/ivCover"
-        android:layout_width="240dp"
-        android:layout_height="242dp"
+        android:layout_width="308dp"
+        android:layout_height="306dp"
         android:layout_margin="32dp"
-        android:layout_marginTop="48dp"
+        android:layout_marginTop="60dp"
         android:contentDescription="@null"
         android:scaleType="centerCrop"
         android:src="@drawable/album_default"
@@ -51,54 +51,54 @@
         android:id="@+id/tvTitle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
         android:text="@string/title"
-        android:textSize="20sp"
-        android:textStyle="bold"
         android:textColor="@android:color/white"
-        android:gravity="center"
-        app:layout_constraintTop_toBottomOf="@id/ivCover"
-        app:layout_constraintStart_toStartOf="parent"
+        android:textSize="25sp"
+        android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="16dp"/>
+        app:layout_constraintStart_toStartOf="@+id/ivCover"
+        app:layout_constraintTop_toBottomOf="@id/ivCover" />
+
+    <!-- Artist -->
 
     <ImageButton
         android:id="@+id/btnFavorite"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        android:src="@drawable/ic_heart_outline"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="@null"
+        android:src="@drawable/ic_heart_outline"
+        app:layout_constraintEnd_toEndOf="@+id/ivCover"
+        app:layout_constraintTop_toTopOf="@id/tvTitle" />
 
-        app:layout_constraintTop_toTopOf="@id/tvTitle"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginEnd="16dp"/>
 
-    <!-- Artist -->
+    <!-- SeekBar -->
     <TextView
         android:id="@+id/tvArtist"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
         android:text="@string/artist"
-        android:textSize="14sp"
         android:textColor="@android:color/white"
-        android:gravity="center"
-        app:layout_constraintTop_toBottomOf="@id/tvTitle"
-        app:layout_constraintStart_toStartOf="parent"
+        android:textSize="20sp"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="4dp"/>
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/ivCover"
+        app:layout_constraintTop_toBottomOf="@id/tvTitle" />
 
-    <!-- SeekBar -->
     <SeekBar
         android:id="@+id/seekBar"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:progress="30"
-        app:layout_constraintTop_toBottomOf="@id/tvArtist"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_width="323dp"
+        android:layout_height="30dp"
         android:layout_marginTop="24dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"/>
+        android:progress="30"
+        android:progressBackgroundTint="#777777"
+        android:progressTint="@android:color/white"
+        android:thumbTint="@android:color/white"
+        app:layout_constraintEnd_toEndOf="@+id/btnFavorite"
+        app:layout_constraintStart_toStartOf="@+id/ivCover"
+        app:layout_constraintTop_toBottomOf="@id/tvArtist" />
 
     <!-- Time -->
     <TextView
@@ -110,7 +110,7 @@
         android:textSize="12sp"
         app:layout_constraintTop_toBottomOf="@id/seekBar"
         app:layout_constraintStart_toStartOf="@id/seekBar"
-        android:layout_marginTop="4dp"/>
+        />
 
     <TextView
         android:id="@+id/tvDuration"
@@ -121,7 +121,7 @@
         android:textSize="12sp"
         app:layout_constraintTop_toBottomOf="@id/seekBar"
         app:layout_constraintEnd_toEndOf="@id/seekBar"
-        android:layout_marginTop="4dp"/>
+        />
 
     <!-- Playback Controls -->
     <LinearLayout
@@ -147,10 +147,11 @@
 
         <ImageButton
             android:id="@+id/btnPlayPause"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
-            android:src="@drawable/ic_play"
-            android:background="@drawable/bg_circle_button"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@android:color/transparent"
+            android:src="@drawable/ic_play_btn"
+            android:scaleType="centerInside"
             android:contentDescription="@null"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"/>
