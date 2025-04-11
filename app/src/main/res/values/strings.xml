@@ -22,4 +22,6 @@
     <string name="library_liked_songs">Liked</string>
     <string name="library_header">Your Library</string>
     <string name="library_add_song">Add Song</string>
+    <string name="current_time">1:44</string>
+    <string name="duration">3:50</string>
 </resources>
