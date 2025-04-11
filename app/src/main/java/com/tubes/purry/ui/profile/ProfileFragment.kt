@@ -39,11 +39,6 @@ class ProfileFragment : Fragment() {
         sessionManager = SessionManager(requireContext())
         viewModel = ViewModelProvider(this).get(ProfileViewModel::class.java)
 
-        binding.btnEditProfile.setOnClickListener {
-            // Implement edit profile functionality
-            Toast.makeText(context, "Edit Profile feature coming soon", Toast.LENGTH_SHORT).show()
-        }
-
         binding.btnLogout.setOnClickListener {
             sessionManager.clearTokens()
             navigateToLogin()
