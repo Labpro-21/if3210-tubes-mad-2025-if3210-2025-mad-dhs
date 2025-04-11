@@ -15,6 +15,10 @@ import com.tubes.purry.databinding.FragmentProfileBinding
 import com.tubes.purry.ui.auth.LoginActivity
 import com.tubes.purry.utils.NetworkUtil
 import com.tubes.purry.utils.SessionManager
+import com.tubes.purry.data.repository.ProfileRepository
+import com.tubes.purry.data.repository.SongRepository
+import com.tubes.purry.data.local.AppDatabase
+import com.tubes.purry.data.remote.ApiClient
 
 class ProfileFragment : Fragment() {
 
@@ -37,7 +41,14 @@ class ProfileFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         sessionManager = SessionManager(requireContext())
-        viewModel = ViewModelProvider(this).get(ProfileViewModel::class.java)
+
+        // Initialize repositories
+        val profileRepository = ProfileRepository(ApiClient.apiService)
+        val songRepository = SongRepository(AppDatabase.getDatabase(requireContext()).songDao())
+
+        // Initialize ViewModel with Factory
+        val viewModelFactory = ProfileViewModelFactory(profileRepository, songRepository)
+        viewModel = ViewModelProvider(this, viewModelFactory)[ProfileViewModel::class.java]
 
         binding.btnLogout.setOnClickListener {
             sessionManager.clearTokens()
@@ -56,11 +67,8 @@ class ProfileFragment : Fragment() {
     private fun loadProfileData() {
         val token = sessionManager.fetchAuthToken()
         if (token != null) {
-            // Add logging
-            Log.d("ProfileFragment", "Token exists, attempting to load profile")
             viewModel.getProfileData("Bearer $token")
         } else {
-            // Add logging
             Log.d("ProfileFragment", "No token found, navigating to login")
             navigateToLogin()
         }
@@ -80,11 +88,14 @@ class ProfileFragment : Fragment() {
                     .error(R.drawable.profile_placeholder)
                     .circleCrop()
                     .into(imgProfile)
+            }
+        }
 
-                // Set stats
-                txtSongsCount.text = profile.songsAdded.toString()
-                txtLikedCount.text = profile.likedSongs.toString()
-                txtListenedCount.text = profile.listenedSongs.toString()
+        viewModel.songStats.observe(viewLifecycleOwner) { stats ->
+            binding.apply {
+                txtSongsCount.text = stats.totalCount.toString()
+                txtLikedCount.text = stats.likedCount.toString()
+                txtListenedCount.text = stats.listenedCount.toString()
             }
         }
 
