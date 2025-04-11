@@ -29,10 +29,38 @@ class LoginActivity : AppCompatActivity() {
         sessionManager = SessionManager(this)
         authRepository = AuthRepository(ApiClient.apiService)
 
-        // Check if user is already logged in
-        if (sessionManager.fetchAuthToken() != null) {
-            navigateToMainActivity()
+        val token = sessionManager.fetchAuthToken()
+        if (!token.isNullOrEmpty()) {
+            // cek validitas token
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    val response = authRepository.verifyToken("Bearer $token")
+                    withContext(Dispatchers.Main) {
+                        if (response.isSuccessful) { // valid
+                            navigateToMainActivity()
+                        } else {
+                            sessionManager.clearTokens()
+                        }
+                    }
+                } catch (e: Exception) {
+                    withContext(Dispatchers.Main) {
+                        // Jaga-jaga kalau ada error jaringan
+                        Toast.makeText(this@LoginActivity, "Error verifying token", Toast.LENGTH_SHORT).show()
+                        sessionManager.clearTokens()
+                    }
+                }
+            }
         }
+
+//        if (intent.getBooleanExtra("EXTRA_LOGOUT", false)) {
+//            sessionManager.clearTokens()
+//            Toast.makeText(this, "Session expired. Please login again.", Toast.LENGTH_SHORT).show()
+//        }
+//
+//        // Check if user is already logged in
+//        if (sessionManager.fetchAuthToken() != null) {
+//            navigateToMainActivity()
+//        }
 
         binding.btnLogin.setOnClickListener {
             val email = binding.etEmail.text.toString()
@@ -52,6 +80,7 @@ class LoginActivity : AppCompatActivity() {
                 val response = authRepository.login(LoginRequest(email, password))
                 withContext(Dispatchers.Main) {
                     if (response.isSuccessful && response.body() != null) {
+                        val loginResponse = response.body()!!
                         response.body()?.accessToken?.let {
                             sessionManager.saveAuthToken(it)
                             Log.d("LoginActivity", "AccessToken saved: ${it.take(10)}...")
@@ -65,6 +94,9 @@ class LoginActivity : AppCompatActivity() {
                         // Verify token was saved correctly
                         val savedToken = sessionManager.fetchAuthToken()
                         Log.d("LoginActivity", "Token verification after save: ${savedToken != null}")
+
+                        sessionManager.saveUserId(loginResponse.id)
+                        Log.d("LoginActivity", "Access token saved. User ID: ${loginResponse.id}")
 
                         navigateToMainActivity()
                     } else {

@@ -15,5 +15,6 @@ data class Song(
     val duration: Int = 0,
     val isLiked: Boolean = false,
     val isLocal: Boolean = false,
-    val lastPlayedAt: Long = 0L
+    val lastPlayedAt: Long = 0L,
+    val userId: Int
 )

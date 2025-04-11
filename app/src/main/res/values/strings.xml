@@ -22,4 +22,9 @@
     <string name="library_liked_songs">Liked</string>
     <string name="library_header">Your Library</string>
     <string name="library_add_song">Add Song</string>
+    <string name="collapse_player" />
+    <string name="album_cover_player" />
+    <string name="play_pause_song" />
+    <string name="next_song" />
+    <string name="previous_song" />
 </resources>

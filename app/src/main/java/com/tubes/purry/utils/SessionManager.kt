@@ -14,6 +14,7 @@ class SessionManager(context: Context) {
     companion object {
         const val USER_TOKEN = "user_token"
         const val REFRESH_TOKEN = "refresh_token"
+        const val USER_ID = "user_id"
         const val PREF_NAME = "purrytify_encrypted_prefs"
     }
 
@@ -104,5 +105,14 @@ class SessionManager(context: Context) {
         } catch (e: Exception) {
             Log.e("SessionManager", "Error clearing tokens: ${e.message}")
         }
+    }
+
+    fun saveUserId(id: Int) {
+        prefs.edit().putInt(USER_ID, id).apply()
+    }
+
+    fun getUserId(): Int? {
+        val id = prefs.getInt(USER_ID, -1)
+        return if (id != -1) id else null
     }
 }

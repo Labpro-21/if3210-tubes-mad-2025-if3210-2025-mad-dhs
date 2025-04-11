@@ -17,7 +17,7 @@ object PlayerController {
             return
         }
 
-        release()
+        this.release()
         isPreparing = true
 
         try {
@@ -29,7 +29,15 @@ object PlayerController {
                         afd.close()
                     }
                     !song.filePath.isNullOrBlank() -> {
-                        setDataSource(context, song.filePath.toUri())
+                        val uri = song.filePath.toUri()
+                        val afd = context.contentResolver.openAssetFileDescriptor(uri, "r")
+                        if (afd != null) {
+                            setDataSource(afd.fileDescriptor)
+                            afd.close()
+                        } else {
+                            Log.e("PlayerController", "Failed to open AssetFileDescriptor for song URI.")
+                            return
+                        }
                     }
                     else -> {
                         Log.e("PlayerController", "Song has no valid source.")
@@ -54,13 +62,14 @@ object PlayerController {
                     true
                 }
 
-                prepareAsync() // Prepares in background and triggers onPrepared
+                prepareAsync()
             }
         } catch (e: Exception) {
             Log.e("PlayerController", "Error playing song: ${e.message}")
-            release()
+            this.release()
         }
     }
+
 
     fun pause() {
         mediaPlayer?.pause()

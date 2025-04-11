@@ -6,6 +6,7 @@ import android.content.Intent
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import android.util.Log
 import android.widget.Toast
 import com.tubes.purry.data.model.RefreshTokenRequest
 import com.tubes.purry.data.remote.ApiClient
@@ -47,7 +48,13 @@ class TokenExpirationService : Service() {
     }
 
     private fun checkTokenExpiration() {
+        Log.d("TokenCheck", "Verifying token...")
         val token = sessionManager.fetchAuthToken() ?: return
+        if (token.isNullOrBlank()) {
+            Log.d("TokenCheck", "Access token is null or blank → Logging out")
+            logoutAndRedirect()
+            return
+        }
 
         CoroutineScope(Dispatchers.IO).launch {
             try {
@@ -62,7 +69,18 @@ class TokenExpirationService : Service() {
         }
     }
 
+    private fun logoutAndRedirect() {
+        sessionManager.clearTokens()
+
+        val intent = Intent(this, LoginActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            putExtra("EXTRA_LOGOUT", true)
+        }
+        startActivity(intent)
+    }
+
     private fun tryRefreshToken() {
+        Log.d("TokenCheck", "Verifying token...")
         val refreshToken = sessionManager.fetchRefreshToken() ?: run {
             logoutUser()
             return

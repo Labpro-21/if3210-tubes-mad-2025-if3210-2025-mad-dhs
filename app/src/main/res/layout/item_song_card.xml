@@ -10,10 +10,10 @@
     <ImageView
         android:id="@+id/imgCover"
         android:layout_width="match_parent"
-        android:layout_height="120dp"
-        android:scaleType="centerCrop"
+        android:layout_height="100dp"
         android:background="@color/black"
-        android:contentDescription="@string/cover_art" />
+        android:contentDescription="@string/cover_art"
+        android:scaleType="centerCrop" />
 
     <TextView
         android:id="@+id/tvTitle"
