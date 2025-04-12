@@ -26,6 +26,7 @@ class AddSongBottomSheetFragment : BottomSheetDialogFragment() {
     private lateinit var viewModel: SongViewModel
     private lateinit var nowPlayingViewModel: NowPlayingViewModel
 
+
     private var audioUri: Uri? = null
     private var duration: Int = 0
     private var imageUri: Uri? = null
@@ -85,6 +86,7 @@ class AddSongBottomSheetFragment : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        nowPlayingViewModel = ViewModelProvider(requireActivity())[NowPlayingViewModel::class.java]
         setupListeners()
     }
 

@@ -5,15 +5,9 @@
     android:id="@+id/mobile_navigation"
     app:startDestination="@+id/navigation_home">
 
-<!--    <fragment-->
-<!--        android:id="@+id/nowPlayingFragment"-->
-<!--        android:name="com.tubes.purry.ui.player.MiniPlayerFragment"-->
-<!--        android:label="Now Playing"-->
-<!--        tools:layout="@layout/fragment_mini_player" />-->
-
     <fragment
         android:id="@+id/addSongFragment"
-        android:name="com.tubes.purry.ui.library.AddSongFragment"
+        android:name="com.tubes.purry.ui.library.AddSongBottomSheetFragment"
         android:label="Add Song"
         tools:layout="@layout/fragment_add_song" />
 
@@ -25,7 +19,7 @@
 
     <fragment
         android:id="@+id/editSongFragment"
-        android:name="com.tubes.purry.ui.library.EditSongFragment"
+        android:name="com.tubes.purry.ui.library.EditSongBottomSheetFragment"
         android:label="Edit Song"
         tools:layout="@layout/fragment_edit_song">
 
