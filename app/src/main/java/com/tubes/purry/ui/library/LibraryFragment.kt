@@ -1,5 +1,6 @@
 package com.tubes.purry.ui.library
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -15,6 +16,7 @@ import com.tubes.purry.data.model.Song
 import com.tubes.purry.databinding.FragmentLibraryBinding
 import com.tubes.purry.ui.player.MiniPlayerFragment
 import com.tubes.purry.ui.player.NowPlayingViewModel
+import com.tubes.purry.utils.SessionManager
 
 class LibraryFragment : Fragment() {
 
@@ -26,6 +28,8 @@ class LibraryFragment : Fragment() {
         SongViewModelFactory(requireContext())
     }
     private lateinit var nowPlayingViewModel: NowPlayingViewModel
+    private lateinit var sessionManager: SessionManager
+    private var currentUserId: Int? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -37,9 +41,11 @@ class LibraryFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        songListAdapter = SongListAdapter { song ->
-            onSongClicked(song)
-        }
+        songListAdapter = SongListAdapter(
+            onClick = { song -> onSongClicked(song) },
+            onEdit = { song -> onEditSong(song) },
+            onDelete = { song -> onDeleteSong(song) }
+        )
 
         binding.rvLibrarySongs.apply {
             adapter = songListAdapter
@@ -74,9 +80,27 @@ class LibraryFragment : Fragment() {
         }
     }
 
+    private fun onEditSong(song: Song) {
+        val action = LibraryFragmentDirections.actionLibraryFragmentToEditSongFragment(song)
+        findNavController().navigate(action)
+    }
+
+    private fun onDeleteSong(song: Song) {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Delete Song")
+            .setMessage("Are you sure you want to delete \"${song.title}\"?")
+            .setPositiveButton("Yes") { _, _ ->
+                viewModel.deleteSong(song)
+            }
+            .setNegativeButton("No", null)
+            .show()
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         nowPlayingViewModel = ViewModelProvider(requireActivity())[NowPlayingViewModel::class.java]
+        sessionManager = SessionManager(requireContext())
+        currentUserId = sessionManager.getUserId()
 
         setupRecyclerView()
         observeSongs()

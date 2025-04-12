@@ -1,7 +1,8 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-//    alias(libs.plugins.hilt)
+    alias(libs.plugins.navigation.safeargs)
+    id("kotlin-parcelize")
     id("kotlin-kapt")
 }
 

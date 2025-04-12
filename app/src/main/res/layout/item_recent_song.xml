@@ -36,4 +36,23 @@
             android:textColor="@android:color/darker_gray"
             android:textSize="12sp" />
     </LinearLayout>
+    <!-- Icon edit -->
+    <ImageView
+        android:id="@+id/iconEdit"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginStart="8dp"
+        android:visibility="gone"
+        android:src="@drawable/ic_edit"
+        android:contentDescription="Edit" />
+
+    <!-- Icon delete -->
+    <ImageView
+        android:id="@+id/iconDelete"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginStart="8dp"
+        android:visibility="gone"
+        android:src="@drawable/ic_delete_song"
+        android:contentDescription="Delete" />
 </LinearLayout>

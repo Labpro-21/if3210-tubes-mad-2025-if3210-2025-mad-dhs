@@ -60,7 +60,7 @@ abstract class AppDatabase : RoomDatabase() {
                 isLiked = false,
                 isLocal = true,
                 lastPlayedAt = 0L,
-                userId = 0
+                uploadedBy = -1
             ),
             Song(
                 id = "2",
@@ -74,7 +74,7 @@ abstract class AppDatabase : RoomDatabase() {
                 isLiked = false,
                 isLocal = true,
                 lastPlayedAt = 0L,
-                userId = 0
+                uploadedBy = -1
             ),
             Song(
                 id = "3",
@@ -88,7 +88,7 @@ abstract class AppDatabase : RoomDatabase() {
                 isLiked = false,
                 isLocal = true,
                 lastPlayedAt = 0L,
-                userId = 0
+                uploadedBy = -1
             )
         )
     }

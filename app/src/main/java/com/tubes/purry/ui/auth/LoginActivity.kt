@@ -81,6 +81,7 @@ class LoginActivity : AppCompatActivity() {
                 withContext(Dispatchers.Main) {
                     if (response.isSuccessful && response.body() != null) {
                         val loginResponse = response.body()!!
+
                         response.body()?.accessToken?.let {
                             sessionManager.saveAuthToken(it)
                             Log.d("LoginActivity", "AccessToken saved: ${it.take(10)}...")
@@ -91,12 +92,22 @@ class LoginActivity : AppCompatActivity() {
                             Log.d("LoginActivity", "Refresh token saved")
                         }
 
-                        // Verify token was saved correctly
                         val savedToken = sessionManager.fetchAuthToken()
                         Log.d("LoginActivity", "Token verification after save: ${savedToken != null}")
 
-                        sessionManager.saveUserId(loginResponse.id)
-                        Log.d("LoginActivity", "Access token saved. User ID: ${loginResponse.id}")
+                        val userIdFromBackend = loginResponse.id
+                        if (userIdFromBackend != 0) {
+                            sessionManager.saveUserId(userIdFromBackend)
+                            Log.d("LoginActivity", "User ID from backend: $userIdFromBackend")
+                        } else {
+                            val userIdFromToken = sessionManager.getUserIdFromToken()
+                            if (userIdFromToken != null) {
+                                sessionManager.saveUserId(userIdFromToken)
+                                Log.d("LoginActivity", "User ID from token: $userIdFromToken")
+                            } else {
+                                Log.w("LoginActivity", "Failed to retrieve userId from both backend and token")
+                            }
+                        }
 
                         navigateToMainActivity()
                     } else {

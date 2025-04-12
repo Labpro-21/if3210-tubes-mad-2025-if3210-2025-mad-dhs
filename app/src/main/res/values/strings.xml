@@ -27,4 +27,11 @@
     <string name="play_pause_song" />
     <string name="next_song" />
     <string name="previous_song" />
+    <string name="edit_song" />
+    <string name="delete_song" />
+    <string name="song_title">Song Title</string>
+    <string name="artist_name">Artist Name</string>
+    <string name="edit_song_drawer">Edit Song</string>
+    <string name="artist_name_edit">Artist Name</string>
+    <string name="song_title_edit">Song Title</string>
 </resources>

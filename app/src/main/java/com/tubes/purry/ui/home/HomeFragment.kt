@@ -55,9 +55,12 @@ class HomeFragment : Fragment() {
             onSongClicked(song)
         }
 
-        recentSongsAdapter = SongListAdapter { song ->
-            onSongClicked(song)
-        }
+        recentSongsAdapter = SongListAdapter(
+            onClick = { song -> onSongClicked(song) },
+            onEdit = {},
+            onDelete = {}
+        )
+
 
         binding.rvNewSongs.apply {
             adapter = newSongsAdapter

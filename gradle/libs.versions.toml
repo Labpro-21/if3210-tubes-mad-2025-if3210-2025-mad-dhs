@@ -13,6 +13,7 @@ lifecycleViewmodelKtx = "2.8.7"
 navigationFragmentKtx = "2.8.9"
 navigationUiKtx = "2.8.9"
 paletteKtx = "1.0.0"
+safeargs = "2.7.5"
 
 #[versions]
 #core-ktx = "1.10.1"
@@ -64,4 +65,5 @@ androidx-palette-ktx = { group = "androidx.palette", name = "palette-ktx", versi
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+navigation-safeargs = { id = "androidx.navigation.safeargs", version.ref = "safeargs" }
 

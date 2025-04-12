@@ -114,7 +114,7 @@ class AddSongFragment : Fragment() {
                 duration = duration,
                 isLiked = false,
                 isLocal = true,
-                userId = userId
+                uploadedBy = userId
             )
 
             viewModel.insertSong(song)
