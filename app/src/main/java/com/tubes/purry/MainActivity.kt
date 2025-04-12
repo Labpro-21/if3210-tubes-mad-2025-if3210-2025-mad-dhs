@@ -43,8 +43,12 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
             when (destination.id) {
                 R.id.songDetailFragment -> {
                     hideMiniPlayer()
+                    hideBottomNav()
                 }
-                else -> showMiniPlayer()
+                else -> {
+                    showMiniPlayer()
+                    showBottomNav()
+                }
             }
         }
 
@@ -103,6 +107,15 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
     fun hideMiniPlayer() {
         binding.miniPlayerContainer.visibility = View.GONE
     }
+
+    fun hideBottomNav() {
+        binding.navView.visibility = View.GONE
+    }
+
+    fun showBottomNav() {
+        binding.navView.visibility = View.VISIBLE
+    }
+
 
     override fun onStart() {
         super.onStart()
