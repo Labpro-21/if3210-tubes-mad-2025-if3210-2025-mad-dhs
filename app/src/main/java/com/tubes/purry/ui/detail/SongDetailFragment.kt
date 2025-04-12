@@ -45,6 +45,7 @@ class SongDetailFragment : Fragment() {
         nowPlayingViewModel.currSong.observe(viewLifecycleOwner) { song ->
             song?.let {
                 binding.tvTitle.text = it.title
+                binding.tvTitle.isSelected = true
                 binding.tvArtist.text = it.artist
                 Glide.with(this)
                     .load(song.coverPath ?: song.coverResId ?: R.drawable.album_default)
