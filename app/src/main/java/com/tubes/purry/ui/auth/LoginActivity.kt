@@ -7,6 +7,7 @@ import android.util.Patterns
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.tubes.purry.MainActivity
+import com.tubes.purry.data.local.AppDatabase
 import com.tubes.purry.data.model.LoginRequest
 import com.tubes.purry.data.remote.ApiClient
 import com.tubes.purry.data.repository.AuthRepository
@@ -62,12 +63,15 @@ class LoginActivity : AppCompatActivity() {
                 val response = authRepository.login(LoginRequest(email, password))
                 withContext(Dispatchers.Main) {
                     if (response.isSuccessful && response.body() != null) {
-                        response.body()?.accessToken?.let {
+                        val accessToken = response.body()?.accessToken
+                        val refreshToken = response.body()?.refreshToken
+
+                        accessToken?.let {
                             sessionManager.saveAuthToken(it)
                             Log.d("LoginActivity", "AccessToken saved: ${it.take(10)}...")
                         }
 
-                        response.body()?.refreshToken?.let {
+                        refreshToken?.let {
                             sessionManager.saveRefreshToken(it)
                             Log.d("LoginActivity", "Refresh token saved")
                         }
@@ -76,7 +80,26 @@ class LoginActivity : AppCompatActivity() {
                         val savedToken = sessionManager.fetchAuthToken()
                         Log.d("LoginActivity", "Token verification after save: ${savedToken != null}")
 
-                        navigateToMainActivity()
+                        // Fetch profile using saved token
+                        accessToken?.let { token ->
+                            Log.d("LoginActivity", "Attempting to fetch profile using token: Bearer $token")
+                            val profileResponse = ApiClient.apiService.getProfile("Bearer $token")
+                            if (profileResponse.isSuccessful && profileResponse.body() != null) {
+                                val profileData = profileResponse.body()!!
+                                Log.d("LoginActivity", "$profileData")
+
+                                // Insert into Room DB
+                                val db = AppDatabase.getDatabase(applicationContext)
+                                db.userProfileDao().insertOrUpdate(profileData)
+                                Log.d("LoginActivity", "User profile inserted into database")
+                            } else {
+                                Log.e("LoginActivity", "Failed to fetch profile: ${profileResponse.message()}")
+                            }
+                        }
+
+                        withContext(Dispatchers.Main) {
+                            navigateToMainActivity()
+                        }
                     } else {
                         Toast.makeText(this@LoginActivity, "Login failed: ${response.message()}", Toast.LENGTH_SHORT).show()
                     }
