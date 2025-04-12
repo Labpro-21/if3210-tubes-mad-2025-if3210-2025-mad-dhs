@@ -19,6 +19,7 @@ class NowPlayingViewModel : ViewModel() {
     val isPlaying: LiveData<Boolean> = _isPlaying
 
     private val _errorMessage = MutableLiveData<String>()
+    private var originalAllSongs: List<Song> = emptyList()
     private val _mainQueue = MutableLiveData<List<SongInQueue>>(emptyList())
     private val _manualQueue = MutableLiveData<MutableList<SongInQueue>?>(mutableListOf())
 
@@ -106,6 +107,8 @@ class NowPlayingViewModel : ViewModel() {
     }
 
     fun setQueueFromClickedSong(clicked: Song, allSongs: List<Song>, context: Context) {
+        originalAllSongs = allSongs
+
         val newMainQueue = mutableListOf<SongInQueue>()
         newMainQueue.add(SongInQueue(clicked, fromManualQueue = false))
         newMainQueue.addAll(allSongs.filter { it.id != clicked.id }.map { SongInQueue(it, false) })
@@ -192,6 +195,9 @@ class NowPlayingViewModel : ViewModel() {
             if (currentQueueIndex > 0) {
                 currentQueueIndex--
                 playSong(main[currentQueueIndex].song, context)
+            } else if (_repeatMode.value == RepeatMode.ALL && main.isNotEmpty()) {
+                currentQueueIndex = main.size - 1
+                playSong(main[currentQueueIndex].song, context)
             }
         }
     }
@@ -206,7 +212,24 @@ class NowPlayingViewModel : ViewModel() {
     }
 
     fun toggleShuffle() {
-        _isShuffling.value = !(_isShuffling.value ?: false)
+        val isNowShuffling = !(_isShuffling.value ?: false)
+        _isShuffling.value = isNowShuffling
+
+        val currentSong = _currSong.value ?: return
+        val newMainQueue = mutableListOf<SongInQueue>()
+
+        if (isNowShuffling) {
+            val shuffled = originalAllSongs.shuffled().filter { it.id != currentSong.id }
+            newMainQueue.add(SongInQueue(currentSong, fromManualQueue = false))
+            newMainQueue.addAll(shuffled.map { SongInQueue(it, false) })
+        } else {
+            val ordered = originalAllSongs.filter { it.id != currentSong.id }
+            newMainQueue.add(SongInQueue(currentSong, fromManualQueue = false))
+            newMainQueue.addAll(ordered.map { SongInQueue(it, false) })
+        }
+
+        _mainQueue.value = newMainQueue
+        currentQueueIndex = 0
     }
 
     fun toggleRepeat() {
