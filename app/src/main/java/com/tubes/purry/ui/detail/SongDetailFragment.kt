@@ -9,13 +9,17 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import com.tubes.purry.R
 import com.tubes.purry.data.local.AppDatabase
+import com.tubes.purry.data.model.LikedSong
 import com.tubes.purry.databinding.FragmentSongDetailBinding
 import com.tubes.purry.ui.player.NowPlayingViewModel
 import com.tubes.purry.ui.player.NowPlayingViewModelFactory
 import com.tubes.purry.ui.player.PlayerController
 import com.tubes.purry.ui.profile.ProfileViewModel
 import com.tubes.purry.utils.formatDuration
+import kotlinx.coroutines.launch
 
 class SongDetailFragment : Fragment() {
     private lateinit var binding: FragmentSongDetailBinding
@@ -93,6 +97,22 @@ class SongDetailFragment : Fragment() {
                 }
             }
         })
+
+        // Observe the liked state
+        nowPlayingViewModel.isLiked.observe(viewLifecycleOwner) { isLiked ->
+            if (isLiked) {
+                binding.btnFavorite.setImageResource(R.drawable.ic_heart_filled)
+            } else {
+                binding.btnFavorite.setImageResource(R.drawable.ic_heart_outline)
+            }
+        }
+
+        binding.btnFavorite.setOnClickListener {
+            val currentSong = nowPlayingViewModel.currSong.value
+            currentSong?.let { song ->
+                nowPlayingViewModel.toggleLike(song)
+            }
+        }
     }
 
     override fun onResume() {

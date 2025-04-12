@@ -71,9 +71,14 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fb2d9b52-b320-4578-a27c-b77d399ccfa2" name="Changes" comment="feat: restructure DB to support liked songs and fix token refresh bug&#10;&#10;- Refactored database schema and models to include liked songs feature&#10;- Added struct and logic for storing liked songs linked to users&#10;- Fixed bug where expired tokens were not properly refreshed, causing 401 errors">
+    <list default="true" id="fb2d9b52-b320-4578-a27c-b77d399ccfa2" name="Changes" comment="feat: insert profile to RoomDb">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/auth/LoginActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/auth/LoginActivity.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/detail/SongDetailFragment.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/detail/SongDetailFragment.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/player/MiniPlayerFragment.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/player/MiniPlayerFragment.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/player/NowPlayingViewModel.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/player/NowPlayingViewModel.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/fragment_mini_player.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/fragment_mini_player.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/fragment_song_detail.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/fragment_song_detail.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/values/strings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/values/strings.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -312,7 +317,15 @@
       <option name="project" value="LOCAL" />
       <updated>1744446475568</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="feat: insert profile to RoomDb">
+      <option name="closed" value="true" />
+      <created>1744448390644</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1744448390644</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -323,7 +336,8 @@
     <MESSAGE value="fix: fixed bug on play pause button, fixed bug on duration seeding to ms instead of seconds" />
     <MESSAGE value="fix: UI of song detail page" />
     <MESSAGE value="feat: restructure DB to support liked songs and fix token refresh bug&#10;&#10;- Refactored database schema and models to include liked songs feature&#10;- Added struct and logic for storing liked songs linked to users&#10;- Fixed bug where expired tokens were not properly refreshed, causing 401 errors" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat: restructure DB to support liked songs and fix token refresh bug&#10;&#10;- Refactored database schema and models to include liked songs feature&#10;- Added struct and logic for storing liked songs linked to users&#10;- Fixed bug where expired tokens were not properly refreshed, causing 401 errors" />
+    <MESSAGE value="feat: insert profile to RoomDb" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat: insert profile to RoomDb" />
   </component>
   <component name="play_dynamic_filters_status">
     <option name="appIdToCheckInfo">

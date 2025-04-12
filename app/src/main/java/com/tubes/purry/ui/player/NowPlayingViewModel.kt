@@ -27,6 +27,9 @@ class NowPlayingViewModel(
     private val _isPlaying = MutableLiveData(false)
     val isPlaying: LiveData<Boolean> = _isPlaying
 
+    private val _isLiked = MutableLiveData<Boolean>()
+    val isLiked: LiveData<Boolean> = _isLiked
+
     fun playSong(song: Song, context: Context) {
         Log.d("NowPlayingViewModel", "playSong called with song: ${song.title}")
         _isPlaying.value = true
@@ -64,24 +67,23 @@ class NowPlayingViewModel(
         if (_isPlaying.value == true) pauseSong() else resumeSong()
     }
 
-    fun toggleLikeStatus() {
-        val song = _currSong.value ?: return
-        val newLikedStatus = !song.isLiked
-
+    fun toggleLike(song: Song) {
         viewModelScope.launch {
-            // Ensure the userId is not null before proceeding
-            val userId = getUserIdBlocking() ?: return@launch
-
-            val updatedSong = song.copy(isLiked = newLikedStatus)
-            songDao.update(updatedSong)
-
-            if (newLikedStatus) {
-                likedSongDao.likeSong(LikedSong(userId, song.id))
-            } else {
-                likedSongDao.unlikeSong(userId, song.id)
+            val userId = profileViewModel.profileData.value?.id
+            userId?.let { id ->
+                val isLiked = likedSongDao.isSongLiked(id, song.id)
+                if (!isLiked) {
+                    val likedSong = LikedSong(
+                        userId = id,
+                        songId = song.id
+                    )
+                    likedSongDao.likeSong(likedSong)
+                    _isLiked.postValue(true) // Update the liked state
+                } else {
+                    likedSongDao.unlikeSong(id, song.id)
+                    _isLiked.postValue(false) // Update the liked state
+                }
             }
-
-            _currSong.postValue(updatedSong)
         }
     }
 

@@ -62,18 +62,20 @@
 
     <!-- Artist -->
 
+
+    <!-- SeekBar -->
+
     <ImageButton
         android:id="@+id/btnFavorite"
         android:layout_width="48dp"
         android:layout_height="48dp"
+        android:layout_marginTop="8dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="@null"
         android:src="@drawable/ic_heart_outline"
         app:layout_constraintEnd_toEndOf="@+id/ivCover"
         app:layout_constraintTop_toTopOf="@id/tvTitle" />
 
-
-    <!-- SeekBar -->
     <TextView
         android:id="@+id/tvArtist"
         android:layout_width="0dp"

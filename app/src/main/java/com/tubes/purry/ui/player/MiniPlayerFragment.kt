@@ -11,9 +11,12 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.tubes.purry.R
 import com.tubes.purry.databinding.FragmentMiniPlayerBinding
 import androidx.core.net.toUri
+import androidx.lifecycle.lifecycleScope
 import com.tubes.purry.data.local.AppDatabase
+import com.tubes.purry.data.model.LikedSong
 import com.tubes.purry.ui.profile.ProfileViewModel
 import com.tubes.purry.ui.profile.ProfileViewModelFactory
+import kotlinx.coroutines.launch
 
 class MiniPlayerFragment : Fragment() {
     private lateinit var viewModel: NowPlayingViewModel
@@ -71,6 +74,21 @@ class MiniPlayerFragment : Fragment() {
             binding.btnPlayPause.setImageResource(
                 if (playing) R.drawable.ic_pause else R.drawable.ic_play
             )
+        }
+
+        viewModel.isLiked.observe(viewLifecycleOwner) { isLiked ->
+            if (isLiked) {
+                binding.btnFavorite.setImageResource(R.drawable.ic_heart_filled)
+            } else {
+                binding.btnFavorite.setImageResource(R.drawable.ic_heart_outline)
+            }
+        }
+
+        binding.btnFavorite.setOnClickListener {
+            val currentSong = viewModel.currSong.value
+            currentSong?.let { song ->
+                viewModel.toggleLike(song)
+            }
         }
 
         binding.btnPlayPause.setOnClickListener {
