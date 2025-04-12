@@ -12,16 +12,13 @@ import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.tubes.purry.data.model.Song
 import com.tubes.purry.databinding.FragmentAddSongBottomSheetBinding
-import com.tubes.purry.utils.SessionManager
 import com.tubes.purry.utils.extractAudioMetadata
-import java.util.UUID
 
-class AddSongBottomSheetFragment : BottomSheetDialogFragment() {
+class EditSongBottomSheetFragment(private val song: Song) : BottomSheetDialogFragment() {
 
     private var _binding: FragmentAddSongBottomSheetBinding? = null
     private val binding get() = _binding!!
 
-    private lateinit var sessionManager: SessionManager
     private lateinit var viewModel: SongViewModel
 
     private var audioUri: Uri? = null
@@ -31,15 +28,14 @@ class AddSongBottomSheetFragment : BottomSheetDialogFragment() {
     private val pickImage =
         registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
             uri?.let {
-                try {
-                    requireContext().contentResolver.takePersistableUriPermission(
-                        it, Intent.FLAG_GRANT_READ_URI_PERMISSION
-                    )
-                    imageUri = it
-                } catch (_: SecurityException) {}
+                imageUri = it
+                requireContext().contentResolver.takePersistableUriPermission(
+                    it,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION
+                )
                 binding.imgUpload.setImageURI(it)
             }
-        }
+    }
 
     private val pickAudio =
         registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
@@ -50,15 +46,14 @@ class AddSongBottomSheetFragment : BottomSheetDialogFragment() {
                     Intent.FLAG_GRANT_READ_URI_PERMISSION
                 )
                 val metadata = extractAudioMetadata(requireContext(), it)
-                binding.inputTitle.setText(metadata.title ?: "")
-                binding.inputArtist.setText(metadata.artist ?: "")
+                binding.inputTitle.setText(metadata.title ?: song.title)
+                binding.inputArtist.setText(metadata.artist ?: song.artist)
                 duration = metadata.duration
             }
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        sessionManager = SessionManager(requireContext())
         viewModel = ViewModelProvider(
             this,
             SongViewModelFactory(requireContext())
@@ -77,6 +72,14 @@ class AddSongBottomSheetFragment : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        audioUri = song.filePath?.let { Uri.parse(it) }
+        imageUri = song.coverPath?.let { Uri.parse(it) }
+        duration = song.duration
+
+        binding.inputTitle.setText(song.title)
+        binding.inputArtist.setText(song.artist)
+        song.coverPath?.let { binding.imgUpload.setImageURI(Uri.parse(it)) }
+
         setupListeners()
     }
 
@@ -90,7 +93,7 @@ class AddSongBottomSheetFragment : BottomSheetDialogFragment() {
         }
 
         binding.btnSave.setOnClickListener {
-            saveNewSong()
+            saveUpdatedSong()
         }
 
         binding.btnCancel.setOnClickListener {
@@ -98,13 +101,12 @@ class AddSongBottomSheetFragment : BottomSheetDialogFragment() {
         }
     }
 
-    private fun saveNewSong() {
+    private fun saveUpdatedSong() {
         val title = binding.inputTitle.text.toString()
         val artist = binding.inputArtist.text.toString()
-        val filePath = audioUri?.toString() ?: ""
+        val filePath = audioUri?.toString() ?: song.filePath
 
-        // Validation
-        if (audioUri == null) {
+        if (filePath.isNullOrBlank()) {
             Toast.makeText(requireContext(), "Please select an audio file", Toast.LENGTH_SHORT).show()
             return
         }
@@ -119,29 +121,16 @@ class AddSongBottomSheetFragment : BottomSheetDialogFragment() {
             return
         }
 
-        val userId = sessionManager.getUserId()
-
-        if (userId == null) {
-            Toast.makeText(requireContext(), "User not logged in", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        val song = Song(
-            id = UUID.randomUUID().toString(),
+        val updatedSong = song.copy(
             title = title,
             artist = artist,
             filePath = filePath,
-            resId = null,
-            coverResId = null,
-            coverPath = imageUri?.toString() ?: "",
-            duration = duration,
-            isLiked = false,
-            isLocal = true,
-            uploadedBy = userId
+            coverPath = imageUri?.toString(),
+            duration = duration
         )
 
-        viewModel.insertSong(song)
-        Toast.makeText(requireContext(), "Song added", Toast.LENGTH_SHORT).show()
+        viewModel.updateSong(updatedSong)
+        Toast.makeText(requireContext(), "Song updated", Toast.LENGTH_SHORT).show()
         dismiss()
     }
 

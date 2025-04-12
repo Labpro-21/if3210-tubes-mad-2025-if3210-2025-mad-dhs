@@ -1,5 +1,6 @@
 package com.tubes.purry.ui.home
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -18,6 +19,7 @@ import com.tubes.purry.ui.library.SongListAdapter
 import com.tubes.purry.ui.player.NowPlayingViewModel
 import com.tubes.purry.databinding.FragmentHomeBinding
 import com.tubes.purry.data.model.Song
+import com.tubes.purry.ui.library.EditSongBottomSheetFragment
 import com.tubes.purry.ui.player.MiniPlayerFragment
 
 
@@ -30,7 +32,6 @@ class HomeFragment : Fragment() {
 
     private lateinit var newSongsAdapter: SongCardAdapter
     private lateinit var recentSongsAdapter: SongListAdapter
-
     private lateinit var nowPlayingViewModel: NowPlayingViewModel
 
     override fun onCreateView(
@@ -43,9 +44,7 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         nowPlayingViewModel = ViewModelProvider(requireActivity())[NowPlayingViewModel::class.java]
-
         setupAdapters()
         observeSongs()
     }
@@ -57,8 +56,8 @@ class HomeFragment : Fragment() {
 
         recentSongsAdapter = SongListAdapter(
             onClick = { song -> onSongClicked(song) },
-            onEdit = {},
-            onDelete = {}
+            onEdit = {song -> showEditBottomSheet(song)},
+            onDelete = { song -> confirmDelete(song) }
         )
 
 
@@ -71,6 +70,22 @@ class HomeFragment : Fragment() {
             adapter = recentSongsAdapter
             layoutManager = LinearLayoutManager(context)
         }
+    }
+
+    private fun confirmDelete(song: Song) {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Delete Song")
+            .setMessage("Are you sure you want to delete \"${song.title}\"?")
+            .setPositiveButton("Yes") { _, _ ->
+                viewModel.deleteSong(song)
+            }
+            .setNegativeButton("No", null)
+            .show()
+    }
+
+    private fun showEditBottomSheet(song: Song) {
+        val editSheet = EditSongBottomSheetFragment(song)
+        editSheet.show(childFragmentManager, "EditSongBottomSheet")
     }
 
     private fun observeSongs() {
