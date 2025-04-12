@@ -34,4 +34,7 @@
     <string name="edit_song_drawer">Edit Song</string>
     <string name="artist_name_edit">Artist Name</string>
     <string name="song_title_edit">Song Title</string>
+    <string name="empty_library">Your library is empty. Add some songs to get started!</string>
+    <string name="no_search_results">No songs match your search</string>
+    <string name="no_liked_songs">You haven\'t liked any songs yet</string>
 </resources>

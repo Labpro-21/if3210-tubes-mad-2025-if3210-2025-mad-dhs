@@ -12,7 +12,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import com.tubes.purry.R
 
-@Database(entities = [Song::class], version = 2)
+@Database(entities = [Song::class], version = 3)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun songDao(): SongDao
 

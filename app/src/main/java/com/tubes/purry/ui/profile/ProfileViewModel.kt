@@ -8,14 +8,19 @@ import androidx.lifecycle.viewModelScope
 import com.tubes.purry.data.model.ProfileData
 import com.tubes.purry.data.remote.ApiClient
 import com.tubes.purry.data.repository.ProfileRepository
+import com.tubes.purry.data.repository.SongRepository
 import kotlinx.coroutines.launch
 
-class ProfileViewModel : ViewModel() {
-
-    private val repository = ProfileRepository(ApiClient.apiService)
+class ProfileViewModel(
+    private val profileRepository: ProfileRepository,
+    private val songRepository: SongRepository
+) : ViewModel() {
 
     private val _profileData = MutableLiveData<ProfileData>()
     val profileData: LiveData<ProfileData> = _profileData
+
+    private val _songStats = MutableLiveData<SongStats>()
+    val songStats: LiveData<SongStats> = _songStats
 
     private val _errorMessage = MutableLiveData<String>()
     val errorMessage: LiveData<String> = _errorMessage
@@ -23,25 +28,51 @@ class ProfileViewModel : ViewModel() {
     private val _loading = MutableLiveData<Boolean>()
     val loading: LiveData<Boolean> = _loading
 
+    init {
+        fetchSongStats()
+    }
+
     fun getProfileData(token: String) {
         _loading.value = true
         viewModelScope.launch {
             try {
-                Log.d("ProfileViewModel", "Making profile API request")
-                val response = repository.getProfile(token)
+                val response = profileRepository.getProfile(token)
                 if (response.isSuccessful && response.body() != null) {
-                    Log.d("ProfileViewModel", "Profile data retrieved successfully")
                     _profileData.value = response.body()!!
                 } else {
-                    Log.e("ProfileViewModel", "Failed to fetch profile: ${response.code()} - ${response.message()}")
                     _errorMessage.value = "Failed to fetch profile: ${response.message()}"
                 }
             } catch (e: Exception) {
-                Log.e("ProfileViewModel", "Error fetching profile: ${e.message}", e)
                 _errorMessage.value = "Error: ${e.message}"
             } finally {
                 _loading.value = false
             }
         }
     }
+
+    private fun fetchSongStats() {
+        viewModelScope.launch {
+            try {
+                songRepository.getTotalSongCount().collect { totalCount ->
+                    songRepository.getLikedSongsCount().collect { likedCount ->
+                        songRepository.getListenedSongsCount().collect { listenedCount ->
+                            _songStats.value = SongStats(
+                                totalCount = totalCount,
+                                likedCount = likedCount,
+                                listenedCount = listenedCount
+                            )
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                _errorMessage.value = "Error fetching song stats: ${e.message}"
+            }
+        }
+    }
+
+    data class SongStats(
+        val totalCount: Int = 0,
+        val likedCount: Int = 0,
+        val listenedCount: Int = 0
+    )
 }
