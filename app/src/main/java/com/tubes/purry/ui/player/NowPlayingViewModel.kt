@@ -5,7 +5,6 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.tubes.purry.data.model.Song
@@ -36,10 +35,6 @@ class NowPlayingViewModel : ViewModel() {
     private fun getCurrentSongInQueue(): SongInQueue? {
         val currId = _currSong.value?.id ?: return null
         return _manualQueue.value?.find { it.song.id == currId }
-    }
-
-    private fun combineQueues(): List<SongInQueue> {
-        return _manualQueue.value.orEmpty() + _mainQueue.value.orEmpty()
     }
 
     fun playSong(song: Song, context: Context) {

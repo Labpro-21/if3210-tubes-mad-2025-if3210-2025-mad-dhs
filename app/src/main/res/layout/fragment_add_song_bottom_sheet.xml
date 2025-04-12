@@ -32,7 +32,8 @@
             android:layout_height="144dp"
             android:layout_marginEnd="8dp"
             android:scaleType="centerCrop"
-            android:src="@drawable/photo_upload" />
+            android:src="@drawable/photo_upload"
+            android:contentDescription="@string/photo_upload"/>
 
         <ImageView
             android:id="@+id/btnUploadFile"
@@ -40,7 +41,8 @@
             android:layout_height="144dp"
             android:layout_marginStart="16dp"
             android:scaleType="centerCrop"
-            android:src="@drawable/file_upload" />
+            android:src="@drawable/file_upload"
+            android:contentDescription="@string/file_upload"/>
     </LinearLayout>
 
     <LinearLayout
@@ -54,7 +56,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Title"
+            android:text="@string/title_add_edit_song"
             android:textColor="@android:color/white"
             android:textStyle="bold"
             android:layout_marginTop="8dp"/>
@@ -65,18 +67,18 @@
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:background="@drawable/add_song_edit_text_border"
-            android:hint="Song Title"
+            android:hint="@string/song_title_add_edit_song"
             android:padding="8dp"
             android:textSize="12sp"
             android:textColor="@android:color/white"
-            android:textColorHint="@android:color/darker_gray"
+            android:textColorHint="@color/white_gray"
             android:layout_marginTop="4dp"/>
 
         <!-- Label Artist -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Artist"
+            android:text="@string/artist_add_edit_song"
             android:textColor="@android:color/white"
             android:textStyle="bold"
             android:layout_marginTop="16dp"/>
@@ -87,11 +89,11 @@
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:background="@drawable/add_song_edit_text_border"
-            android:hint="Artist Name"
+            android:hint="@string/artist_name_add_edit_song"
             android:padding="8dp"
             android:textSize="12sp"
             android:textColor="@android:color/white"
-            android:textColorHint="@android:color/darker_gray"
+            android:textColorHint="@color/white_gray"
             android:layout_marginTop="4dp"/>
     </LinearLayout>
 

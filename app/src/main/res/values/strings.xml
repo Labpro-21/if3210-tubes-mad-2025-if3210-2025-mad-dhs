@@ -45,4 +45,10 @@
     <string name="shuffle">Shuffle</string>
     <string name="repeat">Repeat</string>
     <string name="save_update">Update</string>
+    <string name="title_add_edit_song">Title</string>
+    <string name="song_title_add_edit_song">Song Title</string>
+    <string name="artist_add_edit_song">Artist</string>
+    <string name="artist_name_add_edit_song">Artist Name</string>
+    <string name="file_upload">file upload</string>
+    <string name="photo_upload">photo upload</string>
 </resources>
