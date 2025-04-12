@@ -37,6 +37,8 @@ class LibraryFragment : Fragment() {
     private lateinit var sessionManager: SessionManager
 //    private var currentUserId: Int? = null
     private var allSongs: List<Song> = emptyList()
+    private var likedSongs: List<Song> = emptyList()
+
     private var isShowingLikedOnly = false
     private var currentSearchQuery = ""
 
@@ -69,6 +71,14 @@ class LibraryFragment : Fragment() {
         }
     }
 
+    private fun observeLikedSongs(userId: Int) {
+        viewModel.getLikedSongsByUser(userId).observe(viewLifecycleOwner) { liked ->
+            likedSongs = liked
+            applyFilters()
+        }
+    }
+
+
     private fun setupSearchBar() {
         binding.searchBarLibrary.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
@@ -80,9 +90,7 @@ class LibraryFragment : Fragment() {
                 applyFilters()
             }
 
-            override fun afterTextChanged(s: Editable?) {
-                // Not needed
-            }
+            override fun afterTextChanged(s: Editable?) {}
         })
 
         // Clear search button
@@ -133,14 +141,10 @@ class LibraryFragment : Fragment() {
     private fun applyFilters() {
         val searchText = currentSearchQuery.trim().lowercase()
 
-        // Step 1: Filter by liked status if needed
-        var filteredList = if (isShowingLikedOnly) {
-            allSongs.filter { it.isLiked }
-        } else {
-            allSongs
-        }
+        val baseList = if (isShowingLikedOnly) likedSongs else allSongs
+        var filteredList = baseList
 
-        // Step 2: Apply search filter if text exists
+        // apply search filter if text exists
         if (searchText.isNotEmpty()) {
             filteredList = filteredList.filter { song ->
                 song.title.lowercase().contains(searchText) ||
@@ -231,6 +235,11 @@ class LibraryFragment : Fragment() {
         setupSearchBar()
         setupFilterButtons()
         observeSongs()
+
+        val userId = sessionManager.getUserId()
+        if (userId != null) {
+            observeLikedSongs(userId)
+        }
 
         enableSwipeToAddToQueue(binding.rvLibrarySongs, songListAdapter, nowPlayingViewModel)
 

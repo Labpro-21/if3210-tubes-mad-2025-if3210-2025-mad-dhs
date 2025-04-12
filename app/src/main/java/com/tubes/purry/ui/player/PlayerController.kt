@@ -1,7 +1,9 @@
 package com.tubes.purry.ui.player
 
 import android.content.Context
+import android.content.res.AssetFileDescriptor
 import android.media.MediaPlayer
+import android.net.Uri
 import com.tubes.purry.data.model.Song
 import android.util.Log
 import androidx.core.net.toUri
@@ -114,7 +116,9 @@ object PlayerController {
         }
     }
 
-    fun isPlaying(): Boolean = mediaPlayer?.isPlaying == true
+    fun isPlaying(): Boolean {
+        return mediaPlayer?.isPlaying == true
+    }
 
     fun getCurrentPosition(): Int = mediaPlayer?.currentPosition ?: 0
 

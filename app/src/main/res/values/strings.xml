@@ -11,6 +11,7 @@
     <string name="title">Title</string>
     <string name="upload_song">Upload Song</string>
     <string name="play_song">Play song</string>
+    <string name="like_song">Like song</string>
     <string name="mini_album_cover">Mini Album Cover</string>
     <string name="mini_player_artist_name">Artist</string>
     <string name="mini_player_song_title">Song Title</string>

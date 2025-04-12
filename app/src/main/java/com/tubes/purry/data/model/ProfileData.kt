@@ -1,9 +1,12 @@
 package com.tubes.purry.data.model
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import com.google.gson.annotations.SerializedName
 
+@Entity(tableName = "user_profile")
 data class ProfileData(
-    @SerializedName("id") val id: Int,
+    @PrimaryKey @SerializedName("id") val id: Int,
     @SerializedName("username") val username: String,
     @SerializedName("email") val email: String,
     @SerializedName("profilePhoto") val profilePhoto: String,

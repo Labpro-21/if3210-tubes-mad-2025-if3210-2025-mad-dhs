@@ -1,22 +1,44 @@
 package com.tubes.purry
 
+import android.Manifest
 import android.content.IntentFilter
+import android.content.pm.PackageManager
 import android.net.ConnectivityManager
+import android.os.Build
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.tubes.purry.databinding.ActivityMainBinding
+import com.tubes.purry.ui.profile.ProfileViewModel
+import com.tubes.purry.ui.profile.ProfileViewModelFactory
+import com.tubes.purry.ui.player.NowPlayingViewModel
 import com.tubes.purry.utils.NetworkStateReceiver
 import com.tubes.purry.utils.NetworkUtil
 import com.tubes.purry.utils.TokenExpirationService
+import com.tubes.purry.utils.seedAssets
 
 class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListener {
 
     private lateinit var binding: ActivityMainBinding
     private val networkStateReceiver = NetworkStateReceiver()
+
+    private val permissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val granted = permissions.values.all { it }
+        if (granted) {
+            seedAssets(this)
+        } else {
+            Toast.makeText(this, "Permissions required to access media files.", Toast.LENGTH_LONG).show()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -70,19 +92,32 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
         if (!NetworkUtil.isNetworkAvailable(this)) {
             showNetworkErrorBanner()
         }
+
+        // Fetch user profile
+        val profileViewModel = ViewModelProvider(this, ProfileViewModelFactory(this))[ProfileViewModel::class.java]
+        profileViewModel.getProfileData()
+
+        // Trigger seeding
+        // checkPermissionsAndSeed()
     }
 
-    override fun onNetworkAvailable() {
-        runOnUiThread {
-            hideNetworkErrorBanner()
+    private fun checkPermissionsAndSeed() {
+        val permissionsToRequest = mutableListOf<String>().apply {
+            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2) {
+                add(Manifest.permission.READ_EXTERNAL_STORAGE)
+            }
+        }
+
+        if (permissionsToRequest.isEmpty() ||
+            permissionsToRequest.all { ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED }) {
+            seedAssets(this)
+        } else {
+            permissionLauncher.launch(permissionsToRequest.toTypedArray())
         }
     }
 
-    override fun onNetworkUnavailable() {
-        runOnUiThread {
-            showNetworkErrorBanner()
-        }
-    }
+    override fun onNetworkAvailable() = runOnUiThread { hideNetworkErrorBanner() }
+    override fun onNetworkUnavailable() = runOnUiThread { showNetworkErrorBanner() }
 
     private fun showNetworkErrorBanner() {
         binding.networkErrorBanner.visibility = View.VISIBLE
@@ -117,7 +152,8 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
 
     override fun onStart() {
         super.onStart()
-        registerReceiver(networkStateReceiver, IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION))
+        registerReceiver(networkStateReceiver,
+            IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION))
     }
 
     override fun onStop() {

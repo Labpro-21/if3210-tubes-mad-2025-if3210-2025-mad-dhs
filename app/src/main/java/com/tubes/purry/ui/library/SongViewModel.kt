@@ -29,4 +29,8 @@ class SongViewModel(private val repository: SongRepository) : ViewModel() {
         val updatedSong = song.copy(lastPlayedAt = System.currentTimeMillis())
         repository.updateSong(updatedSong)
     }
+
+    fun getLikedSongsByUser(userId: Int): LiveData<List<Song>> {
+        return repository.getLikedSongsByUser(userId).asLiveData()
+    }
 }

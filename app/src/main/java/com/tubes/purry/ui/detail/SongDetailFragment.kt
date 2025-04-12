@@ -10,17 +10,23 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.ViewModelProvider
 import com.tubes.purry.R
+import com.tubes.purry.data.local.AppDatabase
 import com.tubes.purry.databinding.FragmentSongDetailBinding
 import com.tubes.purry.ui.player.NowPlayingViewModel
+import com.tubes.purry.ui.player.NowPlayingViewModelFactory
 import com.tubes.purry.ui.player.PlayerController
+import com.tubes.purry.ui.profile.ProfileViewModel
 import com.tubes.purry.utils.formatDuration
 
 class SongDetailFragment : Fragment() {
     private lateinit var binding: FragmentSongDetailBinding
-    private val nowPlayingViewModel: NowPlayingViewModel by activityViewModels()
+    private lateinit var nowPlayingViewModel: NowPlayingViewModel
     private val handler = Handler(Looper.getMainLooper())
     private var isDragging = false
+
+    private val profileViewModel: ProfileViewModel by activityViewModels()
 
     private val updateSeekRunnable = object : Runnable {
         override fun run() {
@@ -42,6 +48,11 @@ class SongDetailFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        val context = requireContext().applicationContext
+        val db = AppDatabase.getDatabase(context)
+        val factory = NowPlayingViewModelFactory(db.LikedSongDao(), db.songDao(), profileViewModel)
+        nowPlayingViewModel = ViewModelProvider(requireActivity(), factory)[NowPlayingViewModel::class.java]
+
         nowPlayingViewModel.currSong.observe(viewLifecycleOwner) { song ->
             song?.let {
                 binding.tvTitle.text = it.title
@@ -109,6 +120,22 @@ class SongDetailFragment : Fragment() {
                 }
             }
         })
+
+        // Observe the liked state
+        nowPlayingViewModel.isLiked.observe(viewLifecycleOwner) { isLiked ->
+            if (isLiked) {
+                binding.btnFavorite.setImageResource(R.drawable.ic_heart_filled)
+            } else {
+                binding.btnFavorite.setImageResource(R.drawable.ic_heart_outline)
+            }
+        }
+
+        binding.btnFavorite.setOnClickListener {
+            val currentSong = nowPlayingViewModel.currSong.value
+            currentSong?.let { song ->
+                nowPlayingViewModel.toggleLike(song)
+            }
+        }
 
         binding.btnShuffle.setOnClickListener {
             nowPlayingViewModel.toggleShuffle()

@@ -7,6 +7,7 @@ import android.security.keystore.KeyProperties
 import android.util.Log
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
+import androidx.core.content.edit
 import org.json.JSONObject
 import android.util.Base64
 
@@ -121,8 +122,6 @@ class SessionManager(context: Context) {
         }
     }
 
-
-
     fun getUserIdFromToken(): Int? {
         val token = fetchAuthToken() ?: return null
         return try {
@@ -142,5 +141,13 @@ class SessionManager(context: Context) {
         val id = prefs.getInt(USER_ID, -1)
         Log.d("SessionManager", "Fetched userId: $id")
         return if (id != -1) id else null
+    }
+
+    fun clearAuthData() {
+        prefs.edit {
+            remove(USER_TOKEN)
+            remove(REFRESH_TOKEN)
+        }
+        Log.d("SessionManager", "Auth data cleared")
     }
 }

@@ -1,6 +1,11 @@
 package com.tubes.purry.ui.player
 
 import android.content.Context
+import androidx.lifecycle.*
+import com.tubes.purry.data.local.LikedSongDao
+import com.tubes.purry.data.local.SongDao
+import com.tubes.purry.data.model.LikedSong
+import com.tubes.purry.data.model.ProfileData
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
@@ -8,14 +13,28 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.tubes.purry.data.model.Song
+import com.tubes.purry.ui.profile.ProfileViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 import com.tubes.purry.data.model.SongInQueue
 
-class NowPlayingViewModel : ViewModel() {
+class NowPlayingViewModel(
+    private val likedSongDao: LikedSongDao,
+    private val songDao: SongDao,
+    private val profileViewModel: ProfileViewModel
+) : ViewModel() {
+
     private val _currSong = MutableLiveData<Song?>() // mutable untuk bisa diubah2
     val currSong: LiveData<Song?> = _currSong // untuk read
 
     private val _isPlaying = MutableLiveData<Boolean>()
     val isPlaying: LiveData<Boolean> = _isPlaying
+
+    private val _isLiked = MutableLiveData<Boolean>()
+    val isLiked: LiveData<Boolean> = _isLiked
 
     private val _errorMessage = MutableLiveData<String>()
     private var originalAllSongs: List<Song> = emptyList()
@@ -38,29 +57,76 @@ class NowPlayingViewModel : ViewModel() {
     }
 
     fun playSong(song: Song, context: Context) {
-        val success = PlayerController.play(song, context)
-        if (success) {
-            _currSong.value = song
-//            _isPlaying.value = true
-            Handler(Looper.getMainLooper()).postDelayed({
-                _isPlaying.value = PlayerController.isPlaying()
-            }, 300)
+        _isPlaying.value = true
 
-            PlayerController.onCompletion = {
-                when (_repeatMode.value) {
-                    RepeatMode.ONE -> {
-                        _currSong.value?.let { playSong(it, context) }
+
+        viewModelScope.launch {
+            val userId = getUserIdBlocking() ?: return@launch
+            val isLiked = likedSongDao.isLiked(userId, song.id)
+            val songWithLike = song.copy(isLiked = isLiked)
+
+            if (_currSong.value?.id == song.id) {
+                _currSong.postValue(songWithLike)
+            }
+
+            Log.d(
+                "NowPlayingViewModel",
+                "Song data: filePath=${song.filePath}, resId=${song.resId}"
+            )
+
+            // Ensure PlayerController.play runs on the main thread
+            withContext(Dispatchers.Main) {
+                val success = PlayerController.play(songWithLike, context)
+                if (success) {
+                    _currSong.value = songWithLike
+                    _isLiked.value = isLiked
+
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        _isPlaying.value = PlayerController.isPlaying()
+                    }, 300)
+
+                    PlayerController.onCompletion = {
+                        when (_repeatMode.value) {
+                            RepeatMode.ONE -> {
+                                _currSong.value?.let { playSong(it, context) }
+                            }
+                            else -> {
+                                removeCurrentFromQueue()
+                                playNextInQueue(context)
+                            }
+                        }
                     }
-                    else -> {
-                        removeCurrentFromQueue()
-                        playNextInQueue(context)
-                    }
+                } else {
+                    _isPlaying.value = false
+                    _errorMessage.value = "Gagal memutar lagu. Cek file atau perizinan."
                 }
             }
-        } else {
-            _isPlaying.value = false
-            _errorMessage.value = "Gagal memutar lagu. Cek file atau perizinan."
         }
+//        val success = PlayerController.play(song, context)
+//        if (success) {
+//            _currSong.value = song
+////            _isPlaying.value = true
+//            Handler(Looper.getMainLooper()).postDelayed({
+//                _isPlaying.value = PlayerController.isPlaying()
+//            }, 300)
+//
+//
+//
+//            PlayerController.onCompletion = {
+//                when (_repeatMode.value) {
+//                    RepeatMode.ONE -> {
+//                        _currSong.value?.let { playSong(it, context) }
+//                    }
+//                    else -> {
+//                        removeCurrentFromQueue()
+//                        playNextInQueue(context)
+//                    }
+//                }
+//            }
+//        } else {
+//            _isPlaying.value = false
+//            _errorMessage.value = "Gagal memutar lagu. Cek file atau perizinan."
+//        }
     }
 
     private fun pauseSong() {
@@ -83,6 +149,40 @@ class NowPlayingViewModel : ViewModel() {
             pauseSong()
         } else {
             resumeSong()
+        }
+    }
+
+    fun toggleLike(song: Song) {
+        viewModelScope.launch {
+            val userId = profileViewModel.profileData.value?.id
+            userId?.let { id ->
+                val isLiked = likedSongDao.isSongLiked(id, song.id)
+                if (!isLiked) {
+                    val likedSong = LikedSong(
+                        userId = id,
+                        songId = song.id
+                    )
+                    likedSongDao.likeSong(likedSong)
+                    _isLiked.postValue(true) // Update the liked state
+                } else {
+                    likedSongDao.unlikeSong(id, song.id)
+                    _isLiked.postValue(false) // Update the liked state
+                }
+            }
+        }
+    }
+
+    private suspend fun getUserIdBlocking(): Int? {
+        return profileViewModel.profileData.value?.id ?: suspendCoroutine { cont ->
+            val observer = object : Observer<ProfileData?> {
+                override fun onChanged(value: ProfileData?) {
+                    if (value != null) {
+                        cont.resume(value.id)
+                        profileViewModel.profileData.removeObserver(this)
+                    }
+                }
+            }
+            profileViewModel.profileData.observeForever(observer)
         }
     }
 

@@ -12,9 +12,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.tubes.purry.R
 import com.tubes.purry.data.local.AppDatabase
-import com.tubes.purry.data.remote.ApiClient
 import com.tubes.purry.databinding.FragmentProfileBinding
-import com.tubes.purry.data.repository.ProfileRepository
 import com.tubes.purry.data.repository.SongRepository
 import com.tubes.purry.ui.auth.LoginActivity
 import com.tubes.purry.utils.NetworkUtil
@@ -42,13 +40,8 @@ class ProfileFragment : Fragment() {
 
         sessionManager = SessionManager(requireContext())
 
-        // Initialize repositories
-        val profileRepository = ProfileRepository(ApiClient.apiService)
-        val songRepository = SongRepository(AppDatabase.getDatabase(requireContext()).songDao())
-
-        // Initialize ViewModel with Factory
-        val viewModelFactory = ProfileViewModelFactory(profileRepository, songRepository)
-        viewModel = ViewModelProvider(this, viewModelFactory)[ProfileViewModel::class.java]
+        val factory = ProfileViewModelFactory(requireContext())
+        viewModel = ViewModelProvider(this, factory)[ProfileViewModel::class.java]
 
         binding.btnLogout.setOnClickListener {
             sessionManager.clearTokens()
@@ -67,7 +60,8 @@ class ProfileFragment : Fragment() {
     private fun loadProfileData() {
         val token = sessionManager.fetchAuthToken()
         if (token != null) {
-            viewModel.getProfileData("Bearer $token")
+            Log.d("ProfileFragment", "Token exists, attempting to load profile")
+            viewModel.getProfileData()
         } else {
             Log.d("ProfileFragment", "No token found, navigating to login")
             navigateToLogin()
@@ -76,18 +70,23 @@ class ProfileFragment : Fragment() {
 
     private fun observeViewModel() {
         viewModel.profileData.observe(viewLifecycleOwner) { profile ->
-            binding.apply {
-                txtUsername.text = profile.username
-                txtLocation.text = profile.location
+            profile?.let {
+                // 1. Tampilkan ke UI
+                binding.apply {
+                    txtUsername.text = it.username
+                    txtLocation.text = it.location
 
-                // Load profile image with Glide
-                val imageUrl = "http://34.101.226.132:3000/uploads/profile-picture/${profile.profilePhoto}"
-                Glide.with(this@ProfileFragment)
-                    .load(imageUrl)
-                    .placeholder(R.drawable.profile_placeholder)
-                    .error(R.drawable.profile_placeholder)
-                    .circleCrop()
-                    .into(imgProfile)
+                    val imageUrl = "http://34.101.226.132:3000/uploads/profile-picture/${it.profilePhoto}"
+                    Glide.with(this@ProfileFragment)
+                        .load(imageUrl)
+                        .placeholder(R.drawable.profile_placeholder)
+                        .error(R.drawable.profile_placeholder)
+                        .circleCrop()
+                        .into(imgProfile)
+                }
+
+                // 2. ⬅️ Panggil untuk update song stats by user ID
+                viewModel.fetchSongStats(it.id)
             }
         }
 
@@ -112,6 +111,8 @@ class ProfileFragment : Fragment() {
         binding.networkErrorLayout.visibility = View.VISIBLE
         binding.profileLayout.visibility = View.GONE
     }
+
+
 
     private fun navigateToLogin() {
         val intent = Intent(requireContext(), LoginActivity::class.java)
