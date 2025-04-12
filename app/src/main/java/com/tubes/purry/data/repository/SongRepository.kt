@@ -10,4 +10,7 @@ class SongRepository(private val songDao: SongDao) {
     suspend fun updateSong(song: Song) = songDao.update(song)
     fun getNewSongs(): Flow<List<Song>> = songDao.getNewSongs()
     fun getRecentlyPlayed(): Flow<List<Song>> = songDao.getRecentlyPlayed()
+    fun getTotalSongCount(): Flow<Int> = songDao.getTotalSongCount()
+    fun getLikedSongsCount(): Flow<Int> = songDao.getLikedSongsCount()
+    fun getListenedSongsCount(): Flow<Int> = songDao.getListenedSongsCount()
 }

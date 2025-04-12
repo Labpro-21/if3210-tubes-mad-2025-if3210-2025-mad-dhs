@@ -11,7 +11,9 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.tubes.purry.R
+import com.tubes.purry.data.local.AppDatabase
 import com.tubes.purry.databinding.FragmentProfileBinding
+import com.tubes.purry.data.repository.SongRepository
 import com.tubes.purry.ui.auth.LoginActivity
 import com.tubes.purry.utils.NetworkUtil
 import com.tubes.purry.utils.SessionManager
@@ -40,11 +42,6 @@ class ProfileFragment : Fragment() {
 
         val factory = ProfileViewModelFactory(requireContext())
         viewModel = ViewModelProvider(this, factory)[ProfileViewModel::class.java]
-
-        binding.btnEditProfile.setOnClickListener {
-            // Implement edit profile functionality
-            Toast.makeText(context, "Edit Profile feature coming soon", Toast.LENGTH_SHORT).show()
-        }
 
         binding.btnLogout.setOnClickListener {
             sessionManager.clearTokens()
@@ -90,6 +87,14 @@ class ProfileFragment : Fragment() {
                 txtSongsCount.text = profile.songsAdded.toString()
                 txtLikedCount.text = profile.likedSongs.toString()
                 txtListenedCount.text = profile.listenedSongs.toString()
+            }
+        }
+
+        viewModel.songStats.observe(viewLifecycleOwner) { stats ->
+            binding.apply {
+                txtSongsCount.text = stats.totalCount.toString()
+                txtLikedCount.text = stats.likedCount.toString()
+                txtListenedCount.text = stats.listenedCount.toString()
             }
         }
 

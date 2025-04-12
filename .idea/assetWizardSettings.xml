@@ -319,8 +319,8 @@
                         <option name="values">
                           <map>
                             <entry key="assetSourceType" value="FILE" />
-                            <entry key="outputName" value="ic_add" />
-                            <entry key="sourceFile" value="D:\mobdevasser\Add.svg" />
+                            <entry key="outputName" value="ic_repeat_one" />
+                            <entry key="sourceFile" value="D:\College\mobile\ic_repeat_one.svg" />
                           </map>
                         </option>
                       </PersistentState>

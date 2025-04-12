@@ -12,6 +12,7 @@ import com.tubes.purry.data.model.LoginRequest
 import com.tubes.purry.data.remote.ApiClient
 import com.tubes.purry.data.repository.AuthRepository
 import com.tubes.purry.databinding.ActivityLoginBinding
+import com.tubes.purry.ui.player.NowPlayingViewModel
 import com.tubes.purry.utils.SessionManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -22,6 +23,7 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoginBinding
     private lateinit var authRepository: AuthRepository
     private lateinit var sessionManager: SessionManager
+    private lateinit var nowPlayingViewModel: NowPlayingViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,9 +33,29 @@ class LoginActivity : AppCompatActivity() {
         sessionManager = SessionManager(this)
         authRepository = AuthRepository(ApiClient.apiService, sessionManager)
 
-        // Check if user is already logged in
-        if (sessionManager.fetchAuthToken() != null) {
-            navigateToMainActivity()
+        val token = sessionManager.fetchAuthToken()
+        if (!token.isNullOrEmpty()) {
+            // cek validitas token
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    val response = authRepository.verifyToken("Bearer $token")
+                    withContext(Dispatchers.Main) {
+                        if (response.isSuccessful) { // valid
+                            navigateToMainActivity()
+                        } else {
+                            sessionManager.clearTokens()
+                            nowPlayingViewModel.clearQueue()
+                        }
+                    }
+                } catch (e: Exception) {
+                    withContext(Dispatchers.Main) {
+                        // Jaga-jaga kalau ada error jaringan
+                        Toast.makeText(this@LoginActivity, "Error verifying token", Toast.LENGTH_SHORT).show()
+                        sessionManager.clearTokens()
+                        nowPlayingViewModel.clearQueue()
+                    }
+                }
+            }
         }
 
         binding.btnLogin.setOnClickListener {
@@ -111,7 +133,6 @@ class LoginActivity : AppCompatActivity() {
             }
         }
     }
-
 
     private fun navigateToMainActivity() {
         val intent = Intent(this, MainActivity::class.java)

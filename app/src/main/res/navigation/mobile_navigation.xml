@@ -24,6 +24,17 @@
         tools:layout="@layout/fragment_home" />
 
     <fragment
+        android:id="@+id/editSongFragment"
+        android:name="com.tubes.purry.ui.library.EditSongFragment"
+        android:label="Edit Song"
+        tools:layout="@layout/fragment_edit_song">
+
+        <argument
+            android:name="song"
+            app:argType="com.tubes.purry.data.model.Song" />
+    </fragment>
+
+    <fragment
         android:id="@+id/navigation_library"
         android:name="com.tubes.purry.ui.library.LibraryFragment"
         android:label="@string/title_library"
@@ -31,6 +42,9 @@
         <action
             android:id="@+id/action_libraryFragment_to_addSongFragment"
             app:destination="@id/addSongFragment" />
+        <action
+            android:id="@+id/action_libraryFragment_to_editSongFragment"
+            app:destination="@id/editSongFragment" />
     </fragment>
 
     <fragment

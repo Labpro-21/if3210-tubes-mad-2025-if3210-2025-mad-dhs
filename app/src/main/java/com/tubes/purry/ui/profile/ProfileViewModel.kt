@@ -9,10 +9,12 @@ import com.tubes.purry.data.model.ProfileData
 import com.tubes.purry.data.remote.ApiClient
 import com.tubes.purry.data.repository.AuthRepository
 import com.tubes.purry.data.repository.ProfileRepository
+import com.tubes.purry.data.repository.SongRepository
 import kotlinx.coroutines.launch
 import java.io.IOException
 
 class ProfileViewModel (
+    private val songRepository: SongRepository,
     authRepository: AuthRepository
 ): ViewModel() {
     private val repository = ProfileRepository(ApiClient.apiService, authRepository)
@@ -20,11 +22,18 @@ class ProfileViewModel (
     private val _profileData = MutableLiveData<ProfileData>()
     val profileData: LiveData<ProfileData> = _profileData
 
+    private val _songStats = MutableLiveData<SongStats>()
+    val songStats: LiveData<SongStats> = _songStats
+
     private val _errorMessage = MutableLiveData<String>()
     val errorMessage: LiveData<String> = _errorMessage
 
     private val _loading = MutableLiveData<Boolean>()
     val loading: LiveData<Boolean> = _loading
+
+    init {
+        fetchSongStats()
+    }
 
     fun getProfileData() {
         _loading.value = true
@@ -43,10 +52,36 @@ class ProfileViewModel (
                 _errorMessage.value = "Network error: ${e.message}"
             } catch (e: Exception) {
                 Log.e("ProfileViewModel", "Error fetching profile: ${e.message}", e)
-                _errorMessage.value = "Unexpected error: ${e.message}"
+                _errorMessage.value = "Error: ${e.message}"
             } finally {
                 _loading.value = false
             }
         }
     }
+
+    private fun fetchSongStats() {
+        viewModelScope.launch {
+            try {
+                songRepository.getTotalSongCount().collect { totalCount ->
+                    songRepository.getLikedSongsCount().collect { likedCount ->
+                        songRepository.getListenedSongsCount().collect { listenedCount ->
+                            _songStats.value = SongStats(
+                                totalCount = totalCount,
+                                likedCount = likedCount,
+                                listenedCount = listenedCount
+                            )
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                _errorMessage.value = "Error fetching song stats: ${e.message}"
+            }
+        }
+    }
+
+    data class SongStats(
+        val totalCount: Int = 0,
+        val likedCount: Int = 0,
+        val listenedCount: Int = 0
+    )
 }

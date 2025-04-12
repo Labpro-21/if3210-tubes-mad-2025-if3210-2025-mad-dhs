@@ -18,11 +18,11 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.tubes.purry.databinding.ActivityMainBinding
 import com.tubes.purry.ui.profile.ProfileViewModel
 import com.tubes.purry.ui.profile.ProfileViewModelFactory
+import com.tubes.purry.ui.player.NowPlayingViewModel
 import com.tubes.purry.utils.NetworkStateReceiver
 import com.tubes.purry.utils.NetworkUtil
 import com.tubes.purry.utils.TokenExpirationService
 import com.tubes.purry.utils.seedAssets
-
 
 class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListener {
 
@@ -51,20 +51,40 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
             ?.findNavController() ?: throw IllegalStateException("NavController not found")
         navView.setupWithNavController(navController)
 
+        // Add mini player fragment
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
                 .replace(R.id.miniPlayerContainer, com.tubes.purry.ui.player.MiniPlayerFragment())
                 .commit()
         }
 
+        // Observe destination changes to hide/show mini player
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            when (destination.id) {
+                R.id.songDetailFragment -> {
+                    hideMiniPlayer()
+                }
+                else -> showMiniPlayer()
+            }
+        }
+
         // Start token expiration service
         TokenExpirationService.startService(this)
 
-        // Setup network monitoring
+        // Setup network status monitoring
         networkStateReceiver.addListener(this)
+        registerReceiver(networkStateReceiver, IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION))
+
+        // Observe network status changes
         NetworkUtil.getNetworkStatus().observe(this) { isAvailable ->
-            if (isAvailable) hideNetworkErrorBanner() else showNetworkErrorBanner()
+            if (isAvailable) {
+                hideNetworkErrorBanner()
+            } else {
+                showNetworkErrorBanner()
+            }
         }
+
+        // Initial network check
         if (!NetworkUtil.isNetworkAvailable(this)) {
             showNetworkErrorBanner()
         }
@@ -119,7 +139,8 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
 
     override fun onStart() {
         super.onStart()
-        registerReceiver(networkStateReceiver, IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION))
+        registerReceiver(networkStateReceiver,
+            IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION))
     }
 
     override fun onStop() {

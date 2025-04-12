@@ -1,22 +1,26 @@
 package com.tubes.purry.ui.profile
 
 import android.content.Context
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.tubes.purry.data.local.AppDatabase
+import com.tubes.purry.data.repository.SongRepository
 import com.tubes.purry.data.remote.ApiClient
 import com.tubes.purry.data.repository.AuthRepository
 import com.tubes.purry.utils.SessionManager
 
 class ProfileViewModelFactory(
-    private val context: Context
+    private val context: Context,
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(ProfileViewModel::class.java)) {
             val sessionManager = SessionManager(context)
+            val songRepository = SongRepository(AppDatabase.getDatabase(context).songDao())
             val authRepository = AuthRepository(ApiClient.apiService, sessionManager)
-            return ProfileViewModel(authRepository) as T
+            @Suppress("UNCHECKED_CAST")
+            return ProfileViewModel(songRepository, authRepository) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }
 }
-

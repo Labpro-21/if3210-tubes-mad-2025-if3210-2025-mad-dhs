@@ -23,6 +23,26 @@
     <string name="library_liked_songs">Liked</string>
     <string name="library_header">Your Library</string>
     <string name="library_add_song">Add Song</string>
+    <string name="collapse_player" />
+    <string name="album_cover_player" />
+    <string name="play_pause_song" />
+    <string name="next_song" />
+    <string name="previous_song" />
+    <string name="edit_song" />
+    <string name="delete_song" />
+    <string name="song_title">Song Title</string>
+    <string name="artist_name">Artist Name</string>
+    <string name="edit_song_drawer">Edit Song</string>
+    <string name="artist_name_edit">Artist Name</string>
+    <string name="song_title_edit">Song Title</string>
+    <string name="empty_library">Your library is empty. Add some songs to get started!</string>
+    <string name="no_search_results">No songs match your search</string>
+    <string name="no_liked_songs">You haven\'t liked any songs yet</string>
     <string name="current_time">1:44</string>
     <string name="duration">3:50</string>
+    <string name="_player">Song Title</string>
+    <string name="song_title_player" />
+    <string name="artist_title_player">The Weeknd, Daft Punk</string>
+    <string name="shuffle">Shuffle</string>
+    <string name="repeat">Repeat</string>
 </resources>
