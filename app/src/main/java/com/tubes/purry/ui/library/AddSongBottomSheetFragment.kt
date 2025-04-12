@@ -50,8 +50,14 @@ class AddSongBottomSheetFragment : BottomSheetDialogFragment() {
                     Intent.FLAG_GRANT_READ_URI_PERMISSION
                 )
                 val metadata = extractAudioMetadata(requireContext(), it)
-                binding.inputTitle.setText(metadata.title ?: "")
-                binding.inputArtist.setText(metadata.artist ?: "")
+
+                if (binding.inputTitle.text.isNullOrBlank() && !metadata.title.isNullOrBlank()) {
+                    binding.inputTitle.setText(metadata.title)
+                }
+
+                if (binding.inputArtist.text.isNullOrBlank() && !metadata.artist.isNullOrBlank()) {
+                    binding.inputArtist.setText(metadata.artist)
+                }
                 duration = metadata.duration
             }
         }
