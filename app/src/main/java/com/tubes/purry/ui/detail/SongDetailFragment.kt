@@ -1,6 +1,7 @@
 package com.tubes.purry.ui.detail
 
 import android.os.Bundle
+import com.bumptech.glide.Glide
 import android.os.Handler
 import android.os.Looper
 import android.view.LayoutInflater
@@ -45,7 +46,9 @@ class SongDetailFragment : Fragment() {
             song?.let {
                 binding.tvTitle.text = it.title
                 binding.tvArtist.text = it.artist
-                binding.ivCover.setImageResource(it.coverResId ?: 0)
+                Glide.with(this)
+                    .load(song.coverPath ?: song.coverResId ?: R.drawable.album_default)
+                    .into(binding.ivCover)
                 binding.tvDuration.text = formatDuration(it.duration)
                 binding.seekBar.max = it.duration
             }

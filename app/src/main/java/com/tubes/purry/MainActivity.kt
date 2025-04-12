@@ -1,14 +1,16 @@
 package com.tubes.purry
 
-import android.os.Bundle
-import android.view.View
 import android.content.IntentFilter
 import android.net.ConnectivityManager
+import android.os.Bundle
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.tubes.purry.databinding.ActivityMainBinding
+import com.tubes.purry.ui.player.NowPlayingViewModel
 import com.tubes.purry.utils.NetworkStateReceiver
 import com.tubes.purry.utils.NetworkUtil
 import com.tubes.purry.utils.TokenExpirationService
@@ -25,15 +27,25 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
 
         // Setup bottom navigation
         val navView: BottomNavigationView = binding.navView
-//        val navController = findNavController(R.id.nav_host_fragment)
         val navController = supportFragmentManager.findFragmentById(R.id.nav_host_fragment)
             ?.findNavController() ?: throw IllegalStateException("NavController not found")
         navView.setupWithNavController(navController)
 
+        // Add mini player fragment
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
                 .replace(R.id.miniPlayerContainer, com.tubes.purry.ui.player.MiniPlayerFragment())
                 .commit()
+        }
+
+        // Observe destination changes to hide/show mini player
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            when (destination.id) {
+                R.id.songDetailFragment -> {
+                    hideMiniPlayer()
+                }
+                else -> showMiniPlayer()
+            }
         }
 
         // Start token expiration service
@@ -41,6 +53,7 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
 
         // Setup network status monitoring
         networkStateReceiver.addListener(this)
+        registerReceiver(networkStateReceiver, IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION))
 
         // Observe network status changes
         NetworkUtil.getNetworkStatus().observe(this) { isAvailable ->
@@ -55,18 +68,6 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
         if (!NetworkUtil.isNetworkAvailable(this)) {
             showNetworkErrorBanner()
         }
-
-//        navController.addOnDestinationChangedListener { _, destination, _ ->
-//            when (destination.id) {
-//                R.id.loginFragment, R.id.splashFragment -> hideMiniPlayer()
-//                else -> {
-//                    if ((supportFragmentManager.findFragmentById(R.id.nav_host_fragment)
-//                                as? com.tubes.purry.ui.player.NowPlayingViewModel)?.currSong?.value != null) {
-//                        showMiniPlayer()
-//                    }
-//                }
-//            }
-//        }
     }
 
     override fun onNetworkAvailable() {
@@ -105,8 +106,7 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
 
     override fun onStart() {
         super.onStart()
-        registerReceiver(networkStateReceiver,
-            IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION))
+        registerReceiver(networkStateReceiver, IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION))
     }
 
     override fun onStop() {
