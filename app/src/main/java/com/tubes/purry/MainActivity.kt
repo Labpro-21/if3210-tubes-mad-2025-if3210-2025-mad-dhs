@@ -1,10 +1,16 @@
 package com.tubes.purry
 
+import android.Manifest
+import android.content.IntentFilter
+import android.content.pm.PackageManager
+import android.net.ConnectivityManager
+import android.os.Build
 import android.os.Bundle
 import android.view.View
-import android.content.IntentFilter
-import android.net.ConnectivityManager
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
@@ -14,13 +20,25 @@ import com.tubes.purry.ui.profile.ProfileViewModel
 import com.tubes.purry.ui.profile.ProfileViewModelFactory
 import com.tubes.purry.utils.NetworkStateReceiver
 import com.tubes.purry.utils.NetworkUtil
-import com.tubes.purry.utils.SessionManager
 import com.tubes.purry.utils.TokenExpirationService
+import com.tubes.purry.utils.seedAssets
+
 
 class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListener {
 
     private lateinit var binding: ActivityMainBinding
     private val networkStateReceiver = NetworkStateReceiver()
+
+    private val permissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val granted = permissions.values.all { it }
+        if (granted) {
+            seedAssets(this)
+        } else {
+            Toast.makeText(this, "Permissions required to access media files.", Toast.LENGTH_LONG).show()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,7 +47,6 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
 
         // Setup bottom navigation
         val navView: BottomNavigationView = binding.navView
-//        val navController = findNavController(R.id.nav_host_fragment)
         val navController = supportFragmentManager.findFragmentById(R.id.nav_host_fragment)
             ?.findNavController() ?: throw IllegalStateException("NavController not found")
         navView.setupWithNavController(navController)
@@ -43,50 +60,40 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
         // Start token expiration service
         TokenExpirationService.startService(this)
 
-        // Setup network status monitoring
+        // Setup network monitoring
         networkStateReceiver.addListener(this)
-
-        // Observe network status changes
         NetworkUtil.getNetworkStatus().observe(this) { isAvailable ->
-            if (isAvailable) {
-                hideNetworkErrorBanner()
-            } else {
-                showNetworkErrorBanner()
-            }
+            if (isAvailable) hideNetworkErrorBanner() else showNetworkErrorBanner()
         }
-
-        // Initial network check
         if (!NetworkUtil.isNetworkAvailable(this)) {
             showNetworkErrorBanner()
         }
 
+        // Fetch user profile
         val profileViewModel = ViewModelProvider(this, ProfileViewModelFactory(this))[ProfileViewModel::class.java]
         profileViewModel.getProfileData()
 
-//        navController.addOnDestinationChangedListener { _, destination, _ ->
-//            when (destination.id) {
-//                R.id.loginFragment, R.id.splashFragment -> hideMiniPlayer()
-//                else -> {
-//                    if ((supportFragmentManager.findFragmentById(R.id.nav_host_fragment)
-//                                as? com.tubes.purry.ui.player.NowPlayingViewModel)?.currSong?.value != null) {
-//                        showMiniPlayer()
-//                    }
-//                }
-//            }
-//        }
+        // Trigger seeding
+        checkPermissionsAndSeed()
     }
 
-    override fun onNetworkAvailable() {
-        runOnUiThread {
-            hideNetworkErrorBanner()
+    private fun checkPermissionsAndSeed() {
+        val permissionsToRequest = mutableListOf<String>().apply {
+            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2) {
+                add(Manifest.permission.READ_EXTERNAL_STORAGE)
+            }
+        }
+
+        if (permissionsToRequest.isEmpty() ||
+            permissionsToRequest.all { ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED }) {
+            seedAssets(this)
+        } else {
+            permissionLauncher.launch(permissionsToRequest.toTypedArray())
         }
     }
 
-    override fun onNetworkUnavailable() {
-        runOnUiThread {
-            showNetworkErrorBanner()
-        }
-    }
+    override fun onNetworkAvailable() = runOnUiThread { hideNetworkErrorBanner() }
+    override fun onNetworkUnavailable() = runOnUiThread { showNetworkErrorBanner() }
 
     private fun showNetworkErrorBanner() {
         binding.networkErrorBanner.visibility = View.VISIBLE
@@ -112,8 +119,7 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
 
     override fun onStart() {
         super.onStart()
-        registerReceiver(networkStateReceiver,
-            IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION))
+        registerReceiver(networkStateReceiver, IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION))
     }
 
     override fun onStop() {

@@ -63,6 +63,7 @@ object PlayerController {
                         afd.close()
                     }
                     !song.filePath.isNullOrBlank() -> {
+                        Log.d("PlayerController", "${song.filePath}")
                         setDataSource(appContext, song.filePath.toUri())
                     }
                     else -> {

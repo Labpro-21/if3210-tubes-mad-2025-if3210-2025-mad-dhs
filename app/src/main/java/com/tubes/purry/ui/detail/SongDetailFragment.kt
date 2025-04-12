@@ -9,17 +9,15 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import com.tubes.purry.R
 import com.tubes.purry.data.local.AppDatabase
-import com.tubes.purry.data.model.LikedSong
 import com.tubes.purry.databinding.FragmentSongDetailBinding
 import com.tubes.purry.ui.player.NowPlayingViewModel
 import com.tubes.purry.ui.player.NowPlayingViewModelFactory
 import com.tubes.purry.ui.player.PlayerController
 import com.tubes.purry.ui.profile.ProfileViewModel
 import com.tubes.purry.utils.formatDuration
-import kotlinx.coroutines.launch
+import com.bumptech.glide.Glide
 
 class SongDetailFragment : Fragment() {
     private lateinit var binding: FragmentSongDetailBinding
@@ -58,7 +56,9 @@ class SongDetailFragment : Fragment() {
             song?.let {
                 binding.tvTitle.text = it.title
                 binding.tvArtist.text = it.artist
-                binding.ivCover.setImageResource(it.coverResId ?: 0)
+                Glide.with(this)
+                    .load(song.coverPath ?: song.coverResId ?: R.drawable.album_default)
+                    .into(binding.ivCover)
                 binding.tvDuration.text = formatDuration(it.duration)
                 binding.seekBar.max = it.duration
             }
