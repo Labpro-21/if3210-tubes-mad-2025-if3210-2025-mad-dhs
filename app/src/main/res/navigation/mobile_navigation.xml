@@ -9,7 +9,7 @@
         android:id="@+id/addSongFragment"
         android:name="com.tubes.purry.ui.library.AddSongBottomSheetFragment"
         android:label="Add Song"
-        tools:layout="@layout/fragment_add_song" />
+        tools:layout="@layout/fragment_add_song_bottom_sheet" />
 
     <fragment
         android:id="@+id/navigation_home"
@@ -21,7 +21,7 @@
         android:id="@+id/editSongFragment"
         android:name="com.tubes.purry.ui.library.EditSongBottomSheetFragment"
         android:label="Edit Song"
-        tools:layout="@layout/fragment_edit_song">
+        tools:layout="@layout/fragment_add_song_bottom_sheet">
 
         <argument
             android:name="song"

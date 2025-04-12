@@ -90,7 +90,7 @@
         android:id="@+id/seekBar"
         android:layout_width="323dp"
         android:layout_height="30dp"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="36dp"
         android:progress="30"
         android:progressBackgroundTint="#777777"
         android:progressTint="@android:color/white"
@@ -125,15 +125,16 @@
         android:id="@+id/playerControls"
         android:layout_width="323dp"
         android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:layout_marginTop="24dp"
+        android:layout_margin="24dp"
+        android:layout_marginTop="32dp"
         android:layout_marginBottom="32dp"
         android:gravity="center"
         android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvCurrentTime">
+        app:layout_constraintTop_toBottomOf="@id/tvCurrentTime"
+        app:layout_constraintVertical_bias="0.4">
 
         <ImageButton
             android:id="@+id/btnShuffle"

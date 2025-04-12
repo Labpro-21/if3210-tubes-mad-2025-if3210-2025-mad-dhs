@@ -1,5 +1,6 @@
 package com.tubes.purry.ui.library
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -10,9 +11,11 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.tubes.purry.R
 import com.tubes.purry.data.model.Song
 import com.tubes.purry.databinding.FragmentAddSongBottomSheetBinding
 import com.tubes.purry.utils.extractAudioMetadata
+import androidx.core.net.toUri
 
 class EditSongBottomSheetFragment(private val song: Song) : BottomSheetDialogFragment() {
 
@@ -69,16 +72,19 @@ class EditSongBottomSheetFragment(private val song: Song) : BottomSheetDialogFra
         return binding.root
     }
 
+    @SuppressLint("SetTextI18n")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        audioUri = song.filePath?.let { Uri.parse(it) }
-        imageUri = song.coverPath?.let { Uri.parse(it) }
+        audioUri = song.filePath?.toUri()
+        imageUri = song.coverPath?.toUri()
         duration = song.duration
 
         binding.inputTitle.setText(song.title)
         binding.inputArtist.setText(song.artist)
-        song.coverPath?.let { binding.imgUpload.setImageURI(Uri.parse(it)) }
+        binding.textTitle.text = getString(R.string.edit_song)
+        binding.btnSave.text = getString(R.string.save_update)
+        song.coverPath?.let { binding.imgUpload.setImageURI(it.toUri()) }
 
         setupListeners()
     }

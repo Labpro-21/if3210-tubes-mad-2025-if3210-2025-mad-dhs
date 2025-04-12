@@ -27,7 +27,7 @@
     <string name="play_pause_song" />
     <string name="next_song" />
     <string name="previous_song" />
-    <string name="edit_song" />
+    <string name="edit_song">Edit Song</string>
     <string name="delete_song" />
     <string name="song_title">Song Title</string>
     <string name="artist_name">Artist Name</string>
@@ -44,4 +44,5 @@
     <string name="artist_title_player">The Weeknd, Daft Punk</string>
     <string name="shuffle">Shuffle</string>
     <string name="repeat">Repeat</string>
+    <string name="save_update">Update</string>
 </resources>

@@ -23,17 +23,12 @@ class NowPlayingViewModel : ViewModel() {
     private val _mainQueue = MutableLiveData<List<SongInQueue>>(emptyList())
     private val _manualQueue = MutableLiveData<MutableList<SongInQueue>?>(mutableListOf())
 
-    private val _queue: LiveData<List<SongInQueue>> = MediatorLiveData<List<SongInQueue>>().apply {
-        addSource(_mainQueue) { value = combineQueues() }
-        addSource(_manualQueue) { value = combineQueues() }
-    }
-
     private var currentQueueIndex = -1
 
     private val _isShuffling = MutableLiveData<Boolean>(false)
     val isShuffling: LiveData<Boolean> = _isShuffling
 
-    private val _repeatMode = MutableLiveData<RepeatMode>(RepeatMode.ONE)
+    private val _repeatMode = MutableLiveData<RepeatMode>(RepeatMode.NONE)
     val repeatMode: LiveData<RepeatMode> = _repeatMode
 
     enum class RepeatMode { NONE, ONE, ALL }

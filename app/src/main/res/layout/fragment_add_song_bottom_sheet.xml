@@ -9,6 +9,7 @@
     android:layout_height="wrap_content">
 
     <TextView
+        android:id="@+id/textTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
@@ -107,7 +108,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:background="@drawable/button_gray_background"
+            android:backgroundTint="@color/gray"
             android:fontFamily="sans-serif-medium"
             android:text="@string/cancel"
             android:textSize="16sp"
