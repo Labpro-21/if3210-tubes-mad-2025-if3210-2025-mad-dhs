@@ -74,7 +74,7 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
         profileViewModel.getProfileData()
 
         // Trigger seeding
-        checkPermissionsAndSeed()
+        // checkPermissionsAndSeed()
     }
 
     private fun checkPermissionsAndSeed() {

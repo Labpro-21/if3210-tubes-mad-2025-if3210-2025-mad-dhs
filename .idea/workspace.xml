@@ -71,11 +71,10 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fb2d9b52-b320-4578-a27c-b77d399ccfa2" name="Changes" comment="feat: like song">
+    <list default="true" id="fb2d9b52-b320-4578-a27c-b77d399ccfa2" name="Changes" comment="fix: bug on permission for uploaded audio and images, disable seeding until needed">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/MainActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/MainActivity.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/detail/SongDetailFragment.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/detail/SongDetailFragment.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/library/AddSongFragment.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/library/AddSongFragment.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/player/PlayerController.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/player/PlayerController.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -331,7 +330,15 @@
       <option name="project" value="LOCAL" />
       <updated>1744451131208</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="feat: seed song into external storage">
+      <option name="closed" value="true" />
+      <created>1744455866754</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1744455866754</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -344,7 +351,9 @@
     <MESSAGE value="feat: restructure DB to support liked songs and fix token refresh bug&#10;&#10;- Refactored database schema and models to include liked songs feature&#10;- Added struct and logic for storing liked songs linked to users&#10;- Fixed bug where expired tokens were not properly refreshed, causing 401 errors" />
     <MESSAGE value="feat: insert profile to RoomDb" />
     <MESSAGE value="feat: like song" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat: like song" />
+    <MESSAGE value="feat: seed song into external storage" />
+    <MESSAGE value="fix: bug on permission for uploaded audio and images, disable seeding until needed" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix: bug on permission for uploaded audio and images, disable seeding until needed" />
   </component>
   <component name="play_dynamic_filters_status">
     <option name="appIdToCheckInfo">

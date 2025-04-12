@@ -1,7 +1,9 @@
 package com.tubes.purry.ui.player
 
 import android.content.Context
+import android.content.res.AssetFileDescriptor
 import android.media.MediaPlayer
+import android.net.Uri
 import com.tubes.purry.data.model.Song
 import android.util.Log
 import androidx.core.net.toUri
@@ -63,8 +65,13 @@ object PlayerController {
                         afd.close()
                     }
                     !song.filePath.isNullOrBlank() -> {
-                        Log.d("PlayerController", "${song.filePath}")
-                        setDataSource(appContext, song.filePath.toUri())
+                        Log.d("PlayerController", "Playing from filePath: ${song.filePath}")
+                        val songUri = song.filePath.toUri()
+                        val afd = loadAudioFileFromUri(appContext, songUri)
+                        afd?.let {
+                            setDataSource(it.fileDescriptor, it.startOffset, it.length)
+                            it.close()
+                        }
                     }
                     else -> {
                         Log.e("PlayerController", "Song has no valid source.")
@@ -80,6 +87,15 @@ object PlayerController {
             Log.e("PlayerController", "Error playing song: ${e.message}")
             isPreparing = false
             release()
+        }
+    }
+
+    private fun loadAudioFileFromUri(context: Context, uri: Uri): AssetFileDescriptor? {
+        return try {
+            context.contentResolver.openAssetFileDescriptor(uri, "r") // Open the file
+        } catch (e: Exception) {
+            Log.e("PlayerController", "Error opening file: ${e.message}")
+            null
         }
     }
 

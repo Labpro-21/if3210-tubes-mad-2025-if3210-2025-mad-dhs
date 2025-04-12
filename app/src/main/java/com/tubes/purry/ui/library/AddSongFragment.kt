@@ -1,5 +1,6 @@
 package com.tubes.purry.ui.library
 
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -29,6 +30,7 @@ class AddSongFragment : Fragment() {
     private val pickImage =
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
             uri?.let {
+                requireContext().contentResolver.takePersistableUriPermission(it, Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 imageUri = it
                 binding.imgUpload.setImageURI(it)
             }
@@ -37,12 +39,13 @@ class AddSongFragment : Fragment() {
     private val pickAudio =
         registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
             uri?.let {
+                requireContext().contentResolver.takePersistableUriPermission(it, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+
                 audioUri = it
                 val metadata = extractAudioMetadata(requireContext(), it)
                 binding.inputTitle.setText(metadata.title ?: "")
                 binding.inputArtist.setText(metadata.artist ?: "")
                 duration = metadata.duration
-//                binding.textDuration.text = "Duration: ${duration / 1000} seconds"
             }
         }
 
