@@ -5,12 +5,16 @@ import android.view.View
 import android.content.IntentFilter
 import android.net.ConnectivityManager
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.tubes.purry.databinding.ActivityMainBinding
+import com.tubes.purry.ui.profile.ProfileViewModel
+import com.tubes.purry.ui.profile.ProfileViewModelFactory
 import com.tubes.purry.utils.NetworkStateReceiver
 import com.tubes.purry.utils.NetworkUtil
+import com.tubes.purry.utils.SessionManager
 import com.tubes.purry.utils.TokenExpirationService
 
 class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListener {
@@ -55,6 +59,9 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
         if (!NetworkUtil.isNetworkAvailable(this)) {
             showNetworkErrorBanner()
         }
+
+        val profileViewModel = ViewModelProvider(this, ProfileViewModelFactory(this))[ProfileViewModel::class.java]
+        profileViewModel.getProfileData()
 
 //        navController.addOnDestinationChangedListener { _, destination, _ ->
 //            when (destination.id) {

@@ -3,6 +3,7 @@ package com.tubes.purry.ui.auth
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.util.Patterns
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.tubes.purry.MainActivity
@@ -27,7 +28,7 @@ class LoginActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         sessionManager = SessionManager(this)
-        authRepository = AuthRepository(ApiClient.apiService)
+        authRepository = AuthRepository(ApiClient.apiService, sessionManager)
 
         // Check if user is already logged in
         if (sessionManager.fetchAuthToken() != null) {
@@ -37,6 +38,15 @@ class LoginActivity : AppCompatActivity() {
         binding.btnLogin.setOnClickListener {
             val email = binding.etEmail.text.toString()
             val password = binding.etPassword.text.toString()
+
+            if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                Toast.makeText(this, "Invalid email format", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            if (password.length < 8) {
+                Toast.makeText(this, "Password must be at least 8 characters", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
 
             if (email.isNotEmpty() && password.isNotEmpty()) {
                 login(email, password)

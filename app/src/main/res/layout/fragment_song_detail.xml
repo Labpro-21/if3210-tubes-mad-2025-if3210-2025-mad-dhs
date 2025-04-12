@@ -90,9 +90,9 @@
     <SeekBar
         android:id="@+id/seekBar"
         android:layout_width="323dp"
-        android:layout_height="30dp"
+        android:layout_height="45dp"
         android:layout_marginTop="24dp"
-        android:progress="30"
+        android:progress="0"
         android:progressBackgroundTint="#777777"
         android:progressTint="@android:color/white"
         android:thumbTint="@android:color/white"
@@ -107,7 +107,7 @@
         android:layout_height="wrap_content"
         android:text="@string/current_time"
         android:textColor="@android:color/white"
-        android:textSize="12sp"
+        android:textSize="15sp"
         app:layout_constraintTop_toBottomOf="@id/seekBar"
         app:layout_constraintStart_toStartOf="@id/seekBar"
         />
@@ -118,7 +118,7 @@
         android:layout_height="wrap_content"
         android:text="@string/duration"
         android:textColor="@android:color/white"
-        android:textSize="12sp"
+        android:textSize="15sp"
         app:layout_constraintTop_toBottomOf="@id/seekBar"
         app:layout_constraintEnd_toEndOf="@id/seekBar"
         />
@@ -131,7 +131,7 @@
         android:orientation="horizontal"
         android:gravity="center"
         app:layout_constraintTop_toBottomOf="@id/tvCurrentTime"
-        app:layout_constraintBottom_toBottomOf="parent"
+
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="24dp"
@@ -139,16 +139,16 @@
 
         <ImageButton
             android:id="@+id/btnPrev"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
             android:src="@drawable/ic_skip_previous"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@null"/>
 
         <ImageButton
             android:id="@+id/btnPlayPause"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
             android:background="@android:color/transparent"
             android:src="@drawable/ic_play_btn"
             android:scaleType="centerInside"
@@ -158,8 +158,8 @@
 
         <ImageButton
             android:id="@+id/btnNext"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
             android:src="@drawable/ic_skip_next"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@null"/>

@@ -13,6 +13,7 @@ object PlayerController {
     private var currentlyPlaying: Song? = null
 
     fun play(song: Song, context: Context) {
+        Log.d("PlayerController", "Preparing to play song: ${song.title}")
         if (currentlyPlaying?.id == song.id && isPlaying()) {
             Log.d("PlayerController", "Same song already playing.")
             return

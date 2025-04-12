@@ -7,6 +7,7 @@ import android.security.keystore.KeyProperties
 import android.util.Log
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
+import androidx.core.content.edit
 
 class SessionManager(context: Context) {
     private var prefs: SharedPreferences
@@ -104,5 +105,13 @@ class SessionManager(context: Context) {
         } catch (e: Exception) {
             Log.e("SessionManager", "Error clearing tokens: ${e.message}")
         }
+    }
+
+    fun clearAuthData() {
+        prefs.edit {
+            remove(USER_TOKEN)
+            remove(REFRESH_TOKEN)
+        }
+        Log.d("SessionManager", "Auth data cleared")
     }
 }

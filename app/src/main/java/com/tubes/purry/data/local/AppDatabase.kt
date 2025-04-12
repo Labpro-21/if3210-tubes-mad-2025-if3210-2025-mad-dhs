@@ -12,10 +12,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import com.tubes.purry.R
 import com.tubes.purry.R.raw.terlintas
+import com.tubes.purry.data.model.LikedSong
+import com.tubes.purry.data.model.ProfileData
 
-@Database(entities = [Song::class], version = 2)
+@Database(entities = [Song::class, LikedSong::class, ProfileData::class], version = 2)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun songDao(): SongDao
+    abstract fun userProfileDao(): UserProfileDao
+    abstract fun LikedSongDao(): LikedSongDao
 
     companion object {
         @Volatile private var INSTANCE: AppDatabase? = null
@@ -41,6 +45,27 @@ abstract class AppDatabase : RoomDatabase() {
         override fun onCreate(db: SupportSQLiteDatabase) {
             super.onCreate(db)
             Log.d("AppDatabase", "onCreate triggered. Seeding data...")
+
+            // Create triggers for likedSongs counter
+            db.execSQL("""
+                CREATE TRIGGER IF NOT EXISTS increment_liked_songs
+                AFTER INSERT ON liked_songs
+                BEGIN
+                  UPDATE user_profile
+                  SET likedSongs = likedSongs + 1
+                  WHERE id = NEW.userId;
+                END;
+            """.trimIndent())
+
+            db.execSQL("""
+                CREATE TRIGGER IF NOT EXISTS decrement_liked_songs
+                AFTER DELETE ON liked_songs
+                BEGIN
+                  UPDATE user_profile
+                  SET likedSongs = likedSongs - 1
+                  WHERE id = OLD.userId;
+                END;
+            """.trimIndent())
 
             CoroutineScope(Dispatchers.IO).launch {
                 INSTANCE?.songDao()?.insertAll(predefinedSongs())

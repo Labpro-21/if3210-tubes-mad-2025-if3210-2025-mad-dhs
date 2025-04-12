@@ -37,7 +37,9 @@ class ProfileFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         sessionManager = SessionManager(requireContext())
-        viewModel = ViewModelProvider(this).get(ProfileViewModel::class.java)
+
+        val factory = ProfileViewModelFactory(requireContext())
+        viewModel = ViewModelProvider(this, factory)[ProfileViewModel::class.java]
 
         binding.btnEditProfile.setOnClickListener {
             // Implement edit profile functionality
@@ -61,11 +63,9 @@ class ProfileFragment : Fragment() {
     private fun loadProfileData() {
         val token = sessionManager.fetchAuthToken()
         if (token != null) {
-            // Add logging
             Log.d("ProfileFragment", "Token exists, attempting to load profile")
-            viewModel.getProfileData("Bearer $token")
+            viewModel.getProfileData()
         } else {
-            // Add logging
             Log.d("ProfileFragment", "No token found, navigating to login")
             navigateToLogin()
         }

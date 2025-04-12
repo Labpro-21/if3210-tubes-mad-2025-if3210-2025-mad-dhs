@@ -11,6 +11,9 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.tubes.purry.R
 import com.tubes.purry.databinding.FragmentMiniPlayerBinding
 import androidx.core.net.toUri
+import com.tubes.purry.data.local.AppDatabase
+import com.tubes.purry.ui.profile.ProfileViewModel
+import com.tubes.purry.ui.profile.ProfileViewModelFactory
 
 class MiniPlayerFragment : Fragment() {
     private lateinit var viewModel: NowPlayingViewModel
@@ -27,7 +30,15 @@ class MiniPlayerFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel = ViewModelProvider(requireActivity())[NowPlayingViewModel::class.java]
+        val appContext = requireContext().applicationContext
+        val likedSongDao = AppDatabase.getDatabase(appContext).LikedSongDao()
+        val songDao = AppDatabase.getDatabase(appContext).songDao()
+
+        val profileViewModelFactory = ProfileViewModelFactory(requireContext())
+        val profileViewModel = ViewModelProvider(requireActivity(), profileViewModelFactory)[ProfileViewModel::class.java]
+
+        val factory = NowPlayingViewModelFactory(likedSongDao, songDao, profileViewModel)
+        viewModel = ViewModelProvider(requireActivity(), factory)[NowPlayingViewModel::class.java]
 
         viewModel.currSong.observe(viewLifecycleOwner) { song ->
             if (song != null) {
