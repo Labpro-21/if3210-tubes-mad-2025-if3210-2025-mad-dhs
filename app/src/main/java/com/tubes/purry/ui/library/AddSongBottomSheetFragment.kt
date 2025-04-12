@@ -12,6 +12,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.tubes.purry.data.model.Song
 import com.tubes.purry.databinding.FragmentAddSongBottomSheetBinding
+import com.tubes.purry.ui.player.NowPlayingViewModel
 import com.tubes.purry.utils.SessionManager
 import com.tubes.purry.utils.extractAudioMetadata
 import java.util.UUID
@@ -23,6 +24,7 @@ class AddSongBottomSheetFragment : BottomSheetDialogFragment() {
 
     private lateinit var sessionManager: SessionManager
     private lateinit var viewModel: SongViewModel
+    private lateinit var nowPlayingViewModel: NowPlayingViewModel
 
     private var audioUri: Uri? = null
     private var duration: Int = 0
@@ -147,6 +149,8 @@ class AddSongBottomSheetFragment : BottomSheetDialogFragment() {
         )
 
         viewModel.insertSong(song)
+        nowPlayingViewModel.addToQueue(song, requireContext())
+
         Toast.makeText(requireContext(), "Song added", Toast.LENGTH_SHORT).show()
         dismiss()
     }

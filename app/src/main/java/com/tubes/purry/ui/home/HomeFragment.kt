@@ -2,7 +2,6 @@ package com.tubes.purry.ui.home
 
 import android.app.AlertDialog
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.Paint
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -26,6 +25,7 @@ import com.tubes.purry.databinding.FragmentHomeBinding
 import com.tubes.purry.data.model.Song
 import com.tubes.purry.ui.library.EditSongBottomSheetFragment
 import com.tubes.purry.ui.player.MiniPlayerFragment
+import androidx.core.graphics.toColorInt
 
 
 class HomeFragment : Fragment() {
@@ -34,6 +34,7 @@ class HomeFragment : Fragment() {
     private val viewModel: SongViewModel by viewModels {
         SongViewModelFactory(requireContext())
     }
+    private var allSongs: List<Song> = emptyList()
 
     private lateinit var newSongsAdapter: SongCardAdapter
     private lateinit var recentSongsAdapter: SongListAdapter
@@ -85,6 +86,7 @@ class HomeFragment : Fragment() {
             .setMessage("Are you sure you want to delete \"${song.title}\"?")
             .setPositiveButton("Yes") { _, _ ->
                 viewModel.deleteSong(song)
+                nowPlayingViewModel.removeFromQueue(song.id, requireContext())
             }
             .setNegativeButton("No", null)
             .show()
@@ -97,8 +99,8 @@ class HomeFragment : Fragment() {
 
     private fun observeSongs() {
         viewModel.newSongs.observe(viewLifecycleOwner) { songs ->
+            allSongs = songs
             newSongsAdapter.submitList(songs)
-            nowPlayingViewModel.setAllSongs(songs)
         }
 
         viewModel.recentlyPlayed.observe(viewLifecycleOwner) { songs ->
@@ -108,6 +110,7 @@ class HomeFragment : Fragment() {
     }
 
     private fun onSongClicked(song: Song) {
+        nowPlayingViewModel.setQueueFromClickedSong(song, allSongs, requireContext())
         nowPlayingViewModel.playSong(song, requireContext())
         viewModel.markAsPlayed(song)
 
@@ -137,7 +140,7 @@ class HomeFragment : Fragment() {
         adapter: SongListAdapter,
         nowPlayingViewModel: NowPlayingViewModel
     ) {
-        val paint = Paint().apply { color = Color.parseColor("#4CAF50") }
+        val paint = Paint().apply { color = "#4CAF50".toColorInt() }
 
         val itemTouchHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
             override fun onMove(

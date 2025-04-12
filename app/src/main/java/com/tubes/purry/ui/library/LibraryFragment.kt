@@ -2,9 +2,7 @@ package com.tubes.purry.ui.library
 
 import android.app.AlertDialog
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.Paint
-import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -12,7 +10,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
@@ -25,6 +22,7 @@ import com.tubes.purry.databinding.FragmentLibraryBinding
 import com.tubes.purry.ui.player.MiniPlayerFragment
 import com.tubes.purry.ui.player.NowPlayingViewModel
 import com.tubes.purry.utils.SessionManager
+import androidx.core.graphics.toColorInt
 
 class LibraryFragment : Fragment() {
 
@@ -182,6 +180,7 @@ class LibraryFragment : Fragment() {
     }
 
     private fun onSongClicked(song: Song) {
+        nowPlayingViewModel.setQueueFromClickedSong(song, allSongs, requireContext())
         nowPlayingViewModel.playSong(song, requireContext())
         viewModel.markAsPlayed(song)
 
@@ -220,6 +219,7 @@ class LibraryFragment : Fragment() {
             .setMessage("Are you sure you want to delete \"${song.title}\"?")
             .setPositiveButton("Yes") { _, _ ->
                 viewModel.deleteSong(song)
+                nowPlayingViewModel.removeFromQueue(song.id, requireContext())
             }
             .setNegativeButton("No", null)
             .show()
@@ -248,7 +248,7 @@ class LibraryFragment : Fragment() {
         adapter: SongListAdapter,
         nowPlayingViewModel: NowPlayingViewModel
     ) {
-        val paint = Paint().apply { color = Color.parseColor("#4CAF50") }
+        val paint = Paint().apply { color = "#4CAF50".toColorInt() }
 
         val itemTouchHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
             override fun onMove(

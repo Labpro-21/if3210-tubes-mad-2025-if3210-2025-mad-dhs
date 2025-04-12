@@ -10,6 +10,7 @@ import com.tubes.purry.data.model.LoginRequest
 import com.tubes.purry.data.remote.ApiClient
 import com.tubes.purry.data.repository.AuthRepository
 import com.tubes.purry.databinding.ActivityLoginBinding
+import com.tubes.purry.ui.player.NowPlayingViewModel
 import com.tubes.purry.utils.SessionManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -20,6 +21,7 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoginBinding
     private lateinit var authRepository: AuthRepository
     private lateinit var sessionManager: SessionManager
+    private lateinit var nowPlayingViewModel: NowPlayingViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,6 +42,7 @@ class LoginActivity : AppCompatActivity() {
                             navigateToMainActivity()
                         } else {
                             sessionManager.clearTokens()
+                            nowPlayingViewModel.clearQueue()
                         }
                     }
                 } catch (e: Exception) {
@@ -47,6 +50,7 @@ class LoginActivity : AppCompatActivity() {
                         // Jaga-jaga kalau ada error jaringan
                         Toast.makeText(this@LoginActivity, "Error verifying token", Toast.LENGTH_SHORT).show()
                         sessionManager.clearTokens()
+                        nowPlayingViewModel.clearQueue()
                     }
                 }
             }
