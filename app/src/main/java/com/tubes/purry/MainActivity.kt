@@ -4,9 +4,7 @@ import android.os.Bundle
 import android.view.View
 import android.content.IntentFilter
 import android.net.ConnectivityManager
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -32,6 +30,11 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
             ?.findNavController() ?: throw IllegalStateException("NavController not found")
         navView.setupWithNavController(navController)
 
+        if (savedInstanceState == null) {
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.miniPlayerContainer, com.tubes.purry.ui.player.MiniPlayerFragment())
+                .commit()
+        }
 
         // Start token expiration service
         TokenExpirationService.startService(this)
@@ -52,6 +55,18 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
         if (!NetworkUtil.isNetworkAvailable(this)) {
             showNetworkErrorBanner()
         }
+
+//        navController.addOnDestinationChangedListener { _, destination, _ ->
+//            when (destination.id) {
+//                R.id.loginFragment, R.id.splashFragment -> hideMiniPlayer()
+//                else -> {
+//                    if ((supportFragmentManager.findFragmentById(R.id.nav_host_fragment)
+//                                as? com.tubes.purry.ui.player.NowPlayingViewModel)?.currSong?.value != null) {
+//                        showMiniPlayer()
+//                    }
+//                }
+//            }
+//        }
     }
 
     override fun onNetworkAvailable() {
@@ -72,6 +87,20 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
 
     private fun hideNetworkErrorBanner() {
         binding.networkErrorBanner.visibility = View.GONE
+    }
+
+    fun showMiniPlayer() {
+        binding.miniPlayerContainer.apply {
+            if (visibility != View.VISIBLE) {
+                alpha = 0f
+                visibility = View.VISIBLE
+                animate().alpha(1f).setDuration(250).start()
+            }
+        }
+    }
+
+    fun hideMiniPlayer() {
+        binding.miniPlayerContainer.visibility = View.GONE
     }
 
     override fun onStart() {

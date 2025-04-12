@@ -11,6 +11,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import com.tubes.purry.R
+import com.tubes.purry.R.raw.terlintas
 
 @Database(entities = [Song::class], version = 3)
 abstract class AppDatabase : RoomDatabase() {
@@ -56,7 +57,7 @@ abstract class AppDatabase : RoomDatabase() {
                 coverPath = null,
                 filePath = null,
                 resId = R.raw.katakan_saja,
-                duration = 239,
+                duration = 239000,
                 isLiked = false,
                 isLocal = true,
                 lastPlayedAt = 0L,
@@ -70,7 +71,7 @@ abstract class AppDatabase : RoomDatabase() {
                 coverPath = null,
                 filePath = null,
                 resId = R.raw.primadona,
-                duration = 247,
+                duration = 247000,
                 isLiked = false,
                 isLocal = true,
                 lastPlayedAt = 0L,
@@ -83,8 +84,8 @@ abstract class AppDatabase : RoomDatabase() {
                 coverResId = R.drawable.terlintas,
                 coverPath = null,
                 filePath = null,
-                resId = R.raw.terlintas,
-                duration = 235,
+                resId = terlintas,
+                duration = 235000,
                 isLiked = false,
                 isLocal = true,
                 lastPlayedAt = 0L,

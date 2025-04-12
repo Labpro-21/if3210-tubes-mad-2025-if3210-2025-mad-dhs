@@ -14,6 +14,8 @@ navigationFragmentKtx = "2.8.9"
 navigationUiKtx = "2.8.9"
 paletteKtx = "1.0.0"
 safeargs = "2.7.5"
+legacySupportV4 = "1.0.0"
+fragmentKtx = "1.5.6"
 
 #[versions]
 #core-ktx = "1.10.1"
@@ -61,6 +63,8 @@ androidx-lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifec
 androidx-navigation-fragment-ktx = { group = "androidx.navigation", name = "navigation-fragment-ktx", version.ref = "navigationFragmentKtx" }
 androidx-navigation-ui-ktx = { group = "androidx.navigation", name = "navigation-ui-ktx", version.ref = "navigationUiKtx" }
 androidx-palette-ktx = { group = "androidx.palette", name = "palette-ktx", version.ref = "paletteKtx" }
+androidx-legacy-support-v4 = { group = "androidx.legacy", name = "legacy-support-v4", version.ref = "legacySupportV4" }
+androidx-fragment-ktx = { group = "androidx.fragment", name = "fragment-ktx", version.ref = "fragmentKtx" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -37,4 +37,6 @@
     <string name="empty_library">Your library is empty. Add some songs to get started!</string>
     <string name="no_search_results">No songs match your search</string>
     <string name="no_liked_songs">You haven\'t liked any songs yet</string>
+    <string name="current_time">1:44</string>
+    <string name="duration">3:50</string>
 </resources>

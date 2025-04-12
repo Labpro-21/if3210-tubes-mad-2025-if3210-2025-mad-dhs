@@ -6,12 +6,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
-// import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.lifecycle.ViewModelProvider
 import com.tubes.purry.R
+import com.tubes.purry.MainActivity
 import com.tubes.purry.ui.library.SongViewModel
 import com.tubes.purry.ui.library.SongViewModelFactory
 import com.tubes.purry.ui.library.SongCardAdapter
@@ -119,5 +119,7 @@ class HomeFragment : Fragment() {
             container.visibility = View.VISIBLE
             container.animate().alpha(1f).setDuration(250).start()
         }
+
+//        (requireActivity() as MainActivity).showMiniPlayer()
     }
 }

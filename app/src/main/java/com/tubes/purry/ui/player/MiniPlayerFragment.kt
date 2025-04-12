@@ -6,7 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.tubes.purry.R
@@ -68,7 +67,12 @@ class MiniPlayerFragment : Fragment() {
         }
 
         binding.root.setOnClickListener {
-            findNavController().navigate(R.id.action_global_nowPlayingFragment)
+            val navHostFragment = requireActivity()
+                .supportFragmentManager
+                .findFragmentById(R.id.nav_host_fragment) as? androidx.navigation.fragment.NavHostFragment
+
+            val navController = navHostFragment?.navController
+            navController?.navigate(R.id.songDetailFragment)
         }
     }
 }
