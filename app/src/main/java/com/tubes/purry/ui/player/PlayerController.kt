@@ -5,26 +5,28 @@ import android.media.MediaPlayer
 import com.tubes.purry.data.model.Song
 import android.util.Log
 import androidx.core.net.toUri
+import com.tubes.purry.ui.player.NowPlayingViewModel.RepeatMode
 
 
 object PlayerController {
     private var mediaPlayer: MediaPlayer? = null
     private var isPreparing = false
     private var currentlyPlaying: Song? = null
+    var onCompletion: (() -> Unit)? = null
 
-    fun play(song: Song, context: Context) {
+    fun play(song: Song, context: Context): Boolean {
         if (currentlyPlaying?.id == song.id && isPlaying()) {
             Log.d("PlayerController", "Same song already playing.")
-            return
+            return true
         }
 
         if (isPreparing) {
             Log.d("PlayerController", "Still preparing previous song. Skipping.")
-            return
+            return false
         }
 
         Log.d("PlayerController", "Preparing song: ${song.title}")
-        this.release()
+        release()
         isPreparing = true
         currentlyPlaying = song
 
@@ -39,19 +41,13 @@ object PlayerController {
 
                 setOnCompletionListener {
                     Log.d("PlayerController", "Playback completed for: ${song.title}")
-                    release()
+                    onCompletion?.invoke()
                 }
 
                 setOnErrorListener { _, what, extra ->
                     Log.e("PlayerController", "MediaPlayer error: what=$what, extra=$extra")
                     isPreparing = false
                     release()
-
-                    // Optional: Retry once for transient errors
-                    // Handler(Looper.getMainLooper()).postDelayed({
-                    //     play(song, appContext)
-                    // }, 500)
-
                     true
                 }
 
@@ -62,31 +58,32 @@ object PlayerController {
                         afd.close()
                     }
                     !song.filePath.isNullOrBlank() -> {
-                        setDataSource(appContext, song.filePath.toUri())
-//                        val uri = song.filePath.toUri()
-//                        val afd = context.contentResolver.openAssetFileDescriptor(uri, "r")
-//                        if (afd != null) {
-//                            setDataSource(afd.fileDescriptor)
-//                            afd.close()
-//                        } else {
-//                            Log.e("PlayerController", "Failed to open AssetFileDescriptor for song URI.")
-//                            return
-//                        }
+                        try {
+                            setDataSource(appContext, song.filePath.toUri())
+                        } catch (e: SecurityException) {
+                            Log.e("PlayerController", "SecurityException: ${e.message}")
+                            isPreparing = false
+                            release()
+                            return false
+                        }
                     }
                     else -> {
                         Log.e("PlayerController", "Song has no valid source.")
                         isPreparing = false
                         release()
-                        return
+                        return false
                     }
                 }
 
                 prepareAsync()
             }
+
+            return true // sukses jika tidak kena exception
         } catch (e: Exception) {
             Log.e("PlayerController", "Error playing song: ${e.message}")
             isPreparing = false
-            this.release()
+            release()
+            return false
         }
     }
 
@@ -117,9 +114,7 @@ object PlayerController {
         }
     }
 
-    fun isPlaying(): Boolean {
-        return mediaPlayer?.isPlaying == true
-    }
+    fun isPlaying(): Boolean = mediaPlayer?.isPlaying == true
 
     fun getCurrentPosition(): Int = mediaPlayer?.currentPosition ?: 0
 

@@ -25,6 +25,11 @@ class SongListAdapter(
         notifyDataSetChanged()
     }
 
+    fun getSongAt(position: Int): Song {
+        return songs[position]
+    }
+
+
     inner class SongViewHolder(private val binding: ItemSongListBinding) :
         RecyclerView.ViewHolder(binding.root) {
 

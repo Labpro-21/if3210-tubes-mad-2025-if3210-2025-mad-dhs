@@ -6,8 +6,10 @@ import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import com.tubes.purry.R
 import com.tubes.purry.databinding.FragmentSongDetailBinding
 import com.tubes.purry.ui.player.NowPlayingViewModel
 import com.tubes.purry.ui.player.PlayerController
@@ -56,6 +58,27 @@ class SongDetailFragment : Fragment() {
             )
         }
 
+        nowPlayingViewModel.isShuffling.observe(viewLifecycleOwner) { isShuffling ->
+            val color = if (isShuffling) R.color.green else android.R.color.white
+            binding.btnShuffle.setColorFilter(resources.getColor(color, null))
+        }
+
+        nowPlayingViewModel.repeatMode.observe(viewLifecycleOwner) { mode ->
+            val resId = when (mode) {
+                NowPlayingViewModel.RepeatMode.NONE -> R.drawable.ic_repeat
+                NowPlayingViewModel.RepeatMode.ALL -> R.drawable.ic_repeat
+                NowPlayingViewModel.RepeatMode.ONE -> R.drawable.ic_repeat_one
+                null -> R.drawable.ic_repeat
+            }
+            val color = when (mode) {
+                NowPlayingViewModel.RepeatMode.NONE, null -> android.R.color.white
+                NowPlayingViewModel.RepeatMode.ALL, NowPlayingViewModel.RepeatMode.ONE -> R.color.green
+            }
+
+            binding.btnRepeat.setImageResource(resId)
+            binding.btnRepeat.setColorFilter(resources.getColor(color, null))
+        }
+
         binding.btnPlayPause.setOnClickListener {
             nowPlayingViewModel.togglePlayPause()
         }
@@ -82,6 +105,24 @@ class SongDetailFragment : Fragment() {
                 }
             }
         })
+
+        binding.btnShuffle.setOnClickListener {
+            nowPlayingViewModel.toggleShuffle()
+            Toast.makeText(requireContext(), "Shuffle ${if (nowPlayingViewModel.isShuffling.value == true) "ON" else "OFF"}", Toast.LENGTH_SHORT).show()
+        }
+
+        binding.btnRepeat.setOnClickListener {
+            nowPlayingViewModel.toggleRepeat()
+            Toast.makeText(requireContext(), "Repeat mode: ${nowPlayingViewModel.repeatMode.value}", Toast.LENGTH_SHORT).show()
+        }
+
+        binding.btnNext.setOnClickListener {
+            nowPlayingViewModel.nextSong(requireContext())
+        }
+
+        binding.btnPrev.setOnClickListener {
+            nowPlayingViewModel.previousSong(requireContext())
+        }
     }
 
     override fun onResume() {

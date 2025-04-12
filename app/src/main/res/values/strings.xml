@@ -39,4 +39,9 @@
     <string name="no_liked_songs">You haven\'t liked any songs yet</string>
     <string name="current_time">1:44</string>
     <string name="duration">3:50</string>
+    <string name="_player">Song Title</string>
+    <string name="song_title_player" />
+    <string name="artist_title_player">The Weeknd, Daft Punk</string>
+    <string name="shuffle">Shuffle</string>
+    <string name="repeat">Repeat</string>
 </resources>

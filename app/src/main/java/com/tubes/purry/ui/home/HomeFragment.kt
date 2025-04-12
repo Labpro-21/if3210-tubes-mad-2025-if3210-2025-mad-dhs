@@ -1,17 +1,22 @@
 package com.tubes.purry.ui.home
 
 import android.app.AlertDialog
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.RecyclerView
 import com.tubes.purry.R
-import com.tubes.purry.MainActivity
 import com.tubes.purry.ui.library.SongViewModel
 import com.tubes.purry.ui.library.SongViewModelFactory
 import com.tubes.purry.ui.library.SongCardAdapter
@@ -34,6 +39,7 @@ class HomeFragment : Fragment() {
     private lateinit var recentSongsAdapter: SongListAdapter
     private lateinit var nowPlayingViewModel: NowPlayingViewModel
 
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -47,6 +53,7 @@ class HomeFragment : Fragment() {
         nowPlayingViewModel = ViewModelProvider(requireActivity())[NowPlayingViewModel::class.java]
         setupAdapters()
         observeSongs()
+        enableSwipeToAddToQueue(binding.rvRecentlyPlayed, recentSongsAdapter, nowPlayingViewModel)
     }
 
     private fun setupAdapters() {
@@ -91,11 +98,13 @@ class HomeFragment : Fragment() {
     private fun observeSongs() {
         viewModel.newSongs.observe(viewLifecycleOwner) { songs ->
             newSongsAdapter.submitList(songs)
+            nowPlayingViewModel.setAllSongs(songs)
         }
 
         viewModel.recentlyPlayed.observe(viewLifecycleOwner) { songs ->
             recentSongsAdapter.submitList(songs)
         }
+
     }
 
     private fun onSongClicked(song: Song) {
@@ -122,4 +131,52 @@ class HomeFragment : Fragment() {
 
 //        (requireActivity() as MainActivity).showMiniPlayer()
     }
+
+    private fun enableSwipeToAddToQueue(
+        recyclerView: RecyclerView,
+        adapter: SongListAdapter,
+        nowPlayingViewModel: NowPlayingViewModel
+    ) {
+        val paint = Paint().apply { color = Color.parseColor("#4CAF50") }
+
+        val itemTouchHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
+            override fun onMove(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                target: RecyclerView.ViewHolder
+            ) = false
+
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                val position = viewHolder.adapterPosition
+                val song = adapter.getSongAt(position)
+                nowPlayingViewModel.addToQueue(song, requireContext())
+                adapter.notifyItemChanged(position)
+                Toast.makeText(requireContext(), "Added to queue: ${song.title}", Toast.LENGTH_SHORT).show()
+            }
+
+            override fun onChildDraw(
+                c: Canvas,
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                dX: Float,
+                dY: Float,
+                actionState: Int,
+                isCurrentlyActive: Boolean
+            ) {
+                if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
+                    val itemView: View = viewHolder.itemView
+                    c.drawRect(
+                        itemView.right.toFloat() + dX,
+                        itemView.top.toFloat(),
+                        itemView.right.toFloat(),
+                        itemView.bottom.toFloat(),
+                        paint
+                    )
+                }
+                super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
+            }
+        })
+        itemTouchHelper.attachToRecyclerView(recyclerView)
+    }
+
 }
