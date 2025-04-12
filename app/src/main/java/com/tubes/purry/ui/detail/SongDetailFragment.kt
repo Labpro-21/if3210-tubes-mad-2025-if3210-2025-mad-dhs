@@ -57,8 +57,8 @@ class SongDetailFragment : Fragment() {
 
         nowPlayingViewModel.isPlaying.observe(viewLifecycleOwner) { isPlaying ->
             binding.btnPlayPause.setImageResource(
-                if (isPlaying) com.tubes.purry.R.drawable.ic_pause_btn
-                else com.tubes.purry.R.drawable.ic_play_btn
+                if (isPlaying) R.drawable.ic_pause_btn
+                else R.drawable.ic_play_btn
             )
         }
 

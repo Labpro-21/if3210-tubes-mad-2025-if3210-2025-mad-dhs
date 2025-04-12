@@ -5,12 +5,10 @@ import android.net.ConnectivityManager
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.tubes.purry.databinding.ActivityMainBinding
-import com.tubes.purry.ui.player.NowPlayingViewModel
 import com.tubes.purry.utils.NetworkStateReceiver
 import com.tubes.purry.utils.NetworkUtil
 import com.tubes.purry.utils.TokenExpirationService

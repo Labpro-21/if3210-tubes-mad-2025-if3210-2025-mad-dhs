@@ -35,7 +35,7 @@ class LibraryFragment : Fragment() {
     }
     private lateinit var nowPlayingViewModel: NowPlayingViewModel
     private lateinit var sessionManager: SessionManager
-    private var currentUserId: Int? = null
+//    private var currentUserId: Int? = null
     private var allSongs: List<Song> = emptyList()
     private var isShowingLikedOnly = false
     private var currentSearchQuery = ""
@@ -109,14 +109,13 @@ class LibraryFragment : Fragment() {
             applyFilters()
         }
 
-        // Liked songs button
+        // liked songs button
         binding.btnLiked.setOnClickListener {
             isShowingLikedOnly = true
             updateButtonAppearance()
             applyFilters()
         }
 
-        // Initial state
         updateButtonAppearance()
     }
 
@@ -201,7 +200,6 @@ class LibraryFragment : Fragment() {
         }
     }
 
-
     private fun showAddSongBottomSheet() {
         val addSongBottomSheet = AddSongBottomSheetFragment()
         addSongBottomSheet.show(childFragmentManager, "AddSongBottomSheet")
@@ -210,7 +208,6 @@ class LibraryFragment : Fragment() {
     private fun onEditSong(song: Song) {
         val editSongBottomSheet = EditSongBottomSheetFragment(song)
         editSongBottomSheet.show(childFragmentManager, "AddSongBottomSheet")
-//        findNavController().navigate(action)
     }
 
     private fun onDeleteSong(song: Song) {
@@ -229,7 +226,6 @@ class LibraryFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         nowPlayingViewModel = ViewModelProvider(requireActivity())[NowPlayingViewModel::class.java]
         sessionManager = SessionManager(requireContext())
-        currentUserId = sessionManager.getUserId()
 
         setupRecyclerView()
         setupSearchBar()
