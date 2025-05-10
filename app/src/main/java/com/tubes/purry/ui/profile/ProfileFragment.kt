@@ -17,6 +17,7 @@ import com.tubes.purry.data.repository.SongRepository
 import com.tubes.purry.ui.auth.LoginActivity
 import com.tubes.purry.utils.NetworkUtil
 import com.tubes.purry.utils.SessionManager
+import java.util.Locale
 
 class ProfileFragment : Fragment() {
 
@@ -25,6 +26,9 @@ class ProfileFragment : Fragment() {
 
     private lateinit var viewModel: ProfileViewModel
     private lateinit var sessionManager: SessionManager
+
+    // Add a constant for request code
+    private val EDIT_PROFILE_REQUEST_CODE = 100
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -43,17 +47,47 @@ class ProfileFragment : Fragment() {
         val factory = ProfileViewModelFactory(requireContext())
         viewModel = ViewModelProvider(this, factory)[ProfileViewModel::class.java]
 
-        binding.btnLogout.setOnClickListener {
-            sessionManager.clearTokens()
-            navigateToLogin()
-        }
-
+        setupClickListeners()
         observeViewModel()
 
         if (NetworkUtil.isNetworkAvailable(requireContext())) {
             loadProfileData()
         } else {
             showNetworkError()
+        }
+    }
+
+    private fun setupClickListeners() {
+        // Set up logout button
+        binding.btnLogout.setOnClickListener {
+            sessionManager.clearTokens()
+            navigateToLogin()
+        }
+
+        // Set up edit profile button
+        binding.btnEditProfile.setOnClickListener {
+            navigateToEditProfile()
+        }
+
+        // Set up edit photo button
+        binding.btnEditPhoto.setOnClickListener {
+            navigateToEditProfile()
+        }
+    }
+
+    private fun navigateToEditProfile() {
+        val intent = Intent(requireContext(), EditProfileActivity::class.java)
+        startActivityForResult(intent, EDIT_PROFILE_REQUEST_CODE)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == EDIT_PROFILE_REQUEST_CODE) {
+            // Refresh profile data after returning from edit screen
+            if (NetworkUtil.isNetworkAvailable(requireContext())) {
+                loadProfileData()
+            }
         }
     }
 
@@ -74,7 +108,8 @@ class ProfileFragment : Fragment() {
                 // 1. Tampilkan ke UI
                 binding.apply {
                     txtUsername.text = it.username
-                    txtLocation.text = it.location
+                    // Convert country code to country name for better display
+                    txtLocation.text = getCountryNameFromCode(it.location)
 
                     val imageUrl = "http://34.101.226.132:3000/uploads/profile-picture/${it.profilePhoto}"
                     Glide.with(this@ProfileFragment)
@@ -107,12 +142,19 @@ class ProfileFragment : Fragment() {
         }
     }
 
+    private fun getCountryNameFromCode(countryCode: String): String {
+        return try {
+            val locale = Locale("", countryCode)
+            locale.displayCountry
+        } catch (e: Exception) {
+            countryCode // Fallback to showing the code if conversion fails
+        }
+    }
+
     private fun showNetworkError() {
         binding.networkErrorLayout.visibility = View.VISIBLE
         binding.profileLayout.visibility = View.GONE
     }
-
-
 
     private fun navigateToLogin() {
         val intent = Intent(requireContext(), LoginActivity::class.java)

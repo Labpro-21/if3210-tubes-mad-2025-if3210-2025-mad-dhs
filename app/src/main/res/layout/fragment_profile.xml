@@ -131,6 +131,22 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/txtUsername" />
 
+        <!-- Add Edit Profile Button -->
+        <Button
+            android:id="@+id/btnEditProfile"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/button_outline_background"
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp"
+            android:text="Edit Profile"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/txtLocation" />
+
         <Button
             android:id="@+id/btnLogout"
             android:layout_width="wrap_content"
@@ -144,7 +160,7 @@
             android:textColor="@color/white"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/txtLocation" />
+            app:layout_constraintTop_toBottomOf="@+id/btnEditProfile" />
 
         <LinearLayout
             android:id="@+id/statsContainer"

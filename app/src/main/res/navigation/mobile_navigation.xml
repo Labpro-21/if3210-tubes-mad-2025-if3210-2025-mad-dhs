@@ -59,4 +59,5 @@
         app:destination="@id/songDetailFragment"
         app:launchSingleTop="true" />
 
+
 </navigation>
