@@ -17,6 +17,7 @@ safeargs = "2.7.5"
 legacySupportV4 = "1.0.0"
 fragmentKtx = "1.5.6"
 uiGraphicsAndroid = "1.7.8"
+playServicesMaps = "19.2.0"
 
 #[versions]
 #core-ktx = "1.10.1"
@@ -67,6 +68,7 @@ androidx-palette-ktx = { group = "androidx.palette", name = "palette-ktx", versi
 androidx-legacy-support-v4 = { group = "androidx.legacy", name = "legacy-support-v4", version.ref = "legacySupportV4" }
 androidx-fragment-ktx = { group = "androidx.fragment", name = "fragment-ktx", version.ref = "fragmentKtx" }
 androidx-ui-graphics-android = { group = "androidx.compose.ui", name = "ui-graphics-android", version.ref = "uiGraphicsAndroid" }
+play-services-maps = { group = "com.google.android.gms", name = "play-services-maps", version.ref = "playServicesMaps" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

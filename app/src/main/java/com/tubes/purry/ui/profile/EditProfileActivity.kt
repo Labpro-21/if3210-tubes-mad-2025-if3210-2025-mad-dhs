@@ -356,10 +356,6 @@ class EditProfileActivity : AppCompatActivity() {
     }
 
     private fun saveProfileChanges() {
-        if (currentLocation == null) {
-            Toast.makeText(this, "Please select a location", Toast.LENGTH_SHORT).show()
-            return
-        }
 
         val token = sessionManager.fetchAuthToken()
         if (token == null) {
@@ -371,7 +367,7 @@ class EditProfileActivity : AppCompatActivity() {
 
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val locationPart = currentLocation!!.toRequestBody("text/plain".toMediaTypeOrNull())
+                val locationPart = currentLocation?.toRequestBody("text/plain".toMediaTypeOrNull())
 
                 var profilePhotoPart: MultipartBody.Part? = null
                 if (currentPhotoUri != null) {
