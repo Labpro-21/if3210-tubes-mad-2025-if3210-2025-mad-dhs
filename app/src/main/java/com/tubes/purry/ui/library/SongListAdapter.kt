@@ -15,7 +15,8 @@ import com.tubes.purry.utils.SessionManager
 class SongListAdapter(
     private val onClick: (Song) -> Unit,
     private val onEdit: (Song) -> Unit,
-    private val onDelete: (Song) -> Unit
+    private val onDelete: (Song) -> Unit,
+    private val showEditDelete: Boolean = true // Add this parameter with default value true
 ) : RecyclerView.Adapter<SongListAdapter.SongViewHolder>() {
 
     private var songs = listOf<Song>()
@@ -29,7 +30,6 @@ class SongListAdapter(
         return songs[position]
     }
 
-
     inner class SongViewHolder(private val binding: ItemSongListBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
@@ -37,6 +37,7 @@ class SongListAdapter(
             val context = binding.root.context
             val sessionManager = SessionManager(context)
             val currentUserId = sessionManager.getUserId()
+
             binding.tvTitle.text = song.title
             binding.tvArtist.text = song.artist
 
@@ -52,17 +53,18 @@ class SongListAdapter(
                 }
             }
 
-            if (song.uploadedBy == currentUserId) {
+            // Show edit/delete buttons only if showEditDelete is true AND user uploaded the song
+            if (showEditDelete && song.uploadedBy == currentUserId) {
                 binding.btnEdit.visibility = View.VISIBLE
                 binding.btnDelete.visibility = View.VISIBLE
+                binding.btnEdit.setOnClickListener { onEdit(song) }
+                binding.btnDelete.setOnClickListener { onDelete(song) }
             } else {
                 binding.btnEdit.visibility = View.GONE
                 binding.btnDelete.visibility = View.GONE
             }
 
             binding.root.setOnClickListener { onClick(song) }
-            binding.btnEdit.setOnClickListener { onEdit(song) }
-            binding.btnDelete.setOnClickListener { onDelete(song) }
         }
     }
 

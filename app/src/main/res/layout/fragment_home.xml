@@ -6,6 +6,31 @@
     android:orientation="vertical"
     android:padding="16dp">
 
+    <!-- Made for You / Recommendations Title -->
+    <TextView
+        android:id="@+id/labelRecommendations"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Made for you"
+        android:textColor="@android:color/white"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:paddingBottom="8dp" />
+
+    <!-- Horizontal Recommendations -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvRecommendations"
+        android:layout_width="match_parent"
+        android:layout_height="180dp"
+        android:layout_marginBottom="16dp"
+        android:clipToPadding="false"
+        android:orientation="horizontal"
+        android:overScrollMode="never"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        tools:listitem="@layout/item_recommendation" />
+
     <!-- Chart Title -->
     <TextView
         android:id="@+id/labelCharts"

@@ -59,6 +59,10 @@
         <activity android:name=".ui.chart.TopChartDetailActivity"
             android:exported="false"/>
 
+        <activity
+            android:name=".ui.recommendation.RecommendationDetailActivity"
+            android:exported="false" />
+
         <!-- File Provider for camera -->
         <provider
             android:name="androidx.core.content.FileProvider"

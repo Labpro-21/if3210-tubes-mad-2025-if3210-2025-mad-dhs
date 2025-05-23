@@ -89,4 +89,5 @@
     <string name="top_50_global">Top 50 Global</string>
     <string name="chart_cover">chart-cover</string>
     <string name="download_song">download icon</string>
+    <string name="recommendation_cover">Recommendation playlist cover</string>
 </resources>
