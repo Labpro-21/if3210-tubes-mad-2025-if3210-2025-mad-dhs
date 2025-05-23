@@ -9,6 +9,7 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "songs")
 data class Song(
     @PrimaryKey val id: String,
+    val serverId: Int? = null,
     val title: String,
     val artist: String,
     val filePath: String? = null,
@@ -19,10 +20,12 @@ data class Song(
     val isLiked: Boolean = false,
     val isLocal: Boolean = false,
     val lastPlayedAt: Long = 0L,
-    val uploadedBy: Int = 0
+    val uploadedBy: Int = 0,
+
 ) : Parcelable {
     constructor(parcel: Parcel) : this(
         id = parcel.readString() ?: "",
+        serverId = parcel.readValue(Int::class.java.classLoader) as? Int,
         title = parcel.readString() ?: "",
         artist = parcel.readString() ?: "",
         filePath = parcel.readString(),
@@ -38,6 +41,7 @@ data class Song(
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(id)
+        parcel.writeValue(serverId)
         parcel.writeString(title)
         parcel.writeString(artist)
         parcel.writeString(filePath)

@@ -86,4 +86,7 @@
     <string name="delete_song_icon">Delete</string>
     <string name="artist_song_card">Artist</string>
     <string name="song_title_card">Song Title</string>
+    <string name="top_50_global">Top 50 Global</string>
+    <string name="chart_cover">chart-cover</string>
+    <string name="download_song">download icon</string>
 </resources>

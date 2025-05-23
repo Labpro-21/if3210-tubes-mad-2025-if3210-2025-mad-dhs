@@ -17,17 +17,18 @@ object PlayerController {
     var onCompletion: (() -> Unit)? = null
 
     fun play(song: Song, context: Context): Boolean {
+        Log.d("PlayerController", "Masuk play(), judul: ${song.title}, url: ${song.filePath}")
+
         if (currentlyPlaying?.id == song.id && isPlaying()) {
-            Log.d("PlayerController", "Same song already playing.")
+            Log.d("PlayerController", "Lagu sudah diputar")
             return true
         }
 
         if (isPreparing) {
-            Log.d("PlayerController", "Still preparing previous song. Skipping.")
+            Log.d("PlayerController", "Masih mempersiapkan lagu sebelumnya")
             return false
         }
 
-        Log.d("PlayerController", "Preparing song: ${song.title}")
         release()
         isPreparing = true
         currentlyPlaying = song
@@ -35,59 +36,56 @@ object PlayerController {
         try {
             val appContext = context.applicationContext
             mediaPlayer = MediaPlayer().apply {
+                setAudioStreamType(android.media.AudioManager.STREAM_MUSIC) // PENTING
+
                 setOnPreparedListener {
-                    Log.d("PlayerController", "Prepared, starting playback: ${song.title}")
+                    Log.d("PlayerController", "onPrepared terpanggil, mulai putar lagu")
                     isPreparing = false
                     start()
                 }
 
                 setOnCompletionListener {
-                    Log.d("PlayerController", "Playback completed for: ${song.title}")
+                    Log.d("PlayerController", "Lagu selesai diputar")
                     onCompletion?.invoke()
                 }
 
                 setOnErrorListener { _, what, extra ->
-                    Log.e("PlayerController", "MediaPlayer error: what=$what, extra=$extra")
+                    Log.e("PlayerController", "Error MediaPlayer: what=$what, extra=$extra")
                     isPreparing = false
                     release()
                     true
                 }
 
-                when {
-                    song.resId != null -> {
-                        val afd = appContext.resources.openRawResourceFd(song.resId)
-                        setDataSource(afd.fileDescriptor, afd.startOffset, afd.length)
-                        afd.close()
-                    }
-                    !song.filePath.isNullOrBlank() -> {
-                        try {
-                            setDataSource(appContext, song.filePath.toUri())
-                        } catch (e: SecurityException) {
-                            Log.e("PlayerController", "SecurityException: ${e.message}")
-                            isPreparing = false
-                            release()
-                            return false
-                        }
-                    }
-                    else -> {
-                        Log.e("PlayerController", "Song has no valid source.")
+                try {
+                    if (!song.filePath.isNullOrBlank()) {
+                        Log.d("PlayerController", "Memanggil setDataSource dengan URL")
+                        setDataSource(song.filePath)
+                    } else {
+                        Log.e("PlayerController", "filePath kosong")
                         isPreparing = false
                         release()
                         return false
                     }
+                } catch (e: Exception) {
+                    Log.e("PlayerController", "Gagal setDataSource: ${e.message}")
+                    isPreparing = false
+                    release()
+                    return false
                 }
 
+                Log.d("PlayerController", "Memanggil prepareAsync()")
                 prepareAsync()
             }
 
-            return true // sukses jika tidak kena exception
+            return true
         } catch (e: Exception) {
-            Log.e("PlayerController", "Error playing song: ${e.message}")
+            Log.e("PlayerController", "Exception luar: ${e.message}")
             isPreparing = false
             release()
             return false
         }
     }
+
 
     fun pause() {
         if (isPlaying()) {
@@ -105,10 +103,9 @@ object PlayerController {
 
     fun release() {
         try {
-            Log.d("PlayerController", "Releasing media player")
             mediaPlayer?.release()
         } catch (e: Exception) {
-            Log.w("PlayerController", "MediaPlayer release error: ${e.message}")
+            Log.w("PlayerController", "Release error: ${e.message}")
         } finally {
             mediaPlayer = null
             isPreparing = false

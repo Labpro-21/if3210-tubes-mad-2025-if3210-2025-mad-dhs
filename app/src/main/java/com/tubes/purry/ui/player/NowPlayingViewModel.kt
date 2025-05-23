@@ -1,5 +1,6 @@
 package com.tubes.purry.ui.player
 
+import android.app.Application
 import android.content.Context
 import androidx.lifecycle.*
 import com.tubes.purry.data.local.LikedSongDao
@@ -22,10 +23,11 @@ import kotlin.coroutines.suspendCoroutine
 import com.tubes.purry.data.model.SongInQueue
 
 class NowPlayingViewModel(
+    application: Application,
     private val likedSongDao: LikedSongDao,
     private val songDao: SongDao,
     private val profileViewModel: ProfileViewModel
-) : ViewModel() {
+) : AndroidViewModel(application) {
 
     private val _currSong = MutableLiveData<Song?>() // mutable untuk bisa diubah2
     val currSong: LiveData<Song?> = _currSong // untuk read
@@ -58,28 +60,31 @@ class NowPlayingViewModel(
 
     fun playSong(song: Song, context: Context) {
         _isPlaying.value = true
-
+        Log.d("NowPlayingViewModel", "Calling PlayerController.play() with ${song.filePath}")
 
         viewModelScope.launch {
-            val userId = getUserIdBlocking() ?: return@launch
-            val isLiked = likedSongDao.isLiked(userId, song.id)
-            val songWithLike = song.copy(isLiked = isLiked)
+//            val userId = getUserIdBlocking() ?: return@launch
+//            if (userId == null) {
+//                Log.e("NowPlayingViewModel", "userId null! Tidak bisa lanjut play.")
+//                return@launch
+//            }
+//            val isLiked = likedSongDao.isLiked(userId, song.id)
+            val songWithLike = song.copy(isLiked = false)
 
-            if (_currSong.value?.id == song.id) {
-                _currSong.postValue(songWithLike)
-            }
+//            if (_currSong.value?.id == song.id) {
+//                _currSong.postValue(songWithLike)
+//            }
+            _currSong.postValue(songWithLike)
 
             Log.d(
                 "NowPlayingViewModel",
                 "Song data: filePath=${song.filePath}, resId=${song.resId}"
             )
-
-            // Ensure PlayerController.play runs on the main thread
             withContext(Dispatchers.Main) {
                 val success = PlayerController.play(songWithLike, context)
                 if (success) {
                     _currSong.value = songWithLike
-                    _isLiked.value = isLiked
+                    _isLiked.value = false
 
                     Handler(Looper.getMainLooper()).postDelayed({
                         _isPlaying.value = PlayerController.isPlaying()
@@ -332,6 +337,6 @@ class NowPlayingViewModel(
 
     override fun onCleared() {
         super.onCleared()
-        PlayerController.release()
+//        PlayerController.release()
     }
 }

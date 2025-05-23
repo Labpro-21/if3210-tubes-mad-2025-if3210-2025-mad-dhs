@@ -1,6 +1,7 @@
 package com.tubes.purry
 
 import android.Manifest
+import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.net.ConnectivityManager
@@ -97,6 +98,14 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
         val profileViewModel = ViewModelProvider(this, ProfileViewModelFactory(this))[ProfileViewModel::class.java]
         profileViewModel.getProfileData()
 
+        intent?.getStringExtra("navigateTo")?.let { destination ->
+            if (destination == "detail") {
+                val navController = supportFragmentManager.findFragmentById(R.id.nav_host_fragment)
+                    ?.findNavController()
+                navController?.navigate(R.id.songDetailFragment)
+            }
+        }
+
         // Trigger seeding
         // checkPermissionsAndSeed()
     }
@@ -113,6 +122,21 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
             seedAssets(this)
         } else {
             permissionLauncher.launch(permissionsToRequest.toTypedArray())
+        }
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        setIntent(intent) // agar intent terbaru bisa diakses di lifecycle lain jika perlu
+
+        intent?.getStringExtra("navigateTo")?.let { destination ->
+            if (destination == "detail") {
+                val navController = supportFragmentManager.findFragmentById(R.id.nav_host_fragment)
+                    ?.findNavController()
+                if (navController?.currentDestination?.id != R.id.songDetailFragment) {
+                    navController?.navigate(R.id.songDetailFragment)
+                }
+            }
         }
     }
 

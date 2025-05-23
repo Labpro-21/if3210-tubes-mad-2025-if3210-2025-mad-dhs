@@ -15,7 +15,7 @@ import com.tubes.purry.R.raw.terlintas
 import com.tubes.purry.data.model.LikedSong
 import com.tubes.purry.data.model.ProfileData
 
-@Database(entities = [Song::class, LikedSong::class, ProfileData::class], version = 2)
+@Database(entities = [Song::class, LikedSong::class, ProfileData::class], version = 3)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun songDao(): SongDao
     abstract fun userProfileDao(): UserProfileDao
@@ -76,6 +76,7 @@ abstract class AppDatabase : RoomDatabase() {
         private fun predefinedSongs(): List<Song> = listOf(
             Song(
                 id = "1",
+                serverId = null,
                 title = "Katakan Saja",
                 artist = "Adikara",
                 coverResId = R.drawable.katakan_saja,
@@ -90,6 +91,7 @@ abstract class AppDatabase : RoomDatabase() {
             ),
             Song(
                 id = "2",
+                serverId = null,
                 title = "Primadona",
                 artist = "Adikara",
                 coverResId = R.drawable.primadona,
@@ -104,6 +106,7 @@ abstract class AppDatabase : RoomDatabase() {
             ),
             Song(
                 id = "3",
+                serverId = null,
                 title = "Terlintas",
                 artist = "Bernadya",
                 coverResId = R.drawable.terlintas,

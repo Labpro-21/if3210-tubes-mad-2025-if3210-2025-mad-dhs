@@ -1,5 +1,6 @@
 package com.tubes.purry.ui.player
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -11,7 +12,10 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.tubes.purry.R
 import com.tubes.purry.databinding.FragmentMiniPlayerBinding
 import androidx.core.net.toUri
+import android.util.Log
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.NavHostFragment
+import com.tubes.purry.MainActivity
 import com.tubes.purry.data.local.AppDatabase
 import com.tubes.purry.data.model.LikedSong
 import com.tubes.purry.ui.profile.ProfileViewModel
@@ -40,7 +44,7 @@ class MiniPlayerFragment : Fragment() {
         val profileViewModelFactory = ProfileViewModelFactory(requireContext())
         val profileViewModel = ViewModelProvider(requireActivity(), profileViewModelFactory)[ProfileViewModel::class.java]
 
-        val factory = NowPlayingViewModelFactory(likedSongDao, songDao, profileViewModel)
+        val factory = NowPlayingViewModelFactory(requireActivity().application, likedSongDao, songDao, profileViewModel)
         viewModel = ViewModelProvider(requireActivity(), factory)[NowPlayingViewModel::class.java]
 
         viewModel.currSong.observe(viewLifecycleOwner) { song ->
@@ -96,12 +100,32 @@ class MiniPlayerFragment : Fragment() {
         }
 
         binding.root.setOnClickListener {
-            val navHostFragment = requireActivity()
-                .supportFragmentManager
-                .findFragmentById(R.id.nav_host_fragment) as? androidx.navigation.fragment.NavHostFragment
+            val intent = Intent(requireContext(), MainActivity::class.java).apply {
+                putExtra("navigateTo", "detail")
+                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+            }
+            startActivity(intent)
 
-            val navController = navHostFragment?.navController
-            navController?.navigate(R.id.songDetailFragment)
+            try {
+                val navHostFragment = requireActivity()
+                    .supportFragmentManager
+                    .fragments
+                    .find { it is androidx.navigation.fragment.NavHostFragment } as? androidx.navigation.fragment.NavHostFragment
+
+                val navController = navHostFragment?.navController
+                if (navController != null && navController.currentDestination?.id != R.id.songDetailFragment) {
+                    navController.navigate(R.id.songDetailFragment)
+                } else {
+                    Log.e("MiniPlayerFragment", "NavHostFragment atau navController null")
+                }
+
+
+                if (navController?.currentDestination?.id != R.id.songDetailFragment) {
+                    navController?.navigate(R.id.songDetailFragment)
+                }
+            } catch (e: Exception) {
+                Log.e("MiniPlayerFragment", "Navigation error: ${e.message}")
+            }
         }
     }
 }

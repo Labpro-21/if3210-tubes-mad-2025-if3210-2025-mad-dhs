@@ -1,6 +1,7 @@
 package com.tubes.purry.ui.home
 
 import android.app.AlertDialog
+import android.content.Intent
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.os.Bundle
@@ -14,7 +15,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.lifecycle.ViewModelProvider
-import com.tubes.purry.MainActivity
 import com.tubes.purry.data.local.AppDatabase
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
@@ -31,6 +31,8 @@ import com.tubes.purry.ui.profile.ProfileViewModel
 import com.tubes.purry.ui.library.EditSongBottomSheetFragment
 import com.tubes.purry.ui.player.MiniPlayerFragment
 import androidx.core.graphics.toColorInt
+import com.tubes.purry.data.model.ChartItem
+import com.tubes.purry.ui.chart.TopChartDetailActivity
 
 
 class HomeFragment : Fragment() {
@@ -44,6 +46,7 @@ class HomeFragment : Fragment() {
     private lateinit var newSongsAdapter: SongCardAdapter
     private lateinit var recentSongsAdapter: SongListAdapter
     private lateinit var nowPlayingViewModel: NowPlayingViewModel
+    private lateinit var chartAdapter: ChartAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -65,10 +68,11 @@ class HomeFragment : Fragment() {
         val profileViewModel: ProfileViewModel = ViewModelProvider(requireActivity())[ProfileViewModel::class.java]
 
         // Use custom factory
-        val factory = NowPlayingViewModelFactory(likedSongDao, songDao, profileViewModel)
+        val factory = NowPlayingViewModelFactory(requireActivity().application, likedSongDao, songDao, profileViewModel)
         nowPlayingViewModel = ViewModelProvider(requireActivity(), factory)[NowPlayingViewModel::class.java]
 
         setupAdapters()
+        setupChartSection()
         observeSongs()
         enableSwipeToAddToQueue(binding.rvRecentlyPlayed, recentSongsAdapter, nowPlayingViewModel)
     }
@@ -102,7 +106,7 @@ class HomeFragment : Fragment() {
             .setMessage("Are you sure you want to delete \"${song.title}\"?")
             .setPositiveButton("Yes") { _, _ ->
                 viewModel.deleteSong(song)
-                nowPlayingViewModel.removeFromQueue(song.id, requireContext())
+                nowPlayingViewModel.removeFromQueue(song.id.toString(), requireContext())
             }
             .setNegativeButton("No", null)
             .show()
@@ -196,6 +200,35 @@ class HomeFragment : Fragment() {
             }
         })
         itemTouchHelper.attachToRecyclerView(recyclerView)
+    }
+
+
+    private fun setupChartSection() {
+        val chartItems = listOf(
+            ChartItem(
+                title = "Top 50 Global",
+                description = "Most played globally",
+                imageRes = R.drawable.cov_top50_global,
+                isGlobal = true
+            ),
+            ChartItem(
+                title = "Top 50 Indonesia",
+                description = "Most played in Indonesia",
+                imageRes = R.drawable.cov_top50_id,
+                isGlobal = false
+            )
+        )
+
+        chartAdapter = ChartAdapter(chartItems) { item ->
+            val intent = Intent(requireContext(), TopChartDetailActivity::class.java)
+            intent.putExtra("isGlobal", item.isGlobal)
+            startActivity(intent)
+        }
+
+        binding.rvCharts.apply {
+            adapter = chartAdapter
+            layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+        }
     }
 
 }

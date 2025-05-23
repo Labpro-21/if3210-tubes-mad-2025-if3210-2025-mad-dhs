@@ -319,8 +319,8 @@
                         <option name="values">
                           <map>
                             <entry key="assetSourceType" value="FILE" />
-                            <entry key="outputName" value="ic_more_vert" />
-                            <entry key="sourceFile" value="D:\College\mobile\More.svg" />
+                            <entry key="outputName" value="ic_download" />
+                            <entry key="sourceFile" value="D:\College\mobile\ic_download.svg" />
                           </map>
                         </option>
                       </PersistentState>

@@ -50,7 +50,7 @@ class SongDetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val context = requireContext().applicationContext
         val db = AppDatabase.getDatabase(context)
-        val factory = NowPlayingViewModelFactory(db.LikedSongDao(), db.songDao(), profileViewModel)
+        val factory = NowPlayingViewModelFactory(requireActivity().application, db.LikedSongDao(), db.songDao(), profileViewModel)
         nowPlayingViewModel = ViewModelProvider(requireActivity(), factory)[NowPlayingViewModel::class.java]
 
         nowPlayingViewModel.currSong.observe(viewLifecycleOwner) { song ->
