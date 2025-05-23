@@ -91,7 +91,12 @@ dependencies {
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
-    implementation("com.google.android.gms:play-services-location:21.0.1")
+    // Google Maps
+    implementation("com.google.android.gms:play-services-maps:18.2.0")
+    implementation ("com.google.android.gms:play-services-location:21.0.1")
+
+    // CardView untuk UI
+    implementation("androidx.cardview:cardview:1.0.0")
 
 
 //        implementation(libs.androidx.core.ktx)

@@ -95,9 +95,19 @@ class EditProfileActivity : AppCompatActivity() {
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
-            result.data?.getStringExtra("selected_country_code")?.let { countryCode ->
-                currentLocation = countryCode
-                binding.txtCurrentLocation.text = getCountryNameFromCode(countryCode)
+            result.data?.let { data ->
+                val countryCode = data.getStringExtra("selected_country_code")
+                val countryName = data.getStringExtra("selected_country_name")
+                val latitude = data.getDoubleExtra("selected_latitude", 0.0)
+                val longitude = data.getDoubleExtra("selected_longitude", 0.0)
+
+                countryCode?.let { code ->
+                    currentLocation = code
+                    binding.txtCurrentLocation.text = countryName ?: getCountryNameFromCode(code)
+
+                    // Optional: Log the coordinates for debugging
+                    Log.d("EditProfile", "Selected location: $latitude, $longitude in $countryName ($code)")
+                }
             }
         }
     }

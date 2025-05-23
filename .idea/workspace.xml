@@ -15,6 +15,11 @@
           <theme>@style/Theme.Purrytify</theme>
         </config>
       </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/activity_maps.xml">
+        <config>
+          <theme>@style/Theme.Purrytify</theme>
+        </config>
+      </layout>
       <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/activity_top_chart_detail.xml">
         <config>
           <theme>@style/Theme.Purrytify</theme>
@@ -86,7 +91,13 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fb2d9b52-b320-4578-a27c-b77d399ccfa2" name="Changes" comment="fix: update style" />
+    <list default="true" id="fb2d9b52-b320-4578-a27c-b77d399ccfa2" name="Changes" comment="feat: patch">
+      <change beforePath="$PROJECT_DIR$/app/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/app/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/profile/EditProfileActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/profile/EditProfileActivity.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/profile/MapsActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/profile/MapsActivity.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/activity_maps.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/activity_maps.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -178,7 +189,7 @@
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
     "com.google.services.firebase.aqiPopupShown": "true",
-    "git-widget-placeholder": "feat/online-song",
+    "git-widget-placeholder": "feat/recommendation-new",
     "ignore.virus.scanning.warn.message": "true",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "D:/College/Semester 6/Mobile/Tubes1/if3210-tubes-mad-2025-if3210-2025-mad-dhs/app/src/main/java/com/tubes/purry/data/model/Song.kt",
