@@ -64,6 +64,7 @@
         android:layout_marginTop="16dp"
         android:text="Select your country:"
         android:textColor="@color/white"
+        android:gravity="center"
         android:textSize="16sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/txtOrLabel" />
@@ -108,19 +109,22 @@
             android:id="@+id/btnCancel"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
             android:layout_weight="1"
+            android:layout_marginTop="5dp"
             android:backgroundTint="@android:color/darker_gray"
             android:text="Cancel"
             android:textColor="@color/white" />
-
         <Button
             android:id="@+id/btnSelectLocation"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
             android:layout_weight="1"
-            android:text="Select This Country" />
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="5dp"
+            android:backgroundTint="@color/green"
+            android:text="Select Country"
+            android:textColor="@color/white" />
+
 
     </LinearLayout>
 
