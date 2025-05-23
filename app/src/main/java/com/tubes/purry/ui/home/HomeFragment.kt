@@ -31,19 +31,28 @@ import com.tubes.purry.ui.profile.ProfileViewModel
 import com.tubes.purry.ui.library.EditSongBottomSheetFragment
 import com.tubes.purry.ui.player.MiniPlayerFragment
 import androidx.core.graphics.toColorInt
+import com.tubes.purry.utils.SessionManager
 
 
 class HomeFragment : Fragment() {
-
     private lateinit var binding: FragmentHomeBinding
     private val viewModel: SongViewModel by viewModels {
         SongViewModelFactory(requireContext())
     }
-    private var allSongs: List<Song> = emptyList()
 
+    // Add recommendation ViewModel
+    private lateinit var recommendationViewModel: RecommendationViewModel
+
+    private var allSongs: List<Song> = emptyList()
     private lateinit var newSongsAdapter: SongCardAdapter
     private lateinit var recentSongsAdapter: SongListAdapter
     private lateinit var nowPlayingViewModel: NowPlayingViewModel
+
+    private lateinit var sessionManager: SessionManager
+
+    // Add recommendation adapters
+    private lateinit var dailyPlaylistAdapter: RecommendationAdapter
+    private lateinit var topMixesAdapter: RecommendationAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -61,16 +70,22 @@ class HomeFragment : Fragment() {
         val likedSongDao = db.LikedSongDao()
         val songDao = db.songDao()
 
-        // Get ProfileViewModel using default factory
-        val profileViewModel: ProfileViewModel = ViewModelProvider(requireActivity())[ProfileViewModel::class.java]
+        // Initialize SessionManager
+        sessionManager = SessionManager(requireContext())
 
-        // Use custom factory
+        // Initialize recommendation ViewModel
+        recommendationViewModel = ViewModelProvider(this)[RecommendationViewModel::class.java]
+
+        val profileViewModel: ProfileViewModel = ViewModelProvider(requireActivity())[ProfileViewModel::class.java]
         val factory = NowPlayingViewModelFactory(likedSongDao, songDao, profileViewModel)
         nowPlayingViewModel = ViewModelProvider(requireActivity(), factory)[NowPlayingViewModel::class.java]
 
         setupAdapters()
         observeSongs()
+        observeRecommendations()
         enableSwipeToAddToQueue(binding.rvRecentlyPlayed, recentSongsAdapter, nowPlayingViewModel)
+        enableSwipeToAddToQueue(binding.rvDailyPlaylist, dailyPlaylistAdapter, nowPlayingViewModel)
+        enableSwipeToAddToQueue(binding.rvTopMixes, topMixesAdapter, nowPlayingViewModel)
     }
 
     private fun setupAdapters() {
@@ -80,10 +95,18 @@ class HomeFragment : Fragment() {
 
         recentSongsAdapter = SongListAdapter(
             onClick = { song -> onSongClicked(song) },
-            onEdit = {song -> showEditBottomSheet(song)},
+            onEdit = { song -> showEditBottomSheet(song) },
             onDelete = { song -> confirmDelete(song) }
         )
 
+        // Setup recommendation adapters
+        dailyPlaylistAdapter = RecommendationAdapter { song ->
+            onSongClicked(song)
+        }
+
+        topMixesAdapter = RecommendationAdapter { song ->
+            onSongClicked(song)
+        }
 
         binding.rvNewSongs.apply {
             adapter = newSongsAdapter
@@ -94,7 +117,46 @@ class HomeFragment : Fragment() {
             adapter = recentSongsAdapter
             layoutManager = LinearLayoutManager(context)
         }
+
+        // Setup recommendation RecyclerViews
+        binding.rvDailyPlaylist.apply {
+            adapter = dailyPlaylistAdapter
+            layoutManager = LinearLayoutManager(context)
+        }
+
+        binding.rvTopMixes.apply {
+            adapter = topMixesAdapter
+            layoutManager = LinearLayoutManager(context)
+        }
     }
+
+    private fun observeRecommendations() {
+        // Get current user ID (you'll need to implement this based on your profile system)
+        val currentUserId = getCurrentUserId() // Implement this method
+
+        recommendationViewModel.getDailyPlaylist(currentUserId).observe(viewLifecycleOwner) { songs ->
+            dailyPlaylistAdapter.submitList(songs)
+            // Show/hide daily playlist section based on availability
+            binding.sectionDailyPlaylist.visibility = if (songs.isNotEmpty()) View.VISIBLE else View.GONE
+        }
+
+        recommendationViewModel.getTopMixes(currentUserId).observe(viewLifecycleOwner) { songs ->
+            topMixesAdapter.submitList(songs)
+            // Show/hide top mixes section based on availability
+            binding.sectionTopMixes.visibility = if (songs.isNotEmpty()) View.VISIBLE else View.GONE
+        }
+    }
+
+    private fun getCurrentUserId(): Int {
+        // Try to get user ID from SessionManager
+        val userId = sessionManager.getUserId()
+            ?: sessionManager.getUserIdFromToken() // Fallback to token if direct ID not available
+            ?: 1 // Default fallback for development/testing
+
+        Log.d("HomeFragment", "Current user ID: $userId")
+        return userId
+    }
+
 
     private fun confirmDelete(song: Song) {
         AlertDialog.Builder(requireContext())
@@ -151,13 +213,13 @@ class HomeFragment : Fragment() {
 //        (requireActivity() as MainActivity).showMiniPlayer()
     }
 
+    // Add swipe support for recommendation lists
     private fun enableSwipeToAddToQueue(
         recyclerView: RecyclerView,
-        adapter: SongListAdapter,
+        adapter: RecommendationAdapter,
         nowPlayingViewModel: NowPlayingViewModel
     ) {
         val paint = Paint().apply { color = "#4CAF50".toColorInt() }
-
         val itemTouchHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
             override fun onMove(
                 recyclerView: RecyclerView,
@@ -168,6 +230,53 @@ class HomeFragment : Fragment() {
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                 val position = viewHolder.adapterPosition
                 val song = adapter.getSongAt(position)
+                nowPlayingViewModel.addToQueue(song, requireContext())
+                adapter.notifyItemChanged(position)
+                Toast.makeText(requireContext(), "Added to queue: ${song.title}", Toast.LENGTH_SHORT).show()
+            }
+
+            override fun onChildDraw(
+                c: Canvas,
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                dX: Float,
+                dY: Float,
+                actionState: Int,
+                isCurrentlyActive: Boolean
+            ) {
+                if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
+                    val itemView: View = viewHolder.itemView
+                    c.drawRect(
+                        itemView.right.toFloat() + dX,
+                        itemView.top.toFloat(),
+                        itemView.right.toFloat(),
+                        itemView.bottom.toFloat(),
+                        paint
+                    )
+                }
+                super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
+            }
+        })
+        itemTouchHelper.attachToRecyclerView(recyclerView)
+    }
+
+    // Add this overloaded function for SongListAdapter
+    private fun enableSwipeToAddToQueue(
+        recyclerView: RecyclerView,
+        adapter: SongListAdapter,
+        nowPlayingViewModel: NowPlayingViewModel
+    ) {
+        val paint = Paint().apply { color = "#4CAF50".toColorInt() }
+        val itemTouchHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
+            override fun onMove(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                target: RecyclerView.ViewHolder
+            ) = false
+
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                val position = viewHolder.adapterPosition
+                val song = adapter.getSongAt(position) // Make sure SongListAdapter has this method
                 nowPlayingViewModel.addToQueue(song, requireContext())
                 adapter.notifyItemChanged(position)
                 Toast.makeText(requireContext(), "Added to queue: ${song.title}", Toast.LENGTH_SHORT).show()

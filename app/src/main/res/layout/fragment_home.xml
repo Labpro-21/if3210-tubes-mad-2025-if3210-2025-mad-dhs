@@ -1,56 +1,172 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp">
+    android:fillViewport="true">
 
-    <!-- New Songs Title -->
-    <TextView
-        android:id="@+id/labelNewSongs"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/new_songs"
-        android:textColor="@android:color/white"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:paddingBottom="8dp" />
-
-    <!-- Horizontal New Songs -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvNewSongs"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="154dp"
-        android:layout_marginBottom="16dp"
-        android:clipToPadding="false"
-        android:orientation="horizontal"
-        android:overScrollMode="never"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        tools:listitem="@layout/item_song_card" />
-
-    <!-- Recently Played Title -->
-    <TextView
-        android:id="@+id/labelRecentlyPlayed"
-        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/recently_played"
-        android:textColor="@android:color/white"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:paddingBottom="8dp" />
+        android:orientation="vertical"
+        android:padding="16dp">
 
-    <!-- Recently Played Vertical Scroll -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvRecentlyPlayed"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:overScrollMode="never"
-        android:clipToPadding="false"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        tools:listitem="@layout/item_song_list" />
+        <!-- New Songs Section -->
+        <TextView
+            android:id="@+id/labelNewSongs"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/new_songs"
+            android:textColor="@android:color/white"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:paddingBottom="8dp" />
 
-</LinearLayout>
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvNewSongs"
+            android:layout_width="match_parent"
+            android:layout_height="154dp"
+            android:layout_marginBottom="24dp"
+            android:clipToPadding="false"
+            android:orientation="horizontal"
+            android:overScrollMode="never"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            tools:listitem="@layout/item_song_card" />
+
+        <!-- Daily Playlist Section -->
+        <LinearLayout
+            android:id="@+id/sectionDailyPlaylist"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="24dp"
+            android:visibility="gone"
+            tools:visibility="visible">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingBottom="8dp">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_playlist_play"
+                    android:tint="@color/purple_500"
+                    android:layout_marginEnd="8dp" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Daily Playlist"
+                    android:textColor="@android:color/white"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Curated for you"
+                    android:textColor="@android:color/darker_gray"
+                    android:textSize="12sp" />
+
+            </LinearLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvDailyPlaylist"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:overScrollMode="never"
+                android:clipToPadding="false"
+                android:nestedScrollingEnabled="false"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:listitem="@layout/item_song_list"
+                tools:itemCount="5" />
+
+        </LinearLayout>
+
+        <!-- Top Mixes Section -->
+        <LinearLayout
+            android:id="@+id/sectionTopMixes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="24dp"
+            android:visibility="gone"
+            tools:visibility="visible">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingBottom="8dp">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_trending_up"
+                    android:tint="@color/orange_500"
+                    android:layout_marginEnd="8dp" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Top Mixes"
+                    android:textColor="@android:color/white"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Based on your taste"
+                    android:textColor="@android:color/darker_gray"
+                    android:textSize="12sp" />
+
+            </LinearLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvTopMixes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:overScrollMode="never"
+                android:clipToPadding="false"
+                android:nestedScrollingEnabled="false"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:listitem="@layout/item_song_list"
+                tools:itemCount="7" />
+
+        </LinearLayout>
+
+        <!-- Recently Played Section -->
+        <TextView
+            android:id="@+id/labelRecentlyPlayed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/recently_played"
+            android:textColor="@android:color/white"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:paddingBottom="8dp" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvRecentlyPlayed"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:overScrollMode="never"
+            android:clipToPadding="false"
+            android:nestedScrollingEnabled="false"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            tools:listitem="@layout/item_song_list"
+            tools:itemCount="10" />
+
+    </LinearLayout>
+
+</ScrollView>

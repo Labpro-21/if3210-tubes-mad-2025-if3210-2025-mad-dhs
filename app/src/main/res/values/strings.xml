@@ -86,4 +86,8 @@
     <string name="delete_song_icon">Delete</string>
     <string name="artist_song_card">Artist</string>
     <string name="song_title_card">Song Title</string>
+    <string name="daily_playlist">Daily Playlist</string>
+    <string name="top_mixes">Top Mixes</string>
+    <string name="curated_for_you">Curated for you</string>
+    <string name="based_on_your_taste">Based on your taste</string>
 </resources>

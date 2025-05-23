@@ -76,13 +76,19 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fb2d9b52-b320-4578-a27c-b77d399ccfa2" name="Changes" comment="feat: edit profile">
-      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
+    <list default="true" id="fb2d9b52-b320-4578-a27c-b77d399ccfa2" name="Changes" comment="feat: patch">
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/repository/RecommendationRepository.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/home/RecommendationAdapter.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/home/RecommendationViewModel.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_playlist_play.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_trending_up.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/app/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/remote/ApiService.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/remote/ApiService.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/profile/EditProfileActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/profile/EditProfileActivity.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gradle/libs.versions.toml" beforeDir="false" afterPath="$PROJECT_DIR$/gradle/libs.versions.toml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/local/SongDao.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/local/SongDao.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/home/HomeFragment.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/home/HomeFragment.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/fragment_home.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/fragment_home.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/values/colors.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/values/colors.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/values/strings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/values/strings.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -142,11 +148,11 @@
         <option value="Kotlin File" />
         <option value="Kotlin Data Class" />
         <option value="layoutResourceFile" />
-        <option value="resourceFile" />
         <option value="Kotlin File" />
         <option value="Kotlin Data Class" />
         <option value="layoutResourceFile" />
         <option value="Kotlin Class" />
+        <option value="resourceFile" />
       </list>
     </option>
   </component>
@@ -159,12 +165,12 @@
     &quot;assignee&quot;: &quot;HenryofSkalitz1202&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/Labpro-21/if3210-tubes-mad-2025-if3210-2025-mad-dhs.git",
-    "accountId": "fedc41d2-603f-474a-b151-5c7c38bc36b1"
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/Labpro-21/if3210-tubes-mad-2025-if3210-2025-mad-dhs.git&quot;,
+    &quot;accountId&quot;: &quot;fedc41d2-603f-474a-b151-5c7c38bc36b1&quot;
   }
-}]]></component>
+}</component>
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$USER_HOME$/AppData/Local/Google/AndroidStudio2024.3/device-explorer/Medium Phone API 36/_/data/data/com.tubes.purry/shared_prefs/purrytify_encrypted_prefs.xml" root0="SKIP_INSPECTION" />
   </component>
@@ -391,7 +397,15 @@
       <option name="project" value="LOCAL" />
       <updated>1744468467246</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="feat: patch">
+      <option name="closed" value="true" />
+      <created>1747925374826</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1747925374826</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -426,7 +440,8 @@
     <MESSAGE value="fix: styling" />
     <MESSAGE value="refactor: unneeded files and styling" />
     <MESSAGE value="fix: update style" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix: update style" />
+    <MESSAGE value="feat: patch" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat: patch" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

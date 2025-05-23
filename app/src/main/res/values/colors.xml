@@ -10,4 +10,7 @@
     <color name="blue">#3386FF</color>
     <color name="red">#FF3333</color>
     <color name="your_custom_color">#00C853</color>
+    <color name="purple_500">#9C27B0</color>
+    <color name="orange_500">#FF9800</color>
+    <color name="darker_gray">#757575</color>
 </resources>
