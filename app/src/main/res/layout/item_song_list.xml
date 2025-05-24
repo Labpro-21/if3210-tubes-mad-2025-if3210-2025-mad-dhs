@@ -49,24 +49,23 @@
             android:ellipsize="end" />
     </LinearLayout>
 
-    <!-- Edit Button -->
-    <FrameLayout
-        android:layout_width="36dp"
-        android:layout_height="36dp"
-        android:layout_marginStart="8dp">
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginStart="8dp"
+        android:gravity="center_vertical">
 
         <ImageButton
             android:id="@+id/btnEdit"
             android:layout_width="36dp"
             android:layout_height="36dp"
-            android:layout_marginStart="8dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/ic_edit"
             android:contentDescription="@string/edit_song"
             android:visibility="gone"
             app:tint="@android:color/white" />
 
-        <!-- Delete Button -->
         <ImageButton
             android:id="@+id/btnDelete"
             android:layout_width="36dp"
@@ -82,8 +81,8 @@
             android:id="@+id/downloadProgress"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:layout_gravity="center"
+            android:layout_marginStart="8dp"
             android:visibility="gone"
             style="@android:style/Widget.DeviceDefault.Light.ProgressBar.Small" />
-    </FrameLayout>
+    </LinearLayout>
 </LinearLayout>

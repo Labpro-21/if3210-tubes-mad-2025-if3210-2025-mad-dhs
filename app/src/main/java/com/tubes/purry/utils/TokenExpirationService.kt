@@ -11,6 +11,7 @@ import android.widget.Toast
 import com.tubes.purry.data.model.RefreshTokenRequest
 import com.tubes.purry.data.remote.ApiClient
 import com.tubes.purry.ui.auth.LoginActivity
+import com.tubes.purry.ui.player.PlayerController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -71,6 +72,7 @@ class TokenExpirationService : Service() {
 
     private fun logoutAndRedirect() {
         sessionManager.clearTokens()
+        PlayerController.release()
 
         val intent = Intent(this, LoginActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -114,6 +116,7 @@ class TokenExpirationService : Service() {
     private fun logoutUser() {
         // Clear tokens
         sessionManager.clearTokens()
+        PlayerController.release()
 
         // Redirect to login screen
         Handler(Looper.getMainLooper()).post {

@@ -112,21 +112,15 @@ class RecommendationDetailActivity : AppCompatActivity() {
     }
 
     private fun loadDailyMix() {
-        // Daily mix is not needed according to requirements
         currentSongs = emptyList()
         adapter.submitList(emptyList())
         Toast.makeText(this, "Daily mix is not available", Toast.LENGTH_SHORT).show()
     }
 
     private fun loadRecentlyPlayedMix() {
-        // Load truly recently played songs (both local and online)
         songViewModel.recentlyPlayed.observe(this) { localRecentSongs ->
             lifecycleScope.launch {
                 try {
-                    // Get online recently played songs from profile or play history
-                    // For now, we'll use recent local songs and mix with some online variety
-                    // You might need to implement online play history tracking
-
                     val recentSongs = localRecentSongs.take(20)
                     currentSongs = recentSongs
                     adapter.submitList(recentSongs)
@@ -142,7 +136,6 @@ class RecommendationDetailActivity : AppCompatActivity() {
     }
 
     private fun loadLikedSongsMix() {
-        // Get current user ID
         val db = AppDatabase.getDatabase(applicationContext)
         val userId = sessionManager.getUserId()
 
@@ -150,14 +143,11 @@ class RecommendationDetailActivity : AppCompatActivity() {
             db.LikedSongDao().getLikedSongsByUser(userId).asLiveData().observe(this) { likedSongs ->
                 lifecycleScope.launch {
                     try {
-                        // Get online songs from API
                         val onlineSongs = ApiClient.apiService.getTopSongsGlobal()
 
-                        // Find similar songs based on title or artist matching
                         val similarOnlineSongs = mutableListOf<Song>()
 
                         for (likedSong in likedSongs) {
-                            // Find online songs with similar title or same artist
                             val matchingSongs = onlineSongs.filter { onlineSong ->
                                 val titleMatch = onlineSong.title.contains(likedSong.title, ignoreCase = true) ||
                                         likedSong.title.contains(onlineSong.title, ignoreCase = true)
@@ -166,11 +156,9 @@ class RecommendationDetailActivity : AppCompatActivity() {
                                 titleMatch || artistMatch
                             }
 
-                            // Convert to temporary songs and add to list
                             similarOnlineSongs.addAll(matchingSongs.map { it.toTemporarySong() })
                         }
 
-                        // Remove duplicates and combine with liked songs
                         val uniqueSimilarSongs = similarOnlineSongs.distinctBy { it.id }
                         val mixedSongs = (likedSongs + uniqueSimilarSongs).distinctBy {
                             "${it.title.lowercase()}-${it.artist.lowercase()}"
@@ -184,7 +172,6 @@ class RecommendationDetailActivity : AppCompatActivity() {
 
                     } catch (e: Exception) {
                         Log.e("RecommendationDetail", "Error loading similar online songs", e)
-                        // Fallback to liked songs only
                         currentSongs = likedSongs
                         adapter.submitList(likedSongs)
                     }
@@ -194,23 +181,19 @@ class RecommendationDetailActivity : AppCompatActivity() {
     }
 
     private fun loadDiscoveryMix() {
-        // Mix of local songs that haven't been played and random online songs from top global
         songViewModel.allSongs.observe(this) { allLocalSongs ->
             songViewModel.recentlyPlayed.observe(this) { recentlyPlayedSongs ->
                 lifecycleScope.launch {
                     try {
-                        // Filter local songs that haven't been played
                         val recentlyPlayedIds = recentlyPlayedSongs.map { it.id }.toSet()
                         val unplayedLocalSongs = allLocalSongs.filter {
                             it.id !in recentlyPlayedIds
                         }.shuffled().take(15)
 
-                        // Get random online songs from top global
                         val onlineSongs = ApiClient.apiService.getTopSongsGlobal()
                         val randomOnlineSongs = onlineSongs.shuffled().take(15)
                             .map { it.toTemporarySong() }
 
-                        // Combine unplayed local songs with random online songs
                         val discoveryMix = (unplayedLocalSongs + randomOnlineSongs)
                             .distinctBy { it.id }
                             .shuffled()
@@ -224,7 +207,6 @@ class RecommendationDetailActivity : AppCompatActivity() {
 
                     } catch (e: Exception) {
                         Log.e("RecommendationDetail", "Error loading discovery mix", e)
-                        // Fallback to unplayed local songs only
                         val recentlyPlayedIds = recentlyPlayedSongs.map { it.id }.toSet()
                         val unplayedLocalSongs = allLocalSongs.filter {
                             it.id !in recentlyPlayedIds
@@ -241,8 +223,6 @@ class RecommendationDetailActivity : AppCompatActivity() {
     }
 
     private fun getCountryCodeFromLocation(location: String): String {
-        // Simple mapping of common locations to country codes
-        // You might want to use a more sophisticated location-to-country mapping
         return when {
             location.contains("Indonesia", ignoreCase = true) -> "ID"
             location.contains("United States", ignoreCase = true) ||
@@ -258,7 +238,7 @@ class RecommendationDetailActivity : AppCompatActivity() {
             location.contains("Brazil", ignoreCase = true) -> "BR"
             location.contains("India", ignoreCase = true) -> "IN"
             location.contains("China", ignoreCase = true) -> "CN"
-            else -> "" // Return empty for global trending
+            else -> ""
         }
     }
 
@@ -267,10 +247,11 @@ class RecommendationDetailActivity : AppCompatActivity() {
         nowPlayingViewModel.setQueueFromClickedSong(song, currentSongs, this)
         nowPlayingViewModel.playSong(song, this)
 
-        // Only mark local songs as played
-        if (song.isLocal) {
-            songViewModel.markAsPlayed(song)
-        }
+//        // Only mark local songs as played
+//        if (song.isLocal) {
+//            songViewModel.markAsPlayed(song)
+//        }
+        songViewModel.markAsPlayed(song)
 
         // Show mini player
         val fragmentManager = supportFragmentManager
