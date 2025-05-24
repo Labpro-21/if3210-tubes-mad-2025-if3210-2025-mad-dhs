@@ -14,12 +14,14 @@ import com.tubes.purry.R
 import com.tubes.purry.R.raw.terlintas
 import com.tubes.purry.data.model.LikedSong
 import com.tubes.purry.data.model.ProfileData
+import com.tubes.purry.data.model.ListeningSession
 
-@Database(entities = [Song::class, LikedSong::class, ProfileData::class], version = 6)
+@Database(entities = [Song::class, LikedSong::class, ProfileData::class, ListeningSession::class], version = 7)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun songDao(): SongDao
     abstract fun userProfileDao(): UserProfileDao
     abstract fun LikedSongDao(): LikedSongDao
+    abstract fun analyticsDao(): AnalyticsDao
 
     companion object {
         @Volatile private var INSTANCE: AppDatabase? = null

@@ -8,6 +8,7 @@ import com.tubes.purry.data.local.LikedSongDao
 import com.tubes.purry.data.local.SongDao
 import com.tubes.purry.data.model.LikedSong
 import com.tubes.purry.data.model.ProfileData
+import com.tubes.purry.data.repository.AnalyticsRepository
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
@@ -16,6 +17,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.tubes.purry.data.model.Song
 import com.tubes.purry.ui.profile.ProfileViewModel
+import com.tubes.purry.utils.SessionManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -57,12 +59,27 @@ class NowPlayingViewModel(
 
     enum class RepeatMode { NONE, ONE, ALL }
 
+    // ===== ANALYTICS TRACKING VARIABLES =====
+    private val analyticsRepository by lazy {
+        val database = AppDatabase.getDatabase(getApplication())
+        AnalyticsRepository(database.analyticsDao(), database.songDao())
+    }
+
+    private var currentSessionId: Long? = null
+    private var sessionStartTime: Long = 0
+    private var isPaused: Boolean = false
+    private var pauseStartTime: Long = 0
+    private var totalPauseTime: Long = 0
+
     private fun getCurrentSongInQueue(): SongInQueue? {
         val currId = _currSong.value?.id ?: return null
         return _manualQueue.value?.find { it.song.id == currId }
     }
 
     fun playSong(song: Song, context: Context) {
+        // ===== END PREVIOUS ANALYTICS SESSION =====
+        endCurrentAnalyticsSession()
+
         _isPlaying.value = true
         Log.d("NowPlayingViewModel", "Calling PlayerController.play() with ${song.filePath}")
 
@@ -87,7 +104,6 @@ class NowPlayingViewModel(
                         _isPlaying.value = PlayerController.isPlaying()
                     }, 300)
 
-
                     val realDuration = PlayerController.getDuration()
                     _currSong.value = _currSong.value?.copy(duration = realDuration)
 
@@ -102,6 +118,10 @@ class NowPlayingViewModel(
                             }
                         }
                     }
+
+                    // ===== START ANALYTICS TRACKING =====
+                    startAnalyticsTracking(songWithLike, context)
+
                     markSongAsRecentlyPlayed(songWithLike)
 
                     val userId = getUserIdBlocking()
@@ -115,17 +135,84 @@ class NowPlayingViewModel(
                 }
             }
         }
-}
+    }
+
+    // ===== ANALYTICS TRACKING METHODS =====
+    private fun startAnalyticsTracking(song: Song, context: Context) {
+        val sessionManager = SessionManager(context)
+        val userId = sessionManager.getUserId()
+
+        Log.d("NowPlayingAnalytics", "🎵 STARTING ANALYTICS: ${song.title}")
+        Log.d("NowPlayingAnalytics", "User ID: $userId")
+
+        if (userId != null) {
+            viewModelScope.launch {
+                try {
+                    currentSessionId = analyticsRepository.startListeningSession(userId, song)
+                    sessionStartTime = System.currentTimeMillis()
+                    totalPauseTime = 0
+                    isPaused = false
+
+                    Log.d("Analytics", "Started session ${currentSessionId} for song: ${song.title}")
+                } catch (e: Exception) {
+                    Log.e("Analytics", "Failed to start analytics session: ${e.message}")
+                }
+            }
+        }
+    }
+
+    private fun endCurrentAnalyticsSession() {
+        Log.d("NowPlayingAnalytics", "🛑 ENDING SESSION: $currentSessionId")
+        currentSessionId?.let { sessionId ->
+            val currentTime = System.currentTimeMillis()
+            val totalDuration = if (isPaused) {
+                // If currently paused, add current pause time
+                (pauseStartTime - sessionStartTime) - totalPauseTime
+            } else {
+                (currentTime - sessionStartTime) - totalPauseTime
+            }
+
+            // Only count sessions longer than 30 seconds
+            if (totalDuration >= 30000) {
+                viewModelScope.launch {
+                    try {
+                        analyticsRepository.endListeningSession(sessionId, totalDuration)
+                        Log.d("Analytics", "Ended session $sessionId, duration: ${totalDuration}ms")
+                    } catch (e: Exception) {
+                        Log.e("Analytics", "Failed to end analytics session: ${e.message}")
+                    }
+                }
+            }
+
+            // Reset tracking variables
+            currentSessionId = null
+            sessionStartTime = 0
+            totalPauseTime = 0
+            isPaused = false
+        }
+    }
 
     private fun pauseSong() {
         PlayerController.pause()
         _isPlaying.value = false
+
+        // ===== ANALYTICS: Track pause =====
+        if (!isPaused && currentSessionId != null) {
+            pauseStartTime = System.currentTimeMillis()
+            isPaused = true
+        }
     }
 
     private fun resumeSong() {
         if (!PlayerController.isPlaying()) {
             PlayerController.resume()
             _isPlaying.value = true
+
+            // ===== ANALYTICS: Track resume =====
+            if (isPaused && currentSessionId != null) {
+                totalPauseTime += System.currentTimeMillis() - pauseStartTime
+                isPaused = false
+            }
         } else {
             Log.d("NowPlayingViewModel", "resumeSong called but already playing.")
         }
@@ -152,8 +239,6 @@ class NowPlayingViewModel(
 
             if (!songExists) {
                 db.songDao().insert(song)
-            //    Log.e("NowPlayingViewModel", "Cannot like: user or song not found in DB.")
-            //    return@launch
             }
 
             val isLiked = db.LikedSongDao().isSongLiked(userId, song.id)
@@ -164,17 +249,6 @@ class NowPlayingViewModel(
                 db.LikedSongDao().unlikeSong(userId, song.id)
                 _isLiked.postValue(false)
             }
-
-//            userId?.let { id ->
-//                val isLiked = likedSongDao.isSongLiked(id, song.id)
-//                if (!isLiked) {
-//                    likedSongDao.likeSong(LikedSong(userId = id, songId = song.id))
-//                    _isLiked.postValue(true)
-//                } else {
-//                    likedSongDao.unlikeSong(id, song.id)
-//                    _isLiked.postValue(false)
-//                }
-//            }
         }
     }
 
@@ -204,16 +278,11 @@ class NowPlayingViewModel(
 
     fun setQueueFromClickedSong(clicked: Song, allSongs: List<Song>, context: Context) {
         originalAllSongs = allSongs
-
-//        val newMainQueue = mutableListOf<SongInQueue>()
         val newMainQueue = allSongs.map { SongInQueue(it, fromManualQueue = false) }
-//        newMainQueue.add(SongInQueue(clicked, fromManualQueue = false))
-//        newMainQueue.addAll(allSongs.filter { it.id != clicked.id }.map { SongInQueue(it, false) })
 
         _manualQueue.value = mutableListOf()
         _mainQueue.value = newMainQueue
         currentQueueIndex = newMainQueue.indexOfFirst { it.song.id == clicked.id }
-//        currentQueueIndex = 0
         playSong(clicked, context)
     }
 
@@ -257,7 +326,6 @@ class NowPlayingViewModel(
         }
     }
 
-
     fun nextSong(context: Context, isManual: Boolean = true) {
         if (isManual && _repeatMode.value == RepeatMode.ONE) {
             _repeatMode.value = RepeatMode.ALL
@@ -278,8 +346,10 @@ class NowPlayingViewModel(
         }
     }
 
-
     fun clearQueue() {
+        // ===== END ANALYTICS SESSION BEFORE CLEARING =====
+        endCurrentAnalyticsSession()
+
         _mainQueue.value = emptyList()
         _manualQueue.value = mutableListOf()
         _currSong.value = null
@@ -341,9 +411,9 @@ class NowPlayingViewModel(
         }
     }
 
-
     override fun onCleared() {
         super.onCleared()
-//        PlayerController.release()
+        // ===== END ANALYTICS SESSION WHEN VIEWMODEL IS CLEARED =====
+        endCurrentAnalyticsSession()
     }
 }

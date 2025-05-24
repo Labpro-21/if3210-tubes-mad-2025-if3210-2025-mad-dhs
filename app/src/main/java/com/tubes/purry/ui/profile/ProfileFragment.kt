@@ -9,14 +9,23 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.tubes.purry.R
 import com.tubes.purry.data.local.AppDatabase
+import com.tubes.purry.data.model.MonthlyAnalytics
+import com.tubes.purry.data.repository.AnalyticsRepository
 import com.tubes.purry.databinding.FragmentProfileBinding
 import com.tubes.purry.data.repository.SongRepository
 import com.tubes.purry.ui.auth.LoginActivity
+import com.tubes.purry.ui.analytics.SoundCapsuleActivity
 import com.tubes.purry.utils.NetworkUtil
 import com.tubes.purry.utils.SessionManager
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
 
 class ProfileFragment : Fragment() {
@@ -44,7 +53,7 @@ class ProfileFragment : Fragment() {
 
         sessionManager = SessionManager(requireContext())
 
-        val factory = ProfileViewModelFactory(requireContext())
+        val factory = ProfileViewModelFactory(requireActivity().application)
         viewModel = ViewModelProvider(this, factory)[ProfileViewModel::class.java]
 
         setupClickListeners()
@@ -73,11 +82,22 @@ class ProfileFragment : Fragment() {
         binding.btnEditPhoto.setOnClickListener {
             navigateToEditProfile()
         }
+
+        // ===== ADD SOUND CAPSULE BUTTON CLICK =====
+        binding.cardSoundCapsule.setOnClickListener {
+            openSoundCapsule()
+        }
     }
 
     private fun navigateToEditProfile() {
         val intent = Intent(requireContext(), EditProfileActivity::class.java)
         startActivityForResult(intent, EDIT_PROFILE_REQUEST_CODE)
+    }
+
+    // ===== ADD SOUND CAPSULE NAVIGATION =====
+    private fun openSoundCapsule() {
+        val intent = Intent(requireContext(), SoundCapsuleActivity::class.java)
+        startActivity(intent)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -122,6 +142,9 @@ class ProfileFragment : Fragment() {
 
                 // 2. ⬅️ Panggil untuk update song stats by user ID
                 viewModel.fetchSongStats(it.id)
+
+                // ===== 3. OBSERVE REAL-TIME ANALYTICS =====
+                observeRealTimeAnalytics(it.id)
             }
         }
 
@@ -139,6 +162,102 @@ class ProfileFragment : Fragment() {
 
         viewModel.loading.observe(viewLifecycleOwner) { isLoading ->
             binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+        }
+    }
+
+    // ===== ADD REAL-TIME ANALYTICS OBSERVER =====
+//    private fun observeRealTimeAnalytics(userId: Int) {
+//        try {
+//            viewModel.getCurrentMonthAnalytics(userId).observe(viewLifecycleOwner) { analytics ->
+//                // Update Sound Capsule summary in real-time
+//                binding.apply {
+//                    tvAnalyticsSummary.text = when {
+//                        analytics.totalMinutesListened > 0 -> {
+//                            "${analytics.totalMinutesListened} minutes this month"
+//                        }
+//                        else -> "Start listening to see your analytics"
+//                    }
+//
+//                    // Update time listened display if available
+//                    if (analytics.totalMinutesListened > 0) {
+//                        tvTimeListened.text = "${analytics.totalMinutesListened} min"
+//                        tvTimeListened.visibility = View.VISIBLE
+//                    } else {
+//                        tvTimeListened.visibility = View.GONE
+//                    }
+//                }
+//            }
+//        } catch (e: Exception) {
+//            Log.e("ProfileFragment", "Error observing analytics: ${e.message}")
+//            // Fallback - set default text
+//            binding.tvAnalyticsSummary.text = "View your music analytics"
+//        }
+//    }
+
+    private fun observeRealTimeAnalytics(userId: Int) {
+        // Simple approach: Load once on profile view, refresh on resume
+        loadAnalyticsSummary(userId)
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        // Refresh analytics when returning to profile
+        sessionManager.getUserId()?.let { userId ->
+            loadAnalyticsSummary(userId)
+        }
+    }
+
+    private fun loadAnalyticsSummary(userId: Int) {
+        // Use viewLifecycleOwner.lifecycleScope to prevent cancellation
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val database = AppDatabase.getDatabase(requireContext())
+                val analyticsDao = database.analyticsDao()
+                val songDao = database.songDao()
+                val analyticsRepository = AnalyticsRepository(analyticsDao, songDao)
+
+                val currentMonth = SimpleDateFormat("yyyy-MM", Locale.getDefault()).format(Date())
+                Log.d("ProfileAnalytics", "Loading analytics for user $userId, month $currentMonth")
+
+                val analytics = withContext(Dispatchers.IO) {
+                    analyticsRepository.getMonthlyAnalytics(userId, currentMonth)
+                }
+
+                // Update UI on main thread
+                withContext(Dispatchers.Main) {
+                    updateAnalyticsUI(analytics)
+                }
+
+                Log.d("ProfileAnalytics", "Analytics loaded successfully: ${analytics.totalMinutesListened} minutes")
+
+            } catch (e: Exception) {
+                Log.e("ProfileAnalytics", "Error loading analytics: ${e.message}", e)
+
+                // Update UI with default text on main thread
+                withContext(Dispatchers.Main) {
+                    binding.tvAnalyticsSummary.text = "View your music analytics"
+                    binding.tvTimeListened.visibility = View.GONE
+                }
+            }
+        }
+    }
+
+    private fun updateAnalyticsUI(analytics: MonthlyAnalytics) {
+        binding.apply {
+            tvAnalyticsSummary.text = when {
+                analytics.totalMinutesListened > 0 -> {
+                    "${analytics.totalMinutesListened} minutes this month"
+                }
+                else -> "Start listening to see your analytics"
+            }
+
+            if (analytics.totalMinutesListened > 0) {
+                tvTimeListened.text = "${analytics.totalMinutesListened} min"
+                tvTimeListened.visibility = View.VISIBLE
+            } else {
+                tvTimeListened.visibility = View.GONE
+            }
         }
     }
 

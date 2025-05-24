@@ -48,4 +48,10 @@ interface SongDao {
 
     @Query("SELECT * FROM songs WHERE isLocal = 1 ORDER BY title ASC")
     fun getLibrarySongs(): Flow<List<Song>>
+
+    @Query("SELECT * FROM songs WHERE title LIKE '%' || :title || '%' AND artist LIKE '%' || :artist || '%' LIMIT 1")
+    suspend fun getSongByTitleAndArtist(title: String, artist: String): Song?
+
+    @Query("SELECT * FROM songs WHERE artist LIKE '%' || :artist || '%'")
+    suspend fun getSongsByArtist(artist: String): List<Song>
 }

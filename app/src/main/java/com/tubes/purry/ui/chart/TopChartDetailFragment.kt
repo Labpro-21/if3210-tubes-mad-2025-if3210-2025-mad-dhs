@@ -40,7 +40,7 @@ class TopChartDetailFragment : Fragment() {
             requireActivity().application,
             AppDatabase.getDatabase(requireContext()).LikedSongDao(),
             AppDatabase.getDatabase(requireContext()).songDao(),
-            ViewModelProvider(requireActivity(), ProfileViewModelFactory(requireContext()))[ProfileViewModel::class.java]
+            ViewModelProvider(requireActivity(), ProfileViewModelFactory(requireActivity().application))[ProfileViewModel::class.java]
         )
     }
 

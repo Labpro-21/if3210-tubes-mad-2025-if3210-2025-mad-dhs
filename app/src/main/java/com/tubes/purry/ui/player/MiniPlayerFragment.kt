@@ -41,7 +41,7 @@ class MiniPlayerFragment : Fragment() {
         val likedSongDao = AppDatabase.getDatabase(appContext).LikedSongDao()
         val songDao = AppDatabase.getDatabase(appContext).songDao()
 
-        val profileViewModelFactory = ProfileViewModelFactory(requireContext())
+        val profileViewModelFactory = ProfileViewModelFactory(requireActivity().application)
         val profileViewModel = ViewModelProvider(requireActivity(), profileViewModelFactory)[ProfileViewModel::class.java]
 
         val factory = NowPlayingViewModelFactory(requireActivity().application, likedSongDao, songDao, profileViewModel)
