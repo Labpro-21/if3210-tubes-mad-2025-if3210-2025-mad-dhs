@@ -99,18 +99,16 @@ class MiniPlayerFragment : Fragment() {
             viewModel.togglePlayPause()
         }
 
+        var lastClickTime = 0L
         binding.root.setOnClickListener {
-            val intent = Intent(requireContext(), MainActivity::class.java).apply {
-                putExtra("navigateTo", "detail")
-                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
-            }
-            startActivity(intent)
+            val now = System.currentTimeMillis()
+            if (now - lastClickTime < 800) return@setOnClickListener
+            lastClickTime = now
 
             try {
                 val navHostFragment = requireActivity()
                     .supportFragmentManager
-                    .fragments
-                    .find { it is androidx.navigation.fragment.NavHostFragment } as? androidx.navigation.fragment.NavHostFragment
+                    .findFragmentById(R.id.nav_host_fragment) as? NavHostFragment
 
                 val navController = navHostFragment?.navController
                 if (navController != null && navController.currentDestination?.id != R.id.songDetailFragment) {
@@ -118,7 +116,6 @@ class MiniPlayerFragment : Fragment() {
                 } else {
                     Log.e("MiniPlayerFragment", "NavHostFragment atau navController null")
                 }
-
 
                 if (navController?.currentDestination?.id != R.id.songDetailFragment) {
                     navController?.navigate(R.id.songDetailFragment)

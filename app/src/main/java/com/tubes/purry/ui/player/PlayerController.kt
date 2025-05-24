@@ -2,6 +2,7 @@ package com.tubes.purry.ui.player
 
 import android.content.Context
 import android.content.res.AssetFileDescriptor
+import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.net.Uri
 import com.tubes.purry.data.model.Song
@@ -13,8 +14,11 @@ import com.tubes.purry.ui.player.NowPlayingViewModel.RepeatMode
 object PlayerController {
     private var mediaPlayer: MediaPlayer? = null
     private var isPreparing = false
+    private var isPrepared = false
     private var currentlyPlaying: Song? = null
+
     var onCompletion: (() -> Unit)? = null
+    var onPrepared: (() -> Unit)? = null
 
     fun play(song: Song, context: Context): Boolean {
         Log.d("PlayerController", "Masuk play(), judul: ${song.title}, url: ${song.filePath}")
@@ -31,17 +35,25 @@ object PlayerController {
 
         release()
         isPreparing = true
+        isPrepared = false
         currentlyPlaying = song
 
         try {
             val appContext = context.applicationContext
             mediaPlayer = MediaPlayer().apply {
-                setAudioStreamType(android.media.AudioManager.STREAM_MUSIC) // PENTING
+                setAudioAttributes(
+                    AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_MEDIA)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                        .build()
+                )
 
                 setOnPreparedListener {
                     Log.d("PlayerController", "onPrepared terpanggil, mulai putar lagu")
                     isPreparing = false
+                    isPrepared = true
                     start()
+                    onPrepared?.invoke()
                 }
 
                 setOnCompletionListener {
@@ -52,6 +64,7 @@ object PlayerController {
                 setOnErrorListener { _, what, extra ->
                     Log.e("PlayerController", "Error MediaPlayer: what=$what, extra=$extra")
                     isPreparing = false
+                    isPrepared = false
                     release()
                     true
                 }
@@ -81,6 +94,7 @@ object PlayerController {
         } catch (e: Exception) {
             Log.e("PlayerController", "Exception luar: ${e.message}")
             isPreparing = false
+            isPrepared = false
             release()
             return false
         }
@@ -95,7 +109,7 @@ object PlayerController {
     }
 
     fun resume() {
-        if (!isPlaying()) {
+        if (!isPlaying() && isPrepared) {
             mediaPlayer?.start()
             Log.d("PlayerController", "Playback resumed")
         }
@@ -109,17 +123,22 @@ object PlayerController {
         } finally {
             mediaPlayer = null
             isPreparing = false
+            isPrepared = false
             currentlyPlaying = null
         }
     }
 
     fun isPlaying(): Boolean {
-        return mediaPlayer?.isPlaying == true
+        return isPrepared && mediaPlayer?.isPlaying == true
     }
 
     fun getCurrentPosition(): Int = mediaPlayer?.currentPosition ?: 0
 
+    fun getDuration(): Int = if (isPrepared) mediaPlayer?.duration ?: 0 else 0
+
     fun seekTo(position: Int) {
-        mediaPlayer?.seekTo(position)
+        if (isPrepared) {
+            mediaPlayer?.seekTo(position)
+        }
     }
 }

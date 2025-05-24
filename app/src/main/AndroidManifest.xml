@@ -56,7 +56,7 @@
             android:name=".ui.profile.MapsActivity"
             android:exported="false" />
 
-        <activity android:name=".ui.chart.TopChartDetailActivity"
+        <activity android:name=".ui.chart.TopChartDetailFragment"
             android:exported="false"/>
 
         <!-- File Provider for camera -->

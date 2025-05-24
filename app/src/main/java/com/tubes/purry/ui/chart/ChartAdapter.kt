@@ -1,4 +1,4 @@
-package com.tubes.purry.ui.home
+package com.tubes.purry.ui.chart
 
 import android.view.LayoutInflater
 import android.view.View

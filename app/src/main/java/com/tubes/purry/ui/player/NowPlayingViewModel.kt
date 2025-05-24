@@ -83,12 +83,20 @@ class NowPlayingViewModel(
             withContext(Dispatchers.Main) {
                 val success = PlayerController.play(songWithLike, context)
                 if (success) {
-                    _currSong.value = songWithLike
-                    _isLiked.value = false
+                    PlayerController.onPrepared = {
+                        val duration = PlayerController.getDuration()
+                        _currSong.postValue(_currSong.value?.copy(duration = duration))
+                        _isPlaying.postValue(PlayerController.isPlaying())
+                    }
+//                    _isLiked.value = false
 
                     Handler(Looper.getMainLooper()).postDelayed({
                         _isPlaying.value = PlayerController.isPlaying()
                     }, 300)
+
+
+                    val realDuration = PlayerController.getDuration()
+                    _currSong.value = _currSong.value?.copy(duration = realDuration)
 
                     PlayerController.onCompletion = {
                         when (_repeatMode.value) {
@@ -135,25 +143,26 @@ class NowPlayingViewModel(
     }
 
     private fun pauseSong() {
-        _isPlaying.value = false
         PlayerController.pause()
+        _isPlaying.value = false
     }
 
     private fun resumeSong() {
         if (!PlayerController.isPlaying()) {
-            _isPlaying.value = true
             PlayerController.resume()
+            _isPlaying.value = true
         } else {
             Log.d("NowPlayingViewModel", "resumeSong called but already playing.")
         }
     }
 
     fun togglePlayPause() {
-        val currentlyPlaying = _isPlaying.value ?: false
-        if (currentlyPlaying) {
-            pauseSong()
+        if (_isPlaying.value == true) {
+            PlayerController.pause()
+            _isPlaying.value = false
         } else {
-            resumeSong()
+            PlayerController.resume()
+            _isPlaying.value = true
         }
     }
 
@@ -163,15 +172,11 @@ class NowPlayingViewModel(
             userId?.let { id ->
                 val isLiked = likedSongDao.isSongLiked(id, song.id)
                 if (!isLiked) {
-                    val likedSong = LikedSong(
-                        userId = id,
-                        songId = song.id
-                    )
-                    likedSongDao.likeSong(likedSong)
-                    _isLiked.postValue(true) // Update the liked state
+                    likedSongDao.likeSong(LikedSong(userId = id, songId = song.id))
+                    _isLiked.postValue(true)
                 } else {
                     likedSongDao.unlikeSong(id, song.id)
-                    _isLiked.postValue(false) // Update the liked state
+                    _isLiked.postValue(false)
                 }
             }
         }
@@ -193,7 +198,7 @@ class NowPlayingViewModel(
 
     fun addToQueue(song: Song, context: Context) {
         val updatedManualQueue = _manualQueue.value ?: mutableListOf()
-        updatedManualQueue.add(SongInQueue(song, fromManualQueue = true))
+        updatedManualQueue.add(SongInQueue(song, true))
         _manualQueue.value = updatedManualQueue
 
         if (_currSong.value == null) {
@@ -203,10 +208,12 @@ class NowPlayingViewModel(
 
     fun setQueueFromClickedSong(clicked: Song, allSongs: List<Song>, context: Context) {
         originalAllSongs = allSongs
-
-        val newMainQueue = mutableListOf<SongInQueue>()
-        newMainQueue.add(SongInQueue(clicked, fromManualQueue = false))
-        newMainQueue.addAll(allSongs.filter { it.id != clicked.id }.map { SongInQueue(it, false) })
+        val newMainQueue = mutableListOf(SongInQueue(clicked, false)).apply {
+            addAll(allSongs.filter { it.id != clicked.id }.map { SongInQueue(it, false) })
+        }
+//        val newMainQueue = mutableListOf<SongInQueue>()
+//        newMainQueue.add(SongInQueue(clicked, fromManualQueue = false))
+//        newMainQueue.addAll(allSongs.filter { it.id != clicked.id }.map { SongInQueue(it, false) })
 
         _manualQueue.value = mutableListOf()
         _mainQueue.value = newMainQueue
@@ -218,20 +225,15 @@ class NowPlayingViewModel(
         val wasCurrent = _currSong.value?.id == deletedSongId
 
         val manualQueueList = _manualQueue.value ?: mutableListOf()
-        val manualIndex = manualQueueList.indexOfFirst { it.song.id == deletedSongId }
+        manualQueueList.removeIf { it.song.id == deletedSongId }
+        _manualQueue.value = manualQueueList
 
-        if (manualIndex != -1) {
-            manualQueueList.removeAt(manualIndex)
-            _manualQueue.value = manualQueueList
-        } else {
-            val mainQueueList = _mainQueue.value?.toMutableList() ?: mutableListOf()
-            val mainIndex = mainQueueList.indexOfFirst { it.song.id == deletedSongId }
-
-            if (mainIndex != -1) {
-                mainQueueList.removeAt(mainIndex)
-                _mainQueue.value = mainQueueList
-                if (mainIndex < currentQueueIndex) currentQueueIndex--
-            }
+        val mainQueueList = _mainQueue.value?.toMutableList() ?: mutableListOf()
+        val mainIndex = mainQueueList.indexOfFirst { it.song.id == deletedSongId }
+        if (mainIndex != -1) {
+            mainQueueList.removeAt(mainIndex)
+            _mainQueue.value = mainQueueList
+            if (mainIndex < currentQueueIndex) currentQueueIndex--
         }
 
         if (wasCurrent) {
@@ -241,12 +243,10 @@ class NowPlayingViewModel(
 
 
     private fun removeCurrentFromQueue() {
-        val currentInQueue = getCurrentSongInQueue()
-        if (currentInQueue?.fromManualQueue == true) {
-            val updatedManual = _manualQueue.value?.toMutableList()
-            updatedManual?.removeIf { it.song.id == currentInQueue.song.id }
-            _manualQueue.value = updatedManual
-        }
+        val currentInQueue = getCurrentSongInQueue() ?: return
+        val updatedManual = _manualQueue.value?.toMutableList() ?: return
+        updatedManual.removeIf { it.song.id == currentInQueue.song.id }
+        _manualQueue.value = updatedManual
     }
 
     private fun playNextInQueue(context: Context) {
@@ -255,6 +255,7 @@ class NowPlayingViewModel(
             val nextManual = manual.removeAt(0)
             _manualQueue.value = manual
             playSong(nextManual.song, context)
+            _isPlaying.postValue(true)
             return
         }
 
@@ -268,8 +269,8 @@ class NowPlayingViewModel(
             currentQueueIndex = 0
             playSong(main[0].song, context)
         }
+        _isPlaying.postValue(true)
     }
-
 
     fun nextSong(context: Context, isManual: Boolean = true) {
         if (isManual && _repeatMode.value == RepeatMode.ONE) {
@@ -315,12 +316,12 @@ class NowPlayingViewModel(
 
         if (isNowShuffling) {
             val shuffled = originalAllSongs.shuffled().filter { it.id != currentSong.id }
-            newMainQueue.add(SongInQueue(currentSong, fromManualQueue = false))
-            newMainQueue.addAll(shuffled.map { SongInQueue(it, false) })
+            newMainQueue.add(SongInQueue(currentSong,false))
+            newMainQueue.addAll(shuffled.map { SongInQueue(it,false) })
         } else {
             val ordered = originalAllSongs.filter { it.id != currentSong.id }
-            newMainQueue.add(SongInQueue(currentSong, fromManualQueue = false))
-            newMainQueue.addAll(ordered.map { SongInQueue(it, false) })
+            newMainQueue.add(SongInQueue(currentSong,false))
+            newMainQueue.addAll(ordered.map { SongInQueue(it,false) })
         }
 
         _mainQueue.value = newMainQueue

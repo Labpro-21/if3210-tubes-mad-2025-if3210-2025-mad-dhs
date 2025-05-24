@@ -1,7 +1,6 @@
 package com.tubes.purry.ui.home
 
 import android.app.AlertDialog
-import android.content.Intent
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.os.Bundle
@@ -31,8 +30,10 @@ import com.tubes.purry.ui.profile.ProfileViewModel
 import com.tubes.purry.ui.library.EditSongBottomSheetFragment
 import com.tubes.purry.ui.player.MiniPlayerFragment
 import androidx.core.graphics.toColorInt
+import androidx.core.os.bundleOf
+import androidx.navigation.fragment.findNavController
 import com.tubes.purry.data.model.ChartItem
-import com.tubes.purry.ui.chart.TopChartDetailActivity
+import com.tubes.purry.ui.chart.ChartAdapter
 
 
 class HomeFragment : Fragment() {
@@ -220,9 +221,16 @@ class HomeFragment : Fragment() {
         )
 
         chartAdapter = ChartAdapter(chartItems) { item ->
-            val intent = Intent(requireContext(), TopChartDetailActivity::class.java)
-            intent.putExtra("isGlobal", item.isGlobal)
-            startActivity(intent)
+            val navController = requireActivity()
+                .supportFragmentManager
+                .findFragmentById(R.id.nav_host_fragment)
+                ?.findNavController()
+
+            navController?.navigate(
+                R.id.topChartDetailFragment,
+                bundleOf("isGlobal" to item.isGlobal)
+            )
+
         }
 
         binding.rvCharts.apply {
