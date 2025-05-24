@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "189854536370",
+    "project_id": "purrityfy",
+    "storage_bucket": "purrityfy.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:189854536370:android:3d4fe8774d027573482fab",
+        "android_client_info": {
+          "package_name": "com.tubes.purry"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAj3_TojkQ7b-aHS4VXqcDhIJpZ7NNoQfI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

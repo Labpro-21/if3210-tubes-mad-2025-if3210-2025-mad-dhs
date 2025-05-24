@@ -89,4 +89,10 @@
     <string name="top_50_global">Top 50 Global</string>
     <string name="chart_cover">chart-cover</string>
     <string name="download_song">download icon</string>
+    <string name="_detail">Nama Artis</string>
+    <string name="_favorit">favorit</string>
+    <string name="_back">back</string>
+    <string name="_options">options</string>
+    <string name="_title">Title</string>
+    <string name="share">Share</string>
 </resources>

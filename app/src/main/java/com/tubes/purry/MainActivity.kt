@@ -1,28 +1,25 @@
 package com.tubes.purry
 
-//import android.Manifest
 import android.content.Intent
 import android.content.IntentFilter
-//import android.content.pm.PackageManager
 import android.net.ConnectivityManager
-//import android.os.Build
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
-//import android.widget.Toast
-//import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-//import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.firebase.dynamiclinks.ktx.dynamicLinks
+import com.google.firebase.ktx.Firebase
 import com.tubes.purry.databinding.ActivityMainBinding
 import com.tubes.purry.ui.profile.ProfileViewModel
 import com.tubes.purry.ui.profile.ProfileViewModelFactory
 import com.tubes.purry.utils.NetworkStateReceiver
 import com.tubes.purry.utils.NetworkUtil
 import com.tubes.purry.utils.TokenExpirationService
-//import com.tubes.purry.utils.seedAssets
 
 class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListener {
 
@@ -99,6 +96,19 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
         val profileViewModel = ViewModelProvider(this, ProfileViewModelFactory(this))[ProfileViewModel::class.java]
         profileViewModel.getProfileData()
 
+        Firebase.dynamicLinks
+            .getDynamicLink(intent)
+            .addOnSuccessListener { pendingDynamicLinkData ->
+                val deepLink: Uri? = pendingDynamicLinkData?.link
+                if (deepLink != null) {
+                    handleDeepLink(deepLink)
+                }
+            }
+            .addOnFailureListener {
+                // Opsional: log error
+            }
+
+
         handleIntentNavigation(intent)
 
         // Trigger seeding
@@ -109,7 +119,38 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
         super.onNewIntent(intent)
         setIntent(intent)
         handleIntentNavigation(intent)
+        handleDeepLink(intent)
     }
+
+    private fun handleDeepLink(data: Uri?) {
+        if (data != null && data.scheme == "purrytify" && data.host == "song") {
+            val songId = data.lastPathSegment?.toIntOrNull()
+            if (songId != null) {
+                val navController = findNavController(R.id.nav_host_fragment)
+                val bundle = Bundle().apply {
+                    putInt("songId", songId)
+                }
+                navController.navigate(R.id.songDetailFragment, bundle)
+            }
+        }
+    }
+
+
+    private fun handleDeepLink(data: Intent?) {
+        val data: Uri? = intent?.data
+        if (data != null && data.scheme == "purrytify" && data.host == "song") {
+            val songId = data.lastPathSegment?.toIntOrNull()
+            if (songId != null) {
+                val navController = findNavController(R.id.nav_host_fragment)
+
+                val bundle = Bundle().apply {
+                    putInt("songId", songId)
+                }
+                navController.navigate(R.id.songDetailFragment, bundle)
+            }
+        }
+    }
+
 
     private fun handleIntentNavigation(intent: Intent?) {
         intent?.getStringExtra("navigateTo")?.let { destination ->
@@ -170,7 +211,6 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
     private fun showBottomNav() {
         binding.navView.visibility = View.VISIBLE
     }
-
 
     override fun onStart() {
         super.onStart()

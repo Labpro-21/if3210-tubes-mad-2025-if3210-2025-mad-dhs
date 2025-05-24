@@ -2,11 +2,13 @@ package com.tubes.purry.ui.detail
 
 import android.os.Bundle
 import com.bumptech.glide.Glide
+import android.content.Intent
 import android.os.Handler
 import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.PopupMenu
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -18,6 +20,8 @@ import com.tubes.purry.ui.player.NowPlayingViewModelFactory
 import com.tubes.purry.ui.player.PlayerController
 import com.tubes.purry.ui.profile.ProfileViewModel
 import com.tubes.purry.utils.formatDuration
+import android.util.Log
+import androidx.lifecycle.viewModelScope
 
 class SongDetailFragment : Fragment() {
     private lateinit var binding: FragmentSongDetailBinding
@@ -55,6 +59,10 @@ class SongDetailFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        val songId = arguments?.getInt("songId")
+        if (songId != null) {
+            nowPlayingViewModel.fetchSongById(songId)
+        }
 
         nowPlayingViewModel.currSong.observe(viewLifecycleOwner) { song ->
             song?.let {
@@ -158,6 +166,37 @@ class SongDetailFragment : Fragment() {
             nowPlayingViewModel.toggleRepeat()
             Toast.makeText(requireContext(), "Repeat mode: ${nowPlayingViewModel.repeatMode.value}", Toast.LENGTH_SHORT).show()
         }
+
+        binding.btnOptions.setOnClickListener {
+            val popup = PopupMenu(requireContext(), it)
+            popup.menuInflater.inflate(R.menu.song_options_menu, popup.menu)
+            popup.setOnMenuItemClickListener { item ->
+                when (item.itemId) {
+                    R.id.menu_share -> {
+                        nowPlayingViewModel.currSong.value?.let { song ->
+                            if (!song.isLocal) {
+                                val intent = Intent(Intent.ACTION_SEND).apply {
+                                    type = "text/plain"
+                                    putExtra(Intent.EXTRA_TEXT, "purrytify://song/${song.id}")
+                                }
+                                startActivity(Intent.createChooser(intent, "Share via"))
+                            } else {
+                                Toast.makeText(requireContext(), "Lagu lokal tidak dapat dibagikan", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                        true
+                    }
+//                    R.id.menu_add_playlist -> {
+//                        Toast.makeText(requireContext(), "Coming Soon: Add to Playlist", Toast.LENGTH_SHORT).show()
+//                        true
+//                    }
+                    else -> false
+                }
+            }
+            popup.show()
+        }
+
+
     }
 
     override fun onResume() {

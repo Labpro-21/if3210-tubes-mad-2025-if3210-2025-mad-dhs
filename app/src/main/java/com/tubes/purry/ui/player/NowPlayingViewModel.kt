@@ -21,6 +21,7 @@ import kotlinx.coroutines.withContext
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import com.tubes.purry.data.model.SongInQueue
+import com.tubes.purry.data.remote.ApiClient.apiService
 
 class NowPlayingViewModel(
     application: Application,
@@ -243,7 +244,6 @@ class NowPlayingViewModel(
         }
     }
 
-
     private fun removeCurrentFromQueue() {
         val currentInQueue = getCurrentSongInQueue() ?: return
         val updatedManual = _manualQueue.value?.toMutableList() ?: return
@@ -325,6 +325,22 @@ class NowPlayingViewModel(
             RepeatMode.ONE, null -> RepeatMode.NONE
         }
     }
+
+    fun fetchSongById(id: Int) {
+        viewModelScope.launch {
+            try {
+                val response = apiService.getSongById(id)
+                if (response.isSuccessful) {
+                    _currSong.postValue(response.body())
+                } else {
+                    Log.e("NowPlayingVM", "Gagal load lagu: ${response.code()}")
+                }
+            } catch (e: Exception) {
+                Log.e("NowPlayingVM", "Error saat fetch lagu: ${e.message}")
+            }
+        }
+    }
+
 
     override fun onCleared() {
         super.onCleared()

@@ -19,8 +19,6 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
-
-
     <uses-feature android:name="android.hardware.camera" android:required="false" />
     <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
     <uses-feature android:name="android.hardware.location.gps" android:required="false" />
@@ -36,6 +34,27 @@
         android:theme="@style/Theme.Purrytify"
         android:usesCleartextTraffic="true">
 
+<!--        <activity-->
+<!--            android:name=".MainActivity"-->
+<!--            android:exported="true"/>-->
+
+        <activity android:name=".MainActivity" android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="purrytify" android:host="song" />
+            </intent-filter>
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="https"
+                    android:host="purrytify.page.link" />
+            </intent-filter>
+        </activity>
+
         <activity
             android:name=".ui.auth.LoginActivity"
             android:exported="true">
@@ -46,10 +65,6 @@
         </activity>
 
         <activity
-            android:name=".MainActivity"
-            android:exported="false" />
-
-        <activity
             android:name=".ui.profile.EditProfileActivity"
             android:exported="false" />
 
@@ -58,7 +73,8 @@
             android:exported="false" />
 
         <activity android:name=".ui.chart.TopChartDetailFragment"
-            android:exported="false"/>
+            android:exported="false"
+            tools:ignore="Instantiatable" />
 
         <!-- File Provider for camera -->
         <provider
@@ -72,6 +88,7 @@
         </provider>
 
         <service android:name=".utils.TokenExpirationService" />
+
 
 <!--        <receiver-->
 <!--            android:name=".utils.NetworkStateReceiver"-->

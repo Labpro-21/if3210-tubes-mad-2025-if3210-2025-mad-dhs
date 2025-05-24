@@ -7,6 +7,7 @@ import com.tubes.purry.data.model.ProfileData
 import com.tubes.purry.data.model.ProfileResponse
 import com.tubes.purry.data.model.RefreshTokenRequest
 import com.tubes.purry.data.model.RefreshTokenResponse
+import com.tubes.purry.data.model.Song
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.Response
@@ -45,4 +46,7 @@ interface ApiService {
 
     @GET("api/top-songs/{country}")
     suspend fun getTopSongsByCountry(@Path("country") code: String): List<OnlineSong>
+
+    @GET("api/songs/{id}")
+    suspend fun getSongById(@Path("id") id: Int): Response<Song>
 }

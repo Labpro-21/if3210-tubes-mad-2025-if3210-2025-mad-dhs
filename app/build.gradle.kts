@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.navigation.safeargs)
+    alias(libs.plugins.google.services)
     id("kotlin-parcelize")
     id("kotlin-kapt")
 }
@@ -92,6 +93,9 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
     implementation("com.google.android.gms:play-services-location:21.0.1")
+
+    implementation("com.google.firebase:firebase-dynamic-links-ktx:21.0.1")
+
 
 
 //        implementation(libs.androidx.core.ktx)
