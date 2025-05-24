@@ -95,7 +95,7 @@ class RecommendationDetailActivity : AppCompatActivity() {
         )
         val title = intent.getStringExtra("title") ?: "Recommendation"
         val description = intent.getStringExtra("description") ?: ""
-        val imageRes = intent.getIntExtra("image_res", R.drawable.cov_top50_global)
+        val imageRes = intent.getIntExtra("image_res", R.drawable.cov_playlist_global)
 
         // Set UI
         binding.ivRecommendationCover.setImageResource(imageRes)

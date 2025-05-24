@@ -59,7 +59,7 @@ class TopChartDetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val isGlobal = arguments?.getBoolean("isGlobal", true) ?: true
         val chartTitle = if (isGlobal) "Top 50 GLOBAL" else "Top 50 INDONESIA"
-        val coverRes = if (isGlobal) R.drawable.cov_top50_global else R.drawable.cov_top50_id
+        val coverRes = if (isGlobal) R.drawable.cov_playlist_global else R.drawable.cov_playlist_around
 
         binding.tvChartTitle.text = chartTitle
         binding.tvChartDescription.text = "Your daily update of the most played tracks right now - $chartTitle"
@@ -104,6 +104,40 @@ class TopChartDetailFragment : Fragment() {
             }
         )
 
+        var isShuffleMode = false
+
+        binding.btnShuffle.setOnClickListener {
+            isShuffleMode = !isShuffleMode
+//            val icon = if (isShuffleMode) R.drawable.ic_shuffle_on else R.drawable.ic_shuffle
+            val color = if (isShuffleMode) R.color.green else android.R.color.white
+//            binding.btnShuffle.setImageResource(icon)
+            binding.btnShuffle.setColorFilter(resources.getColor(color, null))
+        }
+
+        binding.btnPlay.setOnClickListener {
+            val queue = if (isShuffleMode) currentSongList.shuffled() else currentSongList
+            val songList = queue.map { it.toTemporarySong() }
+            val firstSong = songList.firstOrNull()
+            if (firstSong != null) {
+                nowPlayingViewModel.setQueueFromClickedSong(firstSong, songList, requireContext())
+            } else {
+                Toast.makeText(requireContext(), "No songs to play", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        binding.btnDownloadAll.setOnClickListener {
+            val context = requireContext()
+            for (song in currentSongList) {
+                DownloadUtils.downloadSong(context, song) { file ->
+                    if (file != null) {
+                        Toast.makeText(context, "Unduh selesai: ${song.title}", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+            Toast.makeText(context, "Mengunduh semua lagu...", Toast.LENGTH_SHORT).show()
+        }
+
+
         binding.rvChartSongs.layoutManager = LinearLayoutManager(requireContext())
         binding.rvChartSongs.adapter = adapter
 
@@ -112,6 +146,10 @@ class TopChartDetailFragment : Fragment() {
             adapter.updateSongs(songs)
             adapter.checkDownloadedStatus(requireContext()) // ✅ DETEKSI ulang lagu yang sudah terunduh
         }
+        binding.toolbar.setNavigationOnClickListener {
+            requireActivity().onBackPressedDispatcher.onBackPressed()
+        }
+
 
         val countryCode = if (!isGlobal) "ID" else null
         chartViewModel.fetchSongs(isGlobal, countryCode)

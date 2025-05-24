@@ -21,7 +21,7 @@ import java.util.TimerTask
 class TokenExpirationService : Service() {
 
     private val timer = Timer()
-    private val verificationInterval = 60000L // Check every 1 minute
+    private val verificationInterval = 30 * 60 * 1000L // Check every 1 minute
     private lateinit var sessionManager: SessionManager
 
     companion object {
@@ -105,6 +105,7 @@ class TokenExpirationService : Service() {
                         sessionManager.saveRefreshToken(newRefreshToken)
                     }
                 } else {
+                    Log.e("TokenCheck", "Refresh gagal. response code: ${response.code()} body: ${response.errorBody()?.string()}")
                     logoutUser()
                 }
             } catch (e: Exception) {

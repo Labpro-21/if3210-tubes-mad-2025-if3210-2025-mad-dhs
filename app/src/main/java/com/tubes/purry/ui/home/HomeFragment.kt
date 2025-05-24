@@ -217,13 +217,13 @@ class HomeFragment : Fragment() {
             ChartItem(
                 title = "Top 50 Global",
                 description = "Most played globally",
-                imageRes = R.drawable.cov_top50_global,
+                imageRes = R.drawable.cov_playlist_global,
                 isGlobal = true
             ),
             ChartItem(
                 title = "Top 50 Indonesia",
                 description = "Most played in Indonesia",
-                imageRes = R.drawable.cov_top50_id,
+                imageRes = R.drawable.cov_playlist_around,
                 isGlobal = false
             )
         )

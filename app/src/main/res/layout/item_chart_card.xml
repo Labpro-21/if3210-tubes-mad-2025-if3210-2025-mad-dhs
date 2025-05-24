@@ -1,19 +1,36 @@
-<?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
     android:layout_width="140dp"
     android:layout_height="180dp"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_marginEnd="12dp"
-    android:foreground="?attr/selectableItemBackground"
-    android:clickable="true"
-    android:focusable="true"
-    app:cardCornerRadius="16dp">
+    android:layout_margin="8dp"
+    card_view:cardCornerRadius="16dp"
+    card_view:cardElevation="6dp"
+    card_view:cardBackgroundColor="@android:color/black">
 
-    <ImageView
-        android:id="@+id/chartImage"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:contentDescription="chart_image"
-        android:scaleType="centerCrop" />
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="12dp">
 
+        <ImageView
+            android:id="@+id/imgChartCover"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:scaleType="centerCrop"
+            android:contentDescription="@string/chart_cover"
+            android:src="@drawable/cov_playlist_global" />
+
+        <TextView
+            android:id="@+id/tvChartTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Top 50"
+            android:textColor="@android:color/white"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+    </LinearLayout>
 </androidx.cardview.widget.CardView>

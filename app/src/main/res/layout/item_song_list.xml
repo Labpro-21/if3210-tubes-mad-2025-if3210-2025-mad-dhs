@@ -77,6 +77,19 @@
             android:visibility="gone"
             app:tint="@android:color/white" />
 
+        <!-- New Download Button -->
+        <ImageButton
+            android:id="@+id/btnDownload"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginStart="4dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_download"
+            android:contentDescription="@string/download_song"
+            android:visibility="gone"
+            app:tint="@color/white" />
+
+        <!-- Download ProgressBar -->
         <ProgressBar
             android:id="@+id/downloadProgress"
             android:layout_width="24dp"
@@ -84,5 +97,15 @@
             android:layout_marginStart="8dp"
             android:visibility="gone"
             style="@android:style/Widget.DeviceDefault.Light.ProgressBar.Small" />
+
+        <!-- Downloaded Icon -->
+        <ImageView
+            android:id="@+id/iconDownloaded"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginStart="4dp"
+            android:src="@drawable/ic_downloaded"
+            app:tint="@color/green"
+            android:visibility="gone" />
     </LinearLayout>
 </LinearLayout>

@@ -5,8 +5,10 @@ import android.content.IntentFilter
 import android.net.ConnectivityManager
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.os.bundleOf
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
@@ -117,10 +119,19 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
-        setIntent(intent)
-        handleIntentNavigation(intent)
-        handleDeepLink(intent)
+        intent?.data?.let { uri ->
+            val songId = uri.lastPathSegment?.toIntOrNull()
+            if (songId != null) {
+                Log.d("DeepLink", "Opening song with ID: $songId")
+                val navController = findNavController(R.id.nav_host_fragment)
+                navController.navigate(
+                    R.id.songDetailFragment,
+                    bundleOf("song_id" to songId)
+                )
+            }
+        }
     }
+
 
     private fun handleDeepLink(data: Uri?) {
         if (data != null && data.scheme == "purrytify" && data.host == "song") {

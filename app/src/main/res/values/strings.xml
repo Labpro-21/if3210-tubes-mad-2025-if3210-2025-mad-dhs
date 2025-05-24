@@ -96,4 +96,6 @@
     <string name="_title">Title</string>
     <string name="share">Share</string>
     <string name="recommendation_cover">Recommendation playlist cover</string>
+    <string name="play">Play</string>
+    <string name="download_all">Download All</string>
 </resources>

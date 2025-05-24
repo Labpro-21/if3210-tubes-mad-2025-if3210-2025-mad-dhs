@@ -60,6 +60,7 @@ class ProfileFragment : Fragment() {
     private fun setupClickListeners() {
         // Set up logout button
         binding.btnLogout.setOnClickListener {
+            com.tubes.purry.ui.player.PlayerController.release()
             sessionManager.clearTokens()
             navigateToLogin()
         }
