@@ -3,6 +3,7 @@ package com.tubes.purry.ui.player
 import android.app.Application
 import android.content.Context
 import androidx.lifecycle.*
+import com.tubes.purry.data.local.AppDatabase
 import com.tubes.purry.data.local.LikedSongDao
 import com.tubes.purry.data.local.SongDao
 import com.tubes.purry.data.model.LikedSong
@@ -172,16 +173,39 @@ class NowPlayingViewModel(
     fun toggleLike(song: Song) {
         viewModelScope.launch {
             val userId = profileViewModel.profileData.value?.id
-            userId?.let { id ->
-                val isLiked = likedSongDao.isSongLiked(id, song.id)
-                if (!isLiked) {
-                    likedSongDao.likeSong(LikedSong(userId = id, songId = song.id))
-                    _isLiked.postValue(true)
-                } else {
-                    likedSongDao.unlikeSong(id, song.id)
-                    _isLiked.postValue(false)
-                }
+            if (userId == null) {
+                Log.e("NowPlayingViewModel", "User not logged in.")
+                return@launch
             }
+
+            val db = AppDatabase.getDatabase(getApplication())
+            val userExists = db.userProfileDao().getUserById(userId) != null
+            val songExists = db.songDao().getById(song.id) != null
+
+            if (!userExists || !songExists) {
+                Log.e("NowPlayingViewModel", "Cannot like: user or song not found in DB.")
+                return@launch
+            }
+
+            val isLiked = db.LikedSongDao().isSongLiked(userId, song.id)
+            if (!isLiked) {
+                db.LikedSongDao().likeSong(LikedSong(userId = userId, songId = song.id))
+                _isLiked.postValue(true)
+            } else {
+                db.LikedSongDao().unlikeSong(userId, song.id)
+                _isLiked.postValue(false)
+            }
+
+//            userId?.let { id ->
+//                val isLiked = likedSongDao.isSongLiked(id, song.id)
+//                if (!isLiked) {
+//                    likedSongDao.likeSong(LikedSong(userId = id, songId = song.id))
+//                    _isLiked.postValue(true)
+//                } else {
+//                    likedSongDao.unlikeSong(id, song.id)
+//                    _isLiked.postValue(false)
+//                }
+//            }
         }
     }
 
@@ -286,7 +310,6 @@ class NowPlayingViewModel(
     }
 
 
-
     fun clearQueue() {
         _mainQueue.value = emptyList()
         _manualQueue.value = mutableListOf()
@@ -300,6 +323,7 @@ class NowPlayingViewModel(
         _isShuffling.value = isNowShuffling
 
         val currentSong = _currSong.value ?: return
+        val newMainQueue = mutableListOf<SongInQueue>()
 
         if (isNowShuffling) {
             val shuffled = originalAllSongs.shuffled()
@@ -315,8 +339,6 @@ class NowPlayingViewModel(
             shuffledQueue = emptyList()
         }
     }
-
-
 
     fun toggleRepeat() {
         _repeatMode.value = when (_repeatMode.value) {

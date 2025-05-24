@@ -73,7 +73,6 @@
             android:defaultValue="true" />
     </fragment>
 
-
     <action
         android:id="@+id/action_global_songDetailFragment"
         app:destination="@id/songDetailFragment"

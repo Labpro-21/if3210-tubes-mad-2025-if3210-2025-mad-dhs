@@ -6,6 +6,7 @@ import android.graphics.Paint
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
+import androidx.navigation.fragment.findNavController
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
@@ -32,22 +33,28 @@ import com.tubes.purry.ui.player.MiniPlayerFragment
 import androidx.core.graphics.toColorInt
 import androidx.core.os.bundleOf
 import androidx.navigation.fragment.findNavController
+import androidx.core.os.bundleOf
 import com.tubes.purry.data.model.ChartItem
 import com.tubes.purry.ui.chart.ChartAdapter
 
+import com.tubes.purry.data.model.RecommendationItem
+import com.tubes.purry.data.model.RecommendationType
+import com.tubes.purry.ui.chart.ChartAdapter
+import com.tubes.purry.ui.recommendation.RecommendationDetailActivity
+import com.tubes.purry.utils.SessionManager
 
 class HomeFragment : Fragment() {
-
     private lateinit var binding: FragmentHomeBinding
     private val viewModel: SongViewModel by viewModels {
         SongViewModelFactory(requireContext())
     }
     private var allSongs: List<Song> = emptyList()
-
     private lateinit var newSongsAdapter: SongCardAdapter
     private lateinit var recentSongsAdapter: SongListAdapter
     private lateinit var nowPlayingViewModel: NowPlayingViewModel
     private lateinit var chartAdapter: ChartAdapter
+    private lateinit var recommendationAdapter: RecommendationAdapter
+    private lateinit var sessionManager: SessionManager
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -59,11 +66,12 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         val context = requireContext().applicationContext
         val db = AppDatabase.getDatabase(context)
         val likedSongDao = db.LikedSongDao()
         val songDao = db.songDao()
+
+        sessionManager = SessionManager(requireContext())
 
         // Get ProfileViewModel using default factory
         val profileViewModel: ProfileViewModel = ViewModelProvider(requireActivity())[ProfileViewModel::class.java]
@@ -74,6 +82,7 @@ class HomeFragment : Fragment() {
 
         setupAdapters()
         setupChartSection()
+        setupRecommendationSection()
         observeSongs()
         enableSwipeToAddToQueue(binding.rvRecentlyPlayed, recentSongsAdapter, nowPlayingViewModel)
     }
@@ -88,7 +97,6 @@ class HomeFragment : Fragment() {
             onEdit = {song -> showEditBottomSheet(song)},
             onDelete = { song -> confirmDelete(song) }
         )
-
 
         binding.rvNewSongs.apply {
             adapter = newSongsAdapter
@@ -239,4 +247,46 @@ class HomeFragment : Fragment() {
         }
     }
 
+    private fun setupRecommendationSection() {
+        val userId = sessionManager.getUserId()
+        val userName = "User" // You can get this from your user profile
+
+        val recommendationItems = listOf(
+            RecommendationItem(
+                id = "liked_songs_mix",
+                title = "Liked Songs Mix",
+                description = "Based on your favorites",
+                imageRes = R.drawable.cov_liked_mix,
+                type = RecommendationType.LIKED_SONGS_MIX
+            ),
+            RecommendationItem(
+                id = "discovery_mix",
+                title = "Discover Weekly",
+                description = "New music for you",
+                imageRes = R.drawable.cov_discover_weekly,
+                type = RecommendationType.DISCOVERY_MIX
+            ),
+            RecommendationItem(
+                id = "recently_played_mix",
+                title = "On Repeat",
+                description = "Songs you've been playing",
+                imageRes = R.drawable.cov_on_repeat,
+                type = RecommendationType.RECENTLY_PLAYED_MIX
+            )
+        )
+
+        recommendationAdapter = RecommendationAdapter(recommendationItems) { item ->
+            val intent = Intent(requireContext(), RecommendationDetailActivity::class.java)
+            intent.putExtra("recommendation_type", item.type.name)
+            intent.putExtra("title", item.title)
+            intent.putExtra("description", item.description)
+            intent.putExtra("image_res", item.imageRes)
+            startActivity(intent)
+        }
+
+        binding.rvRecommendations.apply {
+            adapter = recommendationAdapter
+            layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+        }
+    }
 }

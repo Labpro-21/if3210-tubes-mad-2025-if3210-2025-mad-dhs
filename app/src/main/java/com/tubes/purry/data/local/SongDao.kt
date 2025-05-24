@@ -35,4 +35,10 @@ interface SongDao {
 
     @Query("SELECT * FROM songs WHERE filePath = :path LIMIT 1")
     suspend fun getSongByFilePath(path: String): Song?
+
+    @Query("SELECT * FROM songs ORDER BY title ASC")
+    fun getAllSongs(): Flow<List<Song>>
+
+    @Query("SELECT * FROM songs WHERE id = :id LIMIT 1")
+    suspend fun getById(id: String): Song?
 }

@@ -76,6 +76,16 @@
             android:exported="false"
             tools:ignore="Instantiatable" />
 
+        <activity
+            android:name=".ui.recommendation.RecommendationDetailActivity"
+            android:exported="false" />
+
+        <!-- Google Maps API Key -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="YOUR_GOOGLE_MAPS_API_KEY_HERE" />
+
+
         <!-- File Provider for camera -->
         <provider
             android:name="androidx.core.content.FileProvider"

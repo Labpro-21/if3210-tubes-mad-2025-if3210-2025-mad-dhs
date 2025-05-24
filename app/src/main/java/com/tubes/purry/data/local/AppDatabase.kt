@@ -15,7 +15,7 @@ import com.tubes.purry.R.raw.terlintas
 import com.tubes.purry.data.model.LikedSong
 import com.tubes.purry.data.model.ProfileData
 
-@Database(entities = [Song::class, LikedSong::class, ProfileData::class], version = 3)
+@Database(entities = [Song::class, LikedSong::class, ProfileData::class], version = 5)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun songDao(): SongDao
     abstract fun userProfileDao(): UserProfileDao
