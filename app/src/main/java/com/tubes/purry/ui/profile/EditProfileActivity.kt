@@ -91,6 +91,7 @@ class EditProfileActivity : AppCompatActivity() {
         }
     }
 
+    // Update bagian mapLauncher di EditProfileActivity.kt
     private val mapLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->

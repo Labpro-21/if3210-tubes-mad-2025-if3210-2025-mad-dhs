@@ -46,6 +46,11 @@
 <!--            android:name=".MainActivity"-->
 <!--            android:exported="true"/>-->
 
+        <!-- Google Maps API Key -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyBbWyagxLmhIKXZT7l80j-wTZYXdOISyWc" />
+
         <activity android:name=".MainActivity" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -112,11 +117,6 @@
             android:name=".ui.analytics.TopArtistsActivity"
             android:exported="false"
              />
-
-        <!-- Google Maps API Key -->
-        <meta-data
-            android:name="com.google.android.geo.API_KEY"
-            android:value="YOUR_GOOGLE_MAPS_API_KEY_HERE" />
 
 
         <!-- File Provider for camera -->

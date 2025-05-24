@@ -124,6 +124,10 @@ dependencies {
     // For image loading (Glide - if not already added)
     implementation("com.github.bumptech.glide:glide:4.16.0")
 
+    // Google Maps
+    implementation("com.google.android.gms:play-services-maps:18.2.0")
+    implementation("com.google.android.gms:play-services-location:21.0.1")
+
 
 
 //        implementation(libs.androidx.core.ktx)
