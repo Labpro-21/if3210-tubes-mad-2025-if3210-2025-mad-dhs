@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
@@ -29,6 +30,9 @@ class SoundCapsuleActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivitySoundCapsuleBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        val toolbar = findViewById<Toolbar>(R.id.toolbar)
+        setSupportActionBar(toolbar)
 
         sessionManager = SessionManager(this)
         setupUI()

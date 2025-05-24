@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.tubes.purry.R
@@ -29,6 +30,9 @@ class MonthDetailActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMonthDetailBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        val toolbar = findViewById<Toolbar>(R.id.toolbar)
+        setSupportActionBar(toolbar)
 
         sessionManager = SessionManager(this)
         currentMonth = intent.getStringExtra("month") ?: getCurrentMonth()
@@ -139,6 +143,7 @@ class MonthDetailActivity : AppCompatActivity() {
         // Stats
         binding.tvTotalSongs.text = "${analytics.totalSongsPlayed} different songs"
         binding.tvTotalArtists.text = "${analytics.totalArtistsListened} artists"
+
 
         // Day streaks
         if (analytics.dayStreaks.isNotEmpty()) {
