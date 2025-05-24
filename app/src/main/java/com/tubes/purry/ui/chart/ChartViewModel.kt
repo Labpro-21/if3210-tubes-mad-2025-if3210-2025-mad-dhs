@@ -23,9 +23,3 @@ class ChartViewModel(private val repository: ChartRepository) : ViewModel() {
         }
     }
 }
-
-class ChartViewModelFactory : ViewModelProvider.Factory {
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return ChartViewModel(ChartRepository()) as T
-    }
-}

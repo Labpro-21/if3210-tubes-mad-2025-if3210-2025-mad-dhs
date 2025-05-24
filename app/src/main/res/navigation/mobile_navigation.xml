@@ -54,6 +54,17 @@
         tools:layout="@layout/fragment_song_detail">
     </fragment>
 
+    <fragment
+        android:id="@+id/topChartDetailFragment"
+        android:name="com.tubes.purry.ui.chart.TopChartDetailFragment"
+        android:label="Top Chart"
+        tools:layout="@layout/fragment_top_chart_detail">
+        <argument
+            android:name="isGlobal"
+            app:argType="boolean"
+            android:defaultValue="true" />
+    </fragment>
+
     <action
         android:id="@+id/action_global_songDetailFragment"
         app:destination="@id/songDetailFragment"

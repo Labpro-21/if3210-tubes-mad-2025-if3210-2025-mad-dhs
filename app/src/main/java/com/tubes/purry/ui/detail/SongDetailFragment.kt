@@ -10,7 +10,6 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.ViewModelProvider
 import com.tubes.purry.R
 import com.tubes.purry.data.local.AppDatabase
 import com.tubes.purry.databinding.FragmentSongDetailBinding
@@ -22,11 +21,18 @@ import com.tubes.purry.utils.formatDuration
 
 class SongDetailFragment : Fragment() {
     private lateinit var binding: FragmentSongDetailBinding
-    private lateinit var nowPlayingViewModel: NowPlayingViewModel
     private val handler = Handler(Looper.getMainLooper())
     private var isDragging = false
 
     private val profileViewModel: ProfileViewModel by activityViewModels()
+    private val nowPlayingViewModel: NowPlayingViewModel by activityViewModels {
+        NowPlayingViewModelFactory(
+            requireActivity().application,
+            AppDatabase.getDatabase(requireContext()).LikedSongDao(),
+            AppDatabase.getDatabase(requireContext()).songDao(),
+            profileViewModel
+        )
+    }
 
     private val updateSeekRunnable = object : Runnable {
         override fun run() {
@@ -48,10 +54,7 @@ class SongDetailFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        val context = requireContext().applicationContext
-        val db = AppDatabase.getDatabase(context)
-        val factory = NowPlayingViewModelFactory(requireActivity().application, db.LikedSongDao(), db.songDao(), profileViewModel)
-        nowPlayingViewModel = ViewModelProvider(requireActivity(), factory)[NowPlayingViewModel::class.java]
+        super.onViewCreated(view, savedInstanceState)
 
         nowPlayingViewModel.currSong.observe(viewLifecycleOwner) { song ->
             song?.let {
@@ -61,46 +64,56 @@ class SongDetailFragment : Fragment() {
                 Glide.with(this)
                     .load(song.coverPath ?: song.coverResId ?: R.drawable.album_default)
                     .into(binding.ivCover)
-                binding.tvDuration.text = formatDuration(it.duration)
-                binding.seekBar.max = it.duration
+                if (it.duration > 0) {
+                    binding.seekBar.max = it.duration
+                    binding.tvDuration.text = formatDuration(it.duration)
+                }
             }
         }
 
-        nowPlayingViewModel.isPlaying.observe(viewLifecycleOwner) { isPlaying ->
+        nowPlayingViewModel.isPlaying.observe(viewLifecycleOwner) { //isPlaying ->
             binding.btnPlayPause.setImageResource(
-                if (isPlaying) R.drawable.ic_pause_btn
+                if (it) R.drawable.ic_pause_btn
                 else R.drawable.ic_play_btn
             )
         }
 
-        nowPlayingViewModel.isShuffling.observe(viewLifecycleOwner) { isShuffling ->
-            val color = if (isShuffling) R.color.green else android.R.color.white
+        nowPlayingViewModel.isShuffling.observe(viewLifecycleOwner) { //isShuffling ->
+            val color = if (it) R.color.green else android.R.color.white
             binding.btnShuffle.setColorFilter(resources.getColor(color, null))
         }
 
         nowPlayingViewModel.repeatMode.observe(viewLifecycleOwner) { mode ->
-            val resId = when (mode) {
-                NowPlayingViewModel.RepeatMode.NONE -> R.drawable.ic_repeat
-                NowPlayingViewModel.RepeatMode.ALL -> R.drawable.ic_repeat
-                NowPlayingViewModel.RepeatMode.ONE -> R.drawable.ic_repeat_one
-                null -> R.drawable.ic_repeat
-            }
-            val color = when (mode) {
-                NowPlayingViewModel.RepeatMode.NONE, null -> android.R.color.white
-                NowPlayingViewModel.RepeatMode.ALL, NowPlayingViewModel.RepeatMode.ONE -> R.color.green
-            }
-
-            binding.btnRepeat.setImageResource(resId)
-            binding.btnRepeat.setColorFilter(resources.getColor(color, null))
+            binding.btnRepeat.setImageResource(
+                when (mode) {
+                    NowPlayingViewModel.RepeatMode.ONE -> R.drawable.ic_repeat_one
+                    else -> R.drawable.ic_repeat
+                }
+            )
+            binding.btnRepeat.setColorFilter(resources.getColor(
+                if (mode == NowPlayingViewModel.RepeatMode.NONE) android.R.color.white else R.color.green,
+                null
+            ))
         }
 
-        binding.btnPlayPause.setOnClickListener {
-            nowPlayingViewModel.togglePlayPause()
-        }
+//        nowPlayingViewModel.repeatMode.observe(viewLifecycleOwner) { mode ->
+//            val resId = when (mode) {
+//                NowPlayingViewModel.RepeatMode.ONE -> R.drawable.ic_repeat_one
+//                else -> R.drawable.ic_repeat
+//            }
+//            val color = when (mode) {
+//                NowPlayingViewModel.RepeatMode.NONE, null -> android.R.color.white
+//                else -> R.color.green
+//            }
+//
+//            binding.btnRepeat.setImageResource(resId)
+//            binding.btnRepeat.setColorFilter(resources.getColor(color, null))
+//        }
 
-        binding.btnBack.setOnClickListener {
-            requireActivity().onBackPressedDispatcher.onBackPressed()
-        }
+        binding.btnPlayPause.setOnClickListener { nowPlayingViewModel.togglePlayPause() }
+        binding.btnBack.setOnClickListener { requireActivity().onBackPressedDispatcher.onBackPressed() }
+        binding.btnNext.setOnClickListener { nowPlayingViewModel.nextSong(requireContext()) }
+        binding.btnPrev.setOnClickListener { nowPlayingViewModel.previousSong(requireContext()) }
 
         binding.seekBar.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: android.widget.SeekBar?, progress: Int, fromUser: Boolean) {
@@ -131,9 +144,8 @@ class SongDetailFragment : Fragment() {
         }
 
         binding.btnFavorite.setOnClickListener {
-            val currentSong = nowPlayingViewModel.currSong.value
-            currentSong?.let { song ->
-                nowPlayingViewModel.toggleLike(song)
+            nowPlayingViewModel.currSong.value?.let {
+                nowPlayingViewModel.toggleLike(it)
             }
         }
 
@@ -145,14 +157,6 @@ class SongDetailFragment : Fragment() {
         binding.btnRepeat.setOnClickListener {
             nowPlayingViewModel.toggleRepeat()
             Toast.makeText(requireContext(), "Repeat mode: ${nowPlayingViewModel.repeatMode.value}", Toast.LENGTH_SHORT).show()
-        }
-
-        binding.btnNext.setOnClickListener {
-            nowPlayingViewModel.nextSong(requireContext())
-        }
-
-        binding.btnPrev.setOnClickListener {
-            nowPlayingViewModel.previousSong(requireContext())
         }
     }
 

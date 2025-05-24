@@ -19,4 +19,7 @@ class SongRepository(private val songDao: SongDao, private val likedSongDao: Lik
     fun getLikedCountByUser(userId: Int): Flow<Int> {
         return likedSongDao.getLikedCountByUser(userId)
     }
+    fun getAllSongs(): Flow<List<Song>> {
+        return songDao.getAllSongs()
+    }
 }

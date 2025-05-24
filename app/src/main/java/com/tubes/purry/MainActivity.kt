@@ -30,21 +30,23 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
     private lateinit var binding: ActivityMainBinding
     private val networkStateReceiver = NetworkStateReceiver()
 
-    private val permissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()
-    ) { permissions ->
-        val granted = permissions.values.all { it }
-        if (granted) {
-            seedAssets(this)
-        } else {
-            Toast.makeText(this, "Permissions required to access media files.", Toast.LENGTH_LONG).show()
-        }
-    }
+//    private val permissionLauncher = registerForActivityResult(
+//        ActivityResultContracts.RequestMultiplePermissions()
+//    ) { permissions ->
+//        val granted = permissions.values.all { it }
+//        if (granted) {
+//            seedAssets(this)
+//        } else {
+//            Toast.makeText(this, "Permissions required to access media files.", Toast.LENGTH_LONG).show()
+//        }
+//    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        intent = intent
 
         // Setup bottom navigation
         val navView: BottomNavigationView = binding.navView
@@ -98,36 +100,24 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
         val profileViewModel = ViewModelProvider(this, ProfileViewModelFactory(this))[ProfileViewModel::class.java]
         profileViewModel.getProfileData()
 
-        intent?.getStringExtra("navigateTo")?.let { destination ->
-            if (destination == "detail") {
-                val navController = supportFragmentManager.findFragmentById(R.id.nav_host_fragment)
-                    ?.findNavController()
-                navController?.navigate(R.id.songDetailFragment)
-            }
-        }
+//        intent?.getStringExtra("navigateTo")?.let { destination ->
+//            if (destination == "detail") {
+//                val navController = supportFragmentManager.findFragmentById(R.id.nav_host_fragment)
+//                    ?.findNavController()
+//                navController?.navigate(R.id.songDetailFragment)
+//            }
+//        }
+
+        handleIntentNavigation(intent)
 
         // Trigger seeding
         // checkPermissionsAndSeed()
     }
 
-    private fun checkPermissionsAndSeed() {
-        val permissionsToRequest = mutableListOf<String>().apply {
-            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2) {
-                add(Manifest.permission.READ_EXTERNAL_STORAGE)
-            }
-        }
-
-        if (permissionsToRequest.isEmpty() ||
-            permissionsToRequest.all { ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED }) {
-            seedAssets(this)
-        } else {
-            permissionLauncher.launch(permissionsToRequest.toTypedArray())
-        }
-    }
-
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
         setIntent(intent) // agar intent terbaru bisa diakses di lifecycle lain jika perlu
+        handleIntentNavigation(intent)
 
         intent?.getStringExtra("navigateTo")?.let { destination ->
             if (destination == "detail") {
@@ -136,6 +126,14 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
                 if (navController?.currentDestination?.id != R.id.songDetailFragment) {
                     navController?.navigate(R.id.songDetailFragment)
                 }
+            }
+        }
+    }
+
+    private fun handleIntentNavigation(intent: Intent?) {
+        intent?.getStringExtra("navigateTo")?.let { destination ->
+            if (destination == "detail") {
+                val navController = supportFragmentManager.findFragmentById(R.id.nav_host_fragment)
             }
         }
     }
@@ -151,7 +149,7 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
         binding.networkErrorBanner.visibility = View.GONE
     }
 
-    fun showMiniPlayer() {
+    private fun showMiniPlayer() {
         binding.miniPlayerContainer.apply {
             if (visibility != View.VISIBLE) {
                 alpha = 0f
@@ -161,15 +159,15 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
         }
     }
 
-    fun hideMiniPlayer() {
+    private fun hideMiniPlayer() {
         binding.miniPlayerContainer.visibility = View.GONE
     }
 
-    fun hideBottomNav() {
+    private fun hideBottomNav() {
         binding.navView.visibility = View.GONE
     }
 
-    fun showBottomNav() {
+    private fun showBottomNav() {
         binding.navView.visibility = View.VISIBLE
     }
 

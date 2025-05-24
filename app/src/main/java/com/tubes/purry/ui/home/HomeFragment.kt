@@ -7,6 +7,7 @@ import android.graphics.Paint
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
+import androidx.navigation.fragment.findNavController
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
@@ -31,10 +32,11 @@ import com.tubes.purry.ui.profile.ProfileViewModel
 import com.tubes.purry.ui.library.EditSongBottomSheetFragment
 import com.tubes.purry.ui.player.MiniPlayerFragment
 import androidx.core.graphics.toColorInt
+import androidx.core.os.bundleOf
 import com.tubes.purry.data.model.ChartItem
 import com.tubes.purry.data.model.RecommendationItem
 import com.tubes.purry.data.model.RecommendationType
-import com.tubes.purry.ui.chart.TopChartDetailActivity
+import com.tubes.purry.ui.chart.ChartAdapter
 import com.tubes.purry.ui.recommendation.RecommendationDetailActivity
 import com.tubes.purry.utils.SessionManager
 
@@ -217,9 +219,16 @@ class HomeFragment : Fragment() {
         )
 
         chartAdapter = ChartAdapter(chartItems) { item ->
-            val intent = Intent(requireContext(), TopChartDetailActivity::class.java)
-            intent.putExtra("isGlobal", item.isGlobal)
-            startActivity(intent)
+            val navController = requireActivity()
+                .supportFragmentManager
+                .findFragmentById(R.id.nav_host_fragment)
+                ?.findNavController()
+
+            navController?.navigate(
+                R.id.topChartDetailFragment,
+                bundleOf("isGlobal" to item.isGlobal)
+            )
+
         }
 
         binding.rvCharts.apply {
@@ -234,20 +243,6 @@ class HomeFragment : Fragment() {
 
         val recommendationItems = listOf(
             RecommendationItem(
-                id = "daily_mix_1",
-                title = "Daily Mix 1",
-                description = "Based on your recent listens",
-                imageRes = R.drawable.cov_daily_mix_1, // You'll need to add these drawable resources
-                type = RecommendationType.DAILY_MIX
-            ),
-            RecommendationItem(
-                id = "recently_played_mix",
-                title = "On Repeat",
-                description = "Songs you've been playing",
-                imageRes = R.drawable.cov_on_repeat,
-                type = RecommendationType.RECENTLY_PLAYED_MIX
-            ),
-            RecommendationItem(
                 id = "liked_songs_mix",
                 title = "Liked Songs Mix",
                 description = "Based on your favorites",
@@ -260,6 +255,13 @@ class HomeFragment : Fragment() {
                 description = "New music for you",
                 imageRes = R.drawable.cov_discover_weekly,
                 type = RecommendationType.DISCOVERY_MIX
+            ),
+            RecommendationItem(
+                id = "recently_played_mix",
+                title = "On Repeat",
+                description = "Songs you've been playing",
+                imageRes = R.drawable.cov_on_repeat,
+                type = RecommendationType.RECENTLY_PLAYED_MIX
             )
         )
 

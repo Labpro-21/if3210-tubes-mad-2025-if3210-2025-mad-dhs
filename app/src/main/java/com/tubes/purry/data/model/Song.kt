@@ -3,10 +3,12 @@ package com.tubes.purry.data.model
 import android.os.Parcel
 import android.os.Parcelable
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
 //@Parcelize
-@Entity(tableName = "songs")
+@Entity(tableName = "songs",
+    indices = [Index(value = ["filePath"], unique = true)])
 data class Song(
     @PrimaryKey val id: String,
     val serverId: Int? = null,

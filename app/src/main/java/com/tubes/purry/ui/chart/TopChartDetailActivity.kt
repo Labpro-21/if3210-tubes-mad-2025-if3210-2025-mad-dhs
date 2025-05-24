@@ -1,51 +1,63 @@
 package com.tubes.purry.ui.chart
 
 import android.os.Bundle
-import android.widget.FrameLayout
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.Toast
-import android.util.Log
-import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.tubes.purry.R
 import com.tubes.purry.data.local.AppDatabase
+import com.tubes.purry.data.model.OnlineSong
+import com.tubes.purry.data.model.Song
 import com.tubes.purry.data.model.toTemporarySong
-import com.tubes.purry.databinding.ActivityTopChartDetailBinding
-import com.tubes.purry.ui.player.MiniPlayerFragment
+import com.tubes.purry.databinding.FragmentTopChartDetailBinding
 import com.tubes.purry.ui.player.NowPlayingViewModel
 import com.tubes.purry.ui.player.NowPlayingViewModelFactory
 import com.tubes.purry.ui.profile.ProfileViewModel
 import com.tubes.purry.ui.profile.ProfileViewModelFactory
+import com.tubes.purry.utils.DownloadUtils
+import kotlinx.coroutines.launch
+import java.util.UUID
 
-class TopChartDetailActivity : AppCompatActivity() {
+class TopChartDetailFragment : Fragment() {
 
-    private lateinit var binding: ActivityTopChartDetailBinding
+    private var _binding: FragmentTopChartDetailBinding? = null
+    private val binding get() = _binding!!
+
+    private var currentSongList: List<OnlineSong> = emptyList()
+
     private lateinit var adapter: OnlineSongListAdapter
-    private lateinit var chartViewModel: ChartViewModel
-    private lateinit var nowPlayingViewModel: NowPlayingViewModel
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        binding = ActivityTopChartDetailBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-
-        val appContext = applicationContext
-        val db = AppDatabase.getDatabase(appContext)
-        val likedSongDao = db.LikedSongDao()
-        val songDao = db.songDao()
-        val profileViewModel = ViewModelProvider(this, ProfileViewModelFactory(appContext))[ProfileViewModel::class.java]
-        val nowPlayingFactory = NowPlayingViewModelFactory(
-            requireNotNull(application),
-            likedSongDao,
-            songDao,
-            profileViewModel
+    private val nowPlayingViewModel: NowPlayingViewModel by activityViewModels {
+        NowPlayingViewModelFactory(
+            requireActivity().application,
+            AppDatabase.getDatabase(requireContext()).LikedSongDao(),
+            AppDatabase.getDatabase(requireContext()).songDao(),
+            ViewModelProvider(requireActivity(), ProfileViewModelFactory(requireContext()))[ProfileViewModel::class.java]
         )
-        nowPlayingViewModel = ViewModelProvider(this, nowPlayingFactory)[NowPlayingViewModel::class.java]
-        chartViewModel = ViewModelProvider(this, ChartViewModelFactory())[ChartViewModel::class.java]
+    }
 
-        // === UI SETUP ===
-        val isGlobal = intent.getBooleanExtra("isGlobal", true)
+    private val chartViewModel: ChartViewModel by viewModels {
+        ChartViewModelFactory()
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentTopChartDetailBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        val isGlobal = arguments?.getBoolean("isGlobal", true) ?: true
         val chartTitle = if (isGlobal) "Top 50 GLOBAL" else "Top 50 INDONESIA"
         val coverRes = if (isGlobal) R.drawable.cov_top50_global else R.drawable.cov_top50_id
 
@@ -53,57 +65,60 @@ class TopChartDetailActivity : AppCompatActivity() {
         binding.tvChartDescription.text = "Your daily update of the most played tracks right now - $chartTitle"
         Glide.with(this).load(coverRes).into(binding.ivChartCover)
 
-        // === ADAPTER SETUP ===
         adapter = OnlineSongListAdapter(
             songs = emptyList(),
-            onClick = { onlineSong ->
-                val tempSong = onlineSong.toTemporarySong()
-                Log.d("TopChartDetail", "Calling playSong for: ${tempSong.title}")
-
-                nowPlayingViewModel.setQueueFromClickedSong(tempSong, listOf(tempSong), this)
-                nowPlayingViewModel.playSong(tempSong, this)
-
-                val container = findViewById<FrameLayout>(R.id.miniPlayerContainer)
-                if (container != null) {
-                    // Cek apakah MiniPlayerFragment sudah ditambahkan
-                    val existingFragment = supportFragmentManager.findFragmentById(R.id.miniPlayerContainer)
-                    if (existingFragment == null) {
-                        supportFragmentManager.beginTransaction()
-                            .replace(R.id.miniPlayerContainer, MiniPlayerFragment())
-                            .commit()
-                    }
-
-                    container.alpha = 0f
-                    container.visibility = FrameLayout.VISIBLE
-                    container.animate().alpha(1f).setDuration(250).start()
-                } else {
-                    Toast.makeText(this, "miniPlayerContainer not found in layout", Toast.LENGTH_SHORT).show()
-                }
+            onClick = { clickedOnlineSong ->
+                val tempList = currentSongList.map { it.toTemporarySong() }
+                val clickedSong = clickedOnlineSong.toTemporarySong()
+                nowPlayingViewModel.setQueueFromClickedSong(clickedSong, tempList, requireContext())
             },
             onDownloadClick = { song ->
-                Toast.makeText(this, "Download: ${song.title}", Toast.LENGTH_SHORT).show()
-                // TODO: implementasi download
+                val context = requireContext()
+                adapter.markAsDownloading(song.url)
+
+                DownloadUtils.downloadSong(
+                    context = context,
+                    onlineSong = song,
+                    onComplete = { file ->
+                        if (file != null) {
+                            Toast.makeText(context, "Berhasil disimpan ke: ${file.absolutePath}", Toast.LENGTH_SHORT).show()
+
+                            val localSong = Song(
+                                id = UUID.randomUUID().toString(),
+                                title = song.title,
+                                artist = song.artist,
+                                filePath = file.absolutePath,
+                                coverPath = song.artwork,
+                                duration = 0,
+                                isLiked = false
+                            )
+                            lifecycleScope.launch {
+                                AppDatabase.getDatabase(context).songDao().insert(localSong)
+                            }
+                            adapter.markAsDownloaded(song.url)
+                        } else {
+                            Toast.makeText(context, "Gagal download lagu", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                )
             }
         )
 
-        binding.rvChartSongs.layoutManager = LinearLayoutManager(this)
+        binding.rvChartSongs.layoutManager = LinearLayoutManager(requireContext())
         binding.rvChartSongs.adapter = adapter
 
-        // === OBSERVER SETUP ===
-        chartViewModel.songs.observe(this) { songs ->
+        chartViewModel.songs.observe(viewLifecycleOwner) { songs ->
+            currentSongList = songs
             adapter.updateSongs(songs)
+            adapter.checkDownloadedStatus(requireContext()) // ✅ DETEKSI ulang lagu yang sudah terunduh
         }
 
-        chartViewModel.error.observe(this) { errorMessage ->
-            Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show()
-        }
-
-        // === FETCH SONGS ===
         val countryCode = if (!isGlobal) "ID" else null
         chartViewModel.fetchSongs(isGlobal, countryCode)
     }
 
-    private fun showMiniPlayer() {
-        showMiniPlayer()
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

@@ -20,6 +20,7 @@ class SongViewModel(private val repository: SongRepository) : ViewModel() {
     fun deleteSong(song: Song) = viewModelScope.launch {
         repository.deleteSong(song)
     }
+    val allSongs: LiveData<List<Song>> = repository.getAllSongs().asLiveData()
 
     val newSongs: LiveData<List<Song>> = repository.getNewSongs().asLiveData()
 

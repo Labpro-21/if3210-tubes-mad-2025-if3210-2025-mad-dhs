@@ -112,57 +112,30 @@ class RecommendationDetailActivity : AppCompatActivity() {
     }
 
     private fun loadDailyMix() {
-        // Combine recently played, local new songs, and online trending songs
-        songViewModel.recentlyPlayed.observe(this) { recentSongs ->
-            songViewModel.newSongs.observe(this) { newSongs ->
-                lifecycleScope.launch {
-                    try {
-                        // Get trending songs from API
-                        val onlineSongs = ApiClient.apiService.getTopSongsGlobal()
-                        val onlineTemporarySongs = onlineSongs.take(10).map { it.toTemporarySong() }
-
-                        // Mix local and online songs
-                        val mixedSongs = (recentSongs + newSongs + onlineTemporarySongs)
-                            .distinctBy { it.id }
-                            .shuffled()
-                            .take(20)
-
-                        currentSongs = mixedSongs
-                        adapter.submitList(mixedSongs)
-                    } catch (e: Exception) {
-                        Log.e("RecommendationDetail", "Error loading online songs for daily mix", e)
-                        // Fallback to local songs only
-                        val localMixedSongs = (recentSongs + newSongs)
-                            .distinctBy { it.id }
-                            .shuffled()
-                            .take(20)
-                        currentSongs = localMixedSongs
-                        adapter.submitList(localMixedSongs)
-                        Toast.makeText(this@RecommendationDetailActivity,
-                            "Using offline songs only", Toast.LENGTH_SHORT).show()
-                    }
-                }
-            }
-        }
+        // Daily mix is not needed according to requirements
+        currentSongs = emptyList()
+        adapter.submitList(emptyList())
+        Toast.makeText(this, "Daily mix is not available", Toast.LENGTH_SHORT).show()
     }
 
     private fun loadRecentlyPlayedMix() {
-        songViewModel.recentlyPlayed.observe(this) { songs ->
+        // Load truly recently played songs (both local and online)
+        songViewModel.recentlyPlayed.observe(this) { localRecentSongs ->
             lifecycleScope.launch {
                 try {
-                    // Add some trending songs to recently played mix
-                    val onlineSongs = ApiClient.apiService.getTopSongsGlobal()
-                    val onlineTemporarySongs = onlineSongs.take(5).map { it.toTemporarySong() }
+                    // Get online recently played songs from profile or play history
+                    // For now, we'll use recent local songs and mix with some online variety
+                    // You might need to implement online play history tracking
 
-                    val mixedSongs = (songs + onlineTemporarySongs).shuffled().take(15)
-                    currentSongs = mixedSongs
-                    adapter.submitList(mixedSongs)
+                    val recentSongs = localRecentSongs.take(20)
+                    currentSongs = recentSongs
+                    adapter.submitList(recentSongs)
+
+                    Log.d("RecommendationDetail", "Loaded ${recentSongs.size} recently played songs")
                 } catch (e: Exception) {
-                    Log.e("RecommendationDetail", "Error loading online songs for recently played", e)
-                    // Fallback to local songs only
-                    val shuffledSongs = songs.shuffled().take(15)
-                    currentSongs = shuffledSongs
-                    adapter.submitList(shuffledSongs)
+                    Log.e("RecommendationDetail", "Error loading recently played songs", e)
+                    currentSongs = localRecentSongs
+                    adapter.submitList(localRecentSongs)
                 }
             }
         }
@@ -175,31 +148,45 @@ class RecommendationDetailActivity : AppCompatActivity() {
 
         if (userId != null) {
             db.LikedSongDao().getLikedSongsByUser(userId).asLiveData().observe(this) { likedSongs ->
-                getUserLocationFromProfile { userLocation ->
-                    lifecycleScope.launch {
-                        try {
-                            val countryCode = getCountryCodeFromLocation(userLocation)
+                lifecycleScope.launch {
+                    try {
+                        // Get online songs from API
+                        val onlineSongs = ApiClient.apiService.getTopSongsGlobal()
 
-                            // Get trending songs from user's country
-                            val onlineSongs = if (countryCode.isNotEmpty()) {
-                                ApiClient.apiService.getTopSongsByCountry(countryCode)
-                            } else {
-                                ApiClient.apiService.getTopSongsGlobal()
+                        // Find similar songs based on title or artist matching
+                        val similarOnlineSongs = mutableListOf<Song>()
+
+                        for (likedSong in likedSongs) {
+                            // Find online songs with similar title or same artist
+                            val matchingSongs = onlineSongs.filter { onlineSong ->
+                                val titleMatch = onlineSong.title.contains(likedSong.title, ignoreCase = true) ||
+                                        likedSong.title.contains(onlineSong.title, ignoreCase = true)
+                                val artistMatch = onlineSong.artist.contains(likedSong.artist, ignoreCase = true) ||
+                                        likedSong.artist.contains(onlineSong.artist, ignoreCase = true)
+                                titleMatch || artistMatch
                             }
 
-                            val onlineTemporarySongs = onlineSongs.take(10).map { it.toTemporarySong() }
-
-                            // Mix liked songs with trending songs from user's region
-                            val mixedSongs = (likedSongs + onlineTemporarySongs).shuffled().take(25)
-                            currentSongs = mixedSongs
-                            adapter.submitList(mixedSongs)
-                        } catch (e: Exception) {
-                            Log.e("RecommendationDetail", "Error loading online songs for liked mix", e)
-                            // Fallback to liked songs only
-                            val shuffledSongs = likedSongs.shuffled().take(25)
-                            currentSongs = shuffledSongs
-                            adapter.submitList(shuffledSongs)
+                            // Convert to temporary songs and add to list
+                            similarOnlineSongs.addAll(matchingSongs.map { it.toTemporarySong() })
                         }
+
+                        // Remove duplicates and combine with liked songs
+                        val uniqueSimilarSongs = similarOnlineSongs.distinctBy { it.id }
+                        val mixedSongs = (likedSongs + uniqueSimilarSongs).distinctBy {
+                            "${it.title.lowercase()}-${it.artist.lowercase()}"
+                        }.take(25)
+
+                        currentSongs = mixedSongs
+                        adapter.submitList(mixedSongs)
+
+                        Log.d("RecommendationDetail",
+                            "Loaded ${likedSongs.size} liked songs + ${uniqueSimilarSongs.size} similar online songs")
+
+                    } catch (e: Exception) {
+                        Log.e("RecommendationDetail", "Error loading similar online songs", e)
+                        // Fallback to liked songs only
+                        currentSongs = likedSongs
+                        adapter.submitList(likedSongs)
                     }
                 }
             }
@@ -207,51 +194,49 @@ class RecommendationDetailActivity : AppCompatActivity() {
     }
 
     private fun loadDiscoveryMix() {
-        // Mix of local new songs and trending online songs for discovery
-        songViewModel.newSongs.observe(this) { localNewSongs ->
-            getUserLocationFromProfile { userLocation ->
+        // Mix of local songs that haven't been played and random online songs from top global
+        songViewModel.allSongs.observe(this) { allLocalSongs ->
+            songViewModel.recentlyPlayed.observe(this) { recentlyPlayedSongs ->
                 lifecycleScope.launch {
                     try {
-                        val countryCode = getCountryCodeFromLocation(userLocation)
+                        // Filter local songs that haven't been played
+                        val recentlyPlayedIds = recentlyPlayedSongs.map { it.id }.toSet()
+                        val unplayedLocalSongs = allLocalSongs.filter {
+                            it.id !in recentlyPlayedIds
+                        }.shuffled().take(15)
 
-                        // Get trending songs (prefer country-specific for better discovery)
-                        val onlineSongs = if (countryCode.isNotEmpty()) {
-                            // Mix both country-specific and global for better discovery
-                            val countrySongs = ApiClient.apiService.getTopSongsByCountry(countryCode)
-                            val globalSongs = ApiClient.apiService.getTopSongsGlobal()
-                            (countrySongs + globalSongs).distinctBy { it.id }
-                        } else {
-                            ApiClient.apiService.getTopSongsGlobal()
-                        }
+                        // Get random online songs from top global
+                        val onlineSongs = ApiClient.apiService.getTopSongsGlobal()
+                        val randomOnlineSongs = onlineSongs.shuffled().take(15)
+                            .map { it.toTemporarySong() }
 
-                        val onlineTemporarySongs = onlineSongs.map { it.toTemporarySong() }
-
-                        // Prioritize online songs for discovery, mix with some local
-                        val discoveryMix = (onlineTemporarySongs + localNewSongs)
+                        // Combine unplayed local songs with random online songs
+                        val discoveryMix = (unplayedLocalSongs + randomOnlineSongs)
                             .distinctBy { it.id }
                             .shuffled()
                             .take(30)
 
                         currentSongs = discoveryMix
                         adapter.submitList(discoveryMix)
+
+                        Log.d("RecommendationDetail",
+                            "Discovery mix: ${unplayedLocalSongs.size} unplayed local + ${randomOnlineSongs.size} random online")
+
                     } catch (e: Exception) {
-                        Log.e("RecommendationDetail", "Error loading online songs for discovery", e)
-                        // Fallback to local songs only
-                        val discoveryMix = localNewSongs.shuffled().take(30)
-                        currentSongs = discoveryMix
-                        adapter.submitList(discoveryMix)
+                        Log.e("RecommendationDetail", "Error loading discovery mix", e)
+                        // Fallback to unplayed local songs only
+                        val recentlyPlayedIds = recentlyPlayedSongs.map { it.id }.toSet()
+                        val unplayedLocalSongs = allLocalSongs.filter {
+                            it.id !in recentlyPlayedIds
+                        }.shuffled().take(30)
+
+                        currentSongs = unplayedLocalSongs
+                        adapter.submitList(unplayedLocalSongs)
                         Toast.makeText(this@RecommendationDetailActivity,
-                            "Discovery mix using offline songs", Toast.LENGTH_SHORT).show()
+                            "Discovery mix using unplayed local songs only", Toast.LENGTH_SHORT).show()
                     }
                 }
             }
-        }
-    }
-
-    private fun getUserLocationFromProfile(callback: (String) -> Unit) {
-        profileViewModel.profileData.observe(this) { profileData ->
-            val location = profileData?.location ?: "US" // Default to US
-            callback(location)
         }
     }
 
