@@ -15,6 +15,7 @@ import com.tubes.purry.databinding.FragmentAddSongBottomSheetBinding
 import com.tubes.purry.ui.player.NowPlayingViewModel
 import com.tubes.purry.utils.SessionManager
 import com.tubes.purry.utils.extractAudioMetadata
+import com.tubes.purry.utils.parseDuration
 import java.util.UUID
 
 class AddSongBottomSheetFragment : BottomSheetDialogFragment() {
@@ -28,7 +29,7 @@ class AddSongBottomSheetFragment : BottomSheetDialogFragment() {
 
 
     private var audioUri: Uri? = null
-    private var duration: Int = 0
+    private var duration: String = null.toString()
     private var imageUri: Uri? = null
 
     private val pickImage =
@@ -61,7 +62,7 @@ class AddSongBottomSheetFragment : BottomSheetDialogFragment() {
                 if (binding.inputArtist.text.isNullOrBlank() && !metadata.artist.isNullOrBlank()) {
                     binding.inputArtist.setText(metadata.artist)
                 }
-                duration = metadata.duration
+                duration = metadata.duration ?: "0:00"
             }
         }
 
@@ -144,7 +145,7 @@ class AddSongBottomSheetFragment : BottomSheetDialogFragment() {
             resId = null,
             coverResId = null,
             coverPath = imageUri?.toString() ?: "",
-            duration = duration,
+            duration = parseDuration(duration),
             isLiked = false,
             isLocal = true,
             uploadedBy = userId

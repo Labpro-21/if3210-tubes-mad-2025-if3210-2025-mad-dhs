@@ -38,7 +38,7 @@
 <!--            android:name=".MainActivity"-->
 <!--            android:exported="true"/>-->
 
-        <activity android:name=".MainActivity" android:exported="true">
+        <activity android:name=".MainActivity" android:launchMode="singleTop" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />

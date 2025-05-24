@@ -16,6 +16,7 @@ import com.tubes.purry.data.model.Song
 import com.tubes.purry.databinding.FragmentAddSongBottomSheetBinding
 import com.tubes.purry.utils.extractAudioMetadata
 import androidx.core.net.toUri
+import com.tubes.purry.utils.parseDuration
 
 class EditSongBottomSheetFragment(private val song: Song) : BottomSheetDialogFragment() {
 
@@ -25,7 +26,7 @@ class EditSongBottomSheetFragment(private val song: Song) : BottomSheetDialogFra
     private lateinit var viewModel: SongViewModel
 
     private var audioUri: Uri? = null
-    private var duration: Int = 0
+    private var duration: String = ""
     private var imageUri: Uri? = null
 
     private val pickImage =
@@ -51,7 +52,7 @@ class EditSongBottomSheetFragment(private val song: Song) : BottomSheetDialogFra
                 val metadata = extractAudioMetadata(requireContext(), it)
                 binding.inputTitle.setText(metadata.title ?: song.title)
                 binding.inputArtist.setText(metadata.artist ?: song.artist)
-                duration = metadata.duration
+                duration = duration.ifBlank { "0:00" }
             }
         }
 
@@ -78,7 +79,7 @@ class EditSongBottomSheetFragment(private val song: Song) : BottomSheetDialogFra
 
         audioUri = song.filePath?.toUri()
         imageUri = song.coverPath?.toUri()
-        duration = song.duration
+        duration = song.duration.toString()
 
         binding.inputTitle.setText(song.title)
         binding.inputArtist.setText(song.artist)
@@ -132,7 +133,7 @@ class EditSongBottomSheetFragment(private val song: Song) : BottomSheetDialogFra
             artist = artist,
             filePath = filePath,
             coverPath = imageUri?.toString(),
-            duration = duration
+            duration = parseDuration(duration)
         )
 
         viewModel.updateSong(updatedSong)

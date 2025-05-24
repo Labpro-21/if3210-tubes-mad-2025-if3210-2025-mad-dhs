@@ -16,7 +16,6 @@ import okhttp3.*
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
-import java.util.UUID
 
 object DownloadUtils {
 
@@ -82,7 +81,7 @@ object DownloadUtils {
                         artist = onlineSong.artist,
                         filePath = destFile.absolutePath,
                         coverPath = onlineSong.artwork,
-                        duration = 0,
+                        duration = parseDuration(onlineSong.duration),
                         isLiked = false,
                         isLocal = true,
                         lastPlayedAt = 0L

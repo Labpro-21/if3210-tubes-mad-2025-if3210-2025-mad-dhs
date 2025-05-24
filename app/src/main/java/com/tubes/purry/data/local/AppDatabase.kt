@@ -68,57 +68,57 @@ abstract class AppDatabase : RoomDatabase() {
             """.trimIndent())
 
             CoroutineScope(Dispatchers.IO).launch {
-                INSTANCE?.songDao()?.insertAll(predefinedSongs())
+//                INSTANCE?.songDao()?.insertAll(predefinedSongs())
                 Log.d("AppDatabase", "Seeding done.")
             }
         }
 
-        private fun predefinedSongs(): List<Song> = listOf(
-            Song(
-                id = "1",
-                serverId = null,
-                title = "Katakan Saja",
-                artist = "Adikara",
-                coverResId = R.drawable.katakan_saja,
-                coverPath = null,
-                filePath = null,
-                resId = R.raw.katakan_saja,
-                duration = 239000,
-                isLiked = false,
-                isLocal = true,
-                lastPlayedAt = 0L,
-                uploadedBy = -1
-            ),
-            Song(
-                id = "2",
-                serverId = null,
-                title = "Primadona",
-                artist = "Adikara",
-                coverResId = R.drawable.primadona,
-                coverPath = null,
-                filePath = null,
-                resId = R.raw.primadona,
-                duration = 247000,
-                isLiked = false,
-                isLocal = true,
-                lastPlayedAt = 0L,
-                uploadedBy = -1
-            ),
-            Song(
-                id = "3",
-                serverId = null,
-                title = "Terlintas",
-                artist = "Bernadya",
-                coverResId = R.drawable.terlintas,
-                coverPath = null,
-                filePath = null,
-                resId = terlintas,
-                duration = 235000,
-                isLiked = false,
-                isLocal = true,
-                lastPlayedAt = 0L,
-                uploadedBy = -1
-            )
-        )
+//        private fun predefinedSongs(): List<Song> = listOf(
+//            Song(
+//                id = "1",
+//                serverId = null,
+//                title = "Katakan Saja",
+//                artist = "Adikara",
+//                coverResId = R.drawable.katakan_saja,
+//                coverPath = null,
+//                filePath = null,
+//                resId = R.raw.katakan_saja,
+//                duration = 239000,
+//                isLiked = false,
+//                isLocal = true,
+//                lastPlayedAt = 0L,
+//                uploadedBy = -1
+//            ),
+//            Song(
+//                id = "2",
+//                serverId = null,
+//                title = "Primadona",
+//                artist = "Adikara",
+//                coverResId = R.drawable.primadona,
+//                coverPath = null,
+//                filePath = null,
+//                resId = R.raw.primadona,
+//                duration = 247000,
+//                isLiked = false,
+//                isLocal = true,
+//                lastPlayedAt = 0L,
+//                uploadedBy = -1
+//            ),
+//            Song(
+//                id = "3",
+//                serverId = null,
+//                title = "Terlintas",
+//                artist = "Bernadya",
+//                coverResId = R.drawable.terlintas,
+//                coverPath = null,
+//                filePath = null,
+//                resId = terlintas,
+//                duration = 235000,
+//                isLiked = false,
+//                isLocal = true,
+//                lastPlayedAt = 0L,
+//                uploadedBy = -1
+//            )
+//        )
     }
 }

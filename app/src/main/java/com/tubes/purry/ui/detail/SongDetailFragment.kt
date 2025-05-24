@@ -12,6 +12,7 @@ import android.widget.PopupMenu
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.navArgs
 import com.tubes.purry.R
 import com.tubes.purry.data.local.AppDatabase
 import com.tubes.purry.databinding.FragmentSongDetailBinding
@@ -22,11 +23,14 @@ import com.tubes.purry.ui.profile.ProfileViewModel
 import com.tubes.purry.utils.formatDuration
 import android.util.Log
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.fragment.findNavController
+import com.tubes.purry.utils.parseDuration
 
 class SongDetailFragment : Fragment() {
     private lateinit var binding: FragmentSongDetailBinding
     private val handler = Handler(Looper.getMainLooper())
     private var isDragging = false
+    private val args: SongDetailFragmentArgs by navArgs()
 
     private val profileViewModel: ProfileViewModel by activityViewModels()
     private val nowPlayingViewModel: NowPlayingViewModel by activityViewModels {
@@ -59,10 +63,15 @@ class SongDetailFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val songId = arguments?.getInt("songId")
-        if (songId != null) {
-            nowPlayingViewModel.fetchSongById(songId)
+
+        val songId = args.songId
+        if (songId <= 0) {
+            // Handle invalid songId - maybe navigate back or show error
+            Toast.makeText(requireContext(), "Invalid song ID", Toast.LENGTH_SHORT).show()
+            findNavController().popBackStack()
+            return
         }
+        nowPlayingViewModel.fetchSongById(songId, requireContext())
 
         nowPlayingViewModel.currSong.observe(viewLifecycleOwner) { song ->
             song?.let {
@@ -72,10 +81,9 @@ class SongDetailFragment : Fragment() {
                 Glide.with(this)
                     .load(song.coverPath ?: song.coverResId ?: R.drawable.album_default)
                     .into(binding.ivCover)
-                if (it.duration > 0) {
-                    binding.seekBar.max = it.duration
-                    binding.tvDuration.text = formatDuration(it.duration)
-                }
+                val durationInSeconds = it.duration
+                binding.seekBar.max = durationInSeconds
+                binding.tvDuration.text = formatDuration(durationInSeconds)
             }
         }
 

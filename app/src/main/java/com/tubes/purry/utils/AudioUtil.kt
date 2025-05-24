@@ -10,8 +10,7 @@ fun extractAudioMetadata(context: Context, uri: Uri): AudioMetadata {
 
     val title = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE)
     val artist = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST)
-    val durationStr = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
-    val duration = durationStr?.toIntOrNull() ?: 0
+    val duration = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
 
     retriever.release()
 

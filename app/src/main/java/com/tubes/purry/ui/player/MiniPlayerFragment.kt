@@ -67,7 +67,7 @@ class MiniPlayerFragment : Fragment() {
                     }
                     else -> {
                         Glide.with(binding.root)
-                            .load(R.drawable.album_default) // 👈 fallback image
+                            .load(R.drawable.album_default)
                             .into(binding.imageCover)
                     }
                 }
@@ -106,20 +106,48 @@ class MiniPlayerFragment : Fragment() {
             lastClickTime = now
 
             try {
+                // ✅ FIX: Check if there's a current song and get its ID
+                val currentSong = viewModel.currSong.value
+                if (currentSong == null) {
+                    Log.w("MiniPlayerFragment", "No current song to show details for")
+                    return@setOnClickListener
+                }
+
+                // Extract numeric ID from song ID
+                val songId = when {
+                    currentSong.id.startsWith("srv-") -> {
+                        // Server song: "srv-123" -> 123
+                        currentSong.id.substring(4).toIntOrNull()
+                    }
+                    currentSong.id.toIntOrNull() != null -> {
+                        // Direct numeric ID
+                        currentSong.id.toInt()
+                    }
+                    else -> {
+                        Log.e("MiniPlayerFragment", "Cannot extract numeric ID from: ${currentSong.id}")
+                        null
+                    }
+                }
+
+                if (songId == null || songId <= 0) {
+                    Log.e("MiniPlayerFragment", "Invalid songId: $songId for song: ${currentSong.id}")
+                    return@setOnClickListener
+                }
+
                 val navHostFragment = requireActivity()
                     .supportFragmentManager
                     .findFragmentById(R.id.nav_host_fragment) as? NavHostFragment
 
                 val navController = navHostFragment?.navController
                 if (navController != null && navController.currentDestination?.id != R.id.songDetailFragment) {
-                    navController.navigate(R.id.songDetailFragment)
+                    val bundle = Bundle().apply {
+                        putInt("songId", songId)
+                    }
+                    navController.navigate(R.id.songDetailFragment, bundle)
                 } else {
                     Log.e("MiniPlayerFragment", "NavHostFragment atau navController null")
                 }
 
-                if (navController?.currentDestination?.id != R.id.songDetailFragment) {
-                    navController?.navigate(R.id.songDetailFragment)
-                }
             } catch (e: Exception) {
                 Log.e("MiniPlayerFragment", "Navigation error: ${e.message}")
             }

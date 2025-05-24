@@ -28,8 +28,9 @@
         tools:layout="@layout/fragment_add_song_bottom_sheet">
 
         <argument
-            android:name="song"
-            app:argType="com.tubes.purry.data.model.Song" />
+            android:name="song_id"
+            app:argType="integer"
+            app:nullable="false" />
     </fragment>
 
     <fragment

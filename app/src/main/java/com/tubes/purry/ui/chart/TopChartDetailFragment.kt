@@ -23,6 +23,7 @@ import com.tubes.purry.ui.player.NowPlayingViewModelFactory
 import com.tubes.purry.ui.profile.ProfileViewModel
 import com.tubes.purry.ui.profile.ProfileViewModelFactory
 import com.tubes.purry.utils.DownloadUtils
+import com.tubes.purry.utils.parseDuration
 import kotlinx.coroutines.launch
 import java.util.UUID
 
@@ -89,7 +90,7 @@ class TopChartDetailFragment : Fragment() {
                                 artist = song.artist,
                                 filePath = file.absolutePath,
                                 coverPath = song.artwork,
-                                duration = 0,
+                                duration = parseDuration(song.duration),
                                 isLiked = false
                             )
                             lifecycleScope.launch {

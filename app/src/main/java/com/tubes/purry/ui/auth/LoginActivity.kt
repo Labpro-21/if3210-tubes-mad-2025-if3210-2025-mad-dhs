@@ -26,7 +26,7 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoginBinding
     private lateinit var authRepository: AuthRepository
     private lateinit var sessionManager: SessionManager
-    private lateinit var nowPlayingViewModel: NowPlayingViewModel
+//    private lateinit var nowPlayingViewModel: NowPlayingViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,7 +47,7 @@ class LoginActivity : AppCompatActivity() {
                             navigateToMainActivity()
                         } else {
                             sessionManager.clearTokens()
-                            nowPlayingViewModel.clearQueue()
+//                            nowPlayingViewModel.clearQueue()
                         }
                     }
                 } catch (e: Exception) {
@@ -55,7 +55,7 @@ class LoginActivity : AppCompatActivity() {
                         // Jaga-jaga kalau ada error jaringan
                         Toast.makeText(this@LoginActivity, "Error verifying token", Toast.LENGTH_SHORT).show()
                         sessionManager.clearTokens()
-                        nowPlayingViewModel.clearQueue()
+//                        nowPlayingViewModel.clearQueue()
                     }
                 }
             }

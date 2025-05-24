@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
 import androidx.lifecycle.ViewModelProvider
@@ -16,7 +17,11 @@ import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.dynamiclinks.ktx.dynamicLinks
 import com.google.firebase.ktx.Firebase
+import com.tubes.purry.data.local.AppDatabase
 import com.tubes.purry.databinding.ActivityMainBinding
+import com.tubes.purry.ui.home.HomeFragmentDirections
+import com.tubes.purry.ui.player.NowPlayingViewModel
+import com.tubes.purry.ui.player.NowPlayingViewModelFactory
 import com.tubes.purry.ui.profile.ProfileViewModel
 import com.tubes.purry.ui.profile.ProfileViewModelFactory
 import com.tubes.purry.utils.NetworkStateReceiver
@@ -27,6 +32,8 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
 
     private lateinit var binding: ActivityMainBinding
     private val networkStateReceiver = NetworkStateReceiver()
+    private lateinit var nowPlayingViewModel: NowPlayingViewModel
+
 
 //    private val permissionLauncher = registerForActivityResult(
 //        ActivityResultContracts.RequestMultiplePermissions()
@@ -97,15 +104,26 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
         // Fetch user profile
         val profileViewModel = ViewModelProvider(this, ProfileViewModelFactory(this))[ProfileViewModel::class.java]
         profileViewModel.getProfileData()
+        nowPlayingViewModel = ViewModelProvider(
+            this,
+            NowPlayingViewModelFactory(application,
+                AppDatabase.getDatabase(this).LikedSongDao(),
+                AppDatabase.getDatabase(this).songDao(),
+                profileViewModel)
+        )[NowPlayingViewModel::class.java]
 
         Firebase.dynamicLinks
             .getDynamicLink(intent)
             .addOnSuccessListener { pendingDynamicLinkData ->
                 val deepLink: Uri? = pendingDynamicLinkData?.link
                 if (deepLink != null) {
-                    handleDeepLink(deepLink)
+                    // TUNDA navigasi sampai View sudah siap
+                    binding.root.post {
+                        handleDeepLink(deepLink)
+                    }
                 }
             }
+
             .addOnFailureListener {
                 // Opsional: log error
             }
@@ -115,61 +133,50 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
 
         // Trigger seeding
         // checkPermissionsAndSeed()
+        binding.root.post {
+            handleDeepLink(intent?.data)
+        }
+
     }
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
-        intent?.data?.let { uri ->
-            val songId = uri.lastPathSegment?.toIntOrNull()
-            if (songId != null) {
-                Log.d("DeepLink", "Opening song with ID: $songId")
-                val navController = findNavController(R.id.nav_host_fragment)
-                navController.navigate(
-                    R.id.songDetailFragment,
-                    bundleOf("song_id" to songId)
-                )
-            }
-        }
+        setIntent(intent)
+        handleDeepLink(intent?.data)
     }
 
 
     private fun handleDeepLink(data: Uri?) {
         if (data != null && data.scheme == "purrytify" && data.host == "song") {
-            val songId = data.lastPathSegment?.toIntOrNull()
+            val rawId = data.lastPathSegment
+            val songId = rawId?.toIntOrNull()
+
             if (songId != null) {
                 val navController = findNavController(R.id.nav_host_fragment)
                 val bundle = Bundle().apply {
                     putInt("songId", songId)
                 }
                 navController.navigate(R.id.songDetailFragment, bundle)
+            } else {
+                Log.e("DeepLink", "Invalid songId in deep link: $rawId")
+                Toast.makeText(this, "Link tidak valid", Toast.LENGTH_SHORT).show()
             }
         }
     }
-
-
-    private fun handleDeepLink(data: Intent?) {
-        val data: Uri? = intent?.data
-        if (data != null && data.scheme == "purrytify" && data.host == "song") {
-            val songId = data.lastPathSegment?.toIntOrNull()
-            if (songId != null) {
-                val navController = findNavController(R.id.nav_host_fragment)
-
-                val bundle = Bundle().apply {
-                    putInt("songId", songId)
-                }
-                navController.navigate(R.id.songDetailFragment, bundle)
-            }
-        }
-    }
-
 
     private fun handleIntentNavigation(intent: Intent?) {
         intent?.getStringExtra("navigateTo")?.let { destination ->
             if (destination == "detail") {
-                val navController = supportFragmentManager.findFragmentById(R.id.nav_host_fragment)
-                    ?.findNavController()
-                if (navController?.currentDestination?.id != R.id.songDetailFragment) {
-                    navController?.navigate(R.id.songDetailFragment)
+                val songId = intent.getIntExtra("songId", -1) // Get songId from intent
+                if (songId != -1) {
+                    val navController = supportFragmentManager.findFragmentById(R.id.nav_host_fragment)
+                        ?.findNavController()
+                    if (navController?.currentDestination?.id != R.id.songDetailFragment) {
+                        val bundle = Bundle().apply {
+                            putInt("songId", songId)
+                        }
+                        navController?.navigate(R.id.songDetailFragment, bundle)
+                    }
                 }
             }
         }

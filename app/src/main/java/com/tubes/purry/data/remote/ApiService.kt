@@ -5,6 +5,7 @@ import com.tubes.purry.data.model.LoginResponse
 import com.tubes.purry.data.model.OnlineSong
 import com.tubes.purry.data.model.ProfileData
 import com.tubes.purry.data.model.ProfileResponse
+import com.tubes.purry.data.model.RawSong
 import com.tubes.purry.data.model.RefreshTokenRequest
 import com.tubes.purry.data.model.RefreshTokenResponse
 import com.tubes.purry.data.model.Song
@@ -49,5 +50,5 @@ interface ApiService {
     suspend fun getTopSongsByCountry(@Path("country") code: String): List<OnlineSong>
 
     @GET("api/songs/{id}")
-    suspend fun getSongById(@Path("id") id: Int): Response<Song>
+    suspend fun getSongById(@Path("id") id: Int): Response<RawSong>
 }

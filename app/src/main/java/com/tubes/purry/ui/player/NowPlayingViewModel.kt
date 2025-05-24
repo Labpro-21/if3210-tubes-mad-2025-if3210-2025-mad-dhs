@@ -22,7 +22,10 @@ import kotlinx.coroutines.withContext
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import com.tubes.purry.data.model.SongInQueue
+import com.tubes.purry.data.model.toTemporarySong
 import com.tubes.purry.data.remote.ApiClient.apiService
+import com.tubes.purry.utils.formatDuration
+import com.tubes.purry.utils.parseDuration
 
 class NowPlayingViewModel(
     application: Application,
@@ -292,7 +295,7 @@ class NowPlayingViewModel(
         _isShuffling.value = isNowShuffling
 
         val currentSong = _currSong.value ?: return
-        val newMainQueue = mutableListOf<SongInQueue>()
+//        val newMainQueue = mutableListOf<SongInQueue>()
 
         if (isNowShuffling) {
             val shuffled = originalAllSongs.shuffled()
@@ -317,12 +320,25 @@ class NowPlayingViewModel(
         }
     }
 
-    fun fetchSongById(id: Int) {
+    fun fetchSongById(id: Int, context: Context) {
         viewModelScope.launch {
             try {
                 val response = apiService.getSongById(id)
                 if (response.isSuccessful) {
-                    _currSong.postValue(response.body())
+                    response.body()?.let { raw ->
+                        val converted = Song(
+                            id = "srv-${raw.id}",
+                            title = raw.title,
+                            artist = raw.artist,
+                            filePath = raw.url,
+                            coverPath = raw.artwork,
+                            duration = parseDuration(raw.duration),
+                            isLocal = false,
+                            isLiked = false
+                        )
+                        _currSong.postValue(converted)
+                        playSong(converted, context)
+                    }
                 } else {
                     Log.e("NowPlayingVM", "Gagal load lagu: ${response.code()}")
                 }
@@ -341,6 +357,11 @@ class NowPlayingViewModel(
         }
     }
 
+    fun formatDuration(seconds: Int): String {
+        val minutes = seconds / 60
+        val secs = seconds % 60
+        return "%d:%02d".format(minutes, secs)
+    }
 
     override fun onCleared() {
         super.onCleared()
