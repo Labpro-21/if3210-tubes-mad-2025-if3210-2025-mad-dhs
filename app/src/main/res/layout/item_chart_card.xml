@@ -1,19 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="140dp"
-    android:layout_height="180dp"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
     android:layout_marginEnd="12dp"
-    android:foreground="?attr/selectableItemBackground"
+    android:background="?attr/selectableItemBackground"
     android:clickable="true"
     android:focusable="true"
-    app:cardCornerRadius="16dp">
+    android:padding="4dp">
 
     <ImageView
         android:id="@+id/chartImage"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:contentDescription="chart_image"
-        android:scaleType="centerCrop" />
+        android:layout_height="140dp"
+        android:scaleType="centerCrop"
+        android:background="@drawable/rounded_corner_background"
+        android:contentDescription="@string/chart_image_desc" />
 
-</androidx.cardview.widget.CardView>
+    <TextView
+        android:id="@+id/chartTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:text="Top 50 Global"
+        android:textColor="@android:color/white"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:maxLines="1"
+        android:ellipsize="end" />
+
+    <TextView
+        android:id="@+id/chartDescription"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:text="Most played globally"
+        android:textColor="#CCCCCC"
+        android:textSize="12sp"
+        android:maxLines="2"
+        android:ellipsize="end" />
+</LinearLayout>

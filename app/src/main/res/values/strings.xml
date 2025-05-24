@@ -105,4 +105,6 @@
     <string name="daily_chart">Daily Chart</string>
     <string name="export_success">Export successful! Check your Downloads folder.</string>
     <string name="export_failed">Export failed. Please try again.</string>
+    <string name="chart_image_desc">Chart cover image</string>
+
 </resources>

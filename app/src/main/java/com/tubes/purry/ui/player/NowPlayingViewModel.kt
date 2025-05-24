@@ -33,6 +33,7 @@ class NowPlayingViewModel(
     private val profileViewModel: ProfileViewModel
 ) : AndroidViewModel(application) {
 
+    val profileData: LiveData<ProfileData> get() = profileViewModel.profileData
     private val _currSong = MutableLiveData<Song?>() // mutable untuk bisa diubah2
     val currSong: LiveData<Song?> = _currSong // untuk read
 
@@ -70,6 +71,7 @@ class NowPlayingViewModel(
     private var isPaused: Boolean = false
     private var pauseStartTime: Long = 0
     private var totalPauseTime: Long = 0
+
 
     private fun getCurrentSongInQueue(): SongInQueue? {
         val currId = _currSong.value?.id ?: return null

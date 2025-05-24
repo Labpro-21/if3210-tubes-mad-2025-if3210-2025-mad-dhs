@@ -25,8 +25,9 @@
         android:id="@+id/scrollContainer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="16dp"
-        android:layout_above="@+id/miniPlayerContainer">
+        android:layout_below="@id/appBarLayout"
+        android:layout_above="@+id/miniPlayerContainer"
+        android:padding="16dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -37,9 +38,9 @@
                 android:id="@+id/ivChartCover"
                 android:layout_width="match_parent"
                 android:layout_height="180dp"
-                android:scaleType="centerCrop"
                 android:layout_marginBottom="12dp"
-                android:contentDescription="@string/chart_cover"/>
+                android:contentDescription="@string/chart_cover"
+                android:scaleType="centerCrop" />
 
             <TextView
                 android:id="@+id/tvChartTitle"
