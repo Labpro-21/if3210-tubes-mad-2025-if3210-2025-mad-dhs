@@ -1,5 +1,6 @@
 package com.tubes.purry.data.local
 
+import androidx.lifecycle.LiveData
 import androidx.room.*
 import com.tubes.purry.data.model.Song
 import kotlinx.coroutines.flow.Flow
@@ -41,4 +42,10 @@ interface SongDao {
 
     @Query("SELECT * FROM songs WHERE id = :id LIMIT 1")
     suspend fun getById(id: String): Song?
+
+    @Query("UPDATE songs SET playCount = playCount + 1 WHERE id = :songId")
+    suspend fun incrementPlayCount(songId: String)
+
+    @Query("SELECT * FROM songs WHERE isLocal = 1 ORDER BY title ASC")
+    fun getLibrarySongs(): Flow<List<Song>>
 }

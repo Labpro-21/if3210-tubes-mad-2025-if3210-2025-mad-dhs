@@ -23,7 +23,7 @@ data class Song(
     val isLocal: Boolean = false,
     val lastPlayedAt: Long = 0L,
     val uploadedBy: Int = 0,
-
+    val playCount: Int = 0
 ) : Parcelable {
     constructor(parcel: Parcel) : this(
         id = parcel.readString() ?: "",
@@ -38,7 +38,8 @@ data class Song(
         isLiked = parcel.readByte() != 0.toByte(),
         isLocal = parcel.readByte() != 0.toByte(),
         lastPlayedAt = parcel.readLong(),
-        uploadedBy = parcel.readInt()
+        uploadedBy = parcel.readInt(),
+        playCount = parcel.readInt()
     )
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
@@ -55,6 +56,7 @@ data class Song(
         parcel.writeByte(if (isLocal) 1 else 0)
         parcel.writeLong(lastPlayedAt)
         parcel.writeInt(uploadedBy)
+        parcel.writeInt(playCount)
     }
 
     override fun describeContents(): Int = 0

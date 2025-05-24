@@ -65,7 +65,7 @@ class LibraryFragment : Fragment() {
     }
 
     private fun observeSongs() {
-        viewModel.newSongs.observe(viewLifecycleOwner) { songs ->
+        viewModel.librarySongs.observe(viewLifecycleOwner) { songs ->
             allSongs = songs
             applyFilters()
         }

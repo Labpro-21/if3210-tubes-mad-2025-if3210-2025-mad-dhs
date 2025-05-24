@@ -77,7 +77,7 @@ object DownloadUtils {
                     Log.d("DownloadUtils", "Download selesai: ${destFile.absolutePath}")
 
                     val song = Song(
-                        id = UUID.randomUUID().toString(),
+                        id = onlineSong.id.toString(),
                         title = onlineSong.title,
                         artist = onlineSong.artist,
                         filePath = destFile.absolutePath,

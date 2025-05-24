@@ -67,17 +67,7 @@ class NowPlayingViewModel(
         Log.d("NowPlayingViewModel", "Calling PlayerController.play() with ${song.filePath}")
 
         viewModelScope.launch {
-//            val userId = getUserIdBlocking() ?: return@launch
-//            if (userId == null) {
-//                Log.e("NowPlayingViewModel", "userId null! Tidak bisa lanjut play.")
-//                return@launch
-//            }
-//            val isLiked = likedSongDao.isLiked(userId, song.id)
             val songWithLike = song.copy(isLiked = false)
-
-//            if (_currSong.value?.id == song.id) {
-//                _currSong.postValue(songWithLike)
-//            }
             _currSong.postValue(songWithLike)
 
             Log.d(
@@ -92,7 +82,6 @@ class NowPlayingViewModel(
                         _currSong.postValue(_currSong.value?.copy(duration = duration))
                         _isPlaying.postValue(PlayerController.isPlaying())
                     }
-//                    _isLiked.value = false
 
                     Handler(Looper.getMainLooper()).postDelayed({
                         _isPlaying.value = PlayerController.isPlaying()
@@ -113,38 +102,20 @@ class NowPlayingViewModel(
                             }
                         }
                     }
+                    markSongAsRecentlyPlayed(songWithLike)
+
+                    val userId = getUserIdBlocking()
+                    if (userId != null) {
+                        val isLiked = likedSongDao.isSongLiked(userId, songWithLike.id)
+                        _isLiked.postValue(isLiked)
+                    }
                 } else {
                     _isPlaying.value = false
                     _errorMessage.value = "Gagal memutar lagu. Cek file atau perizinan."
                 }
             }
         }
-//        val success = PlayerController.play(song, context)
-//        if (success) {
-//            _currSong.value = song
-////            _isPlaying.value = true
-//            Handler(Looper.getMainLooper()).postDelayed({
-//                _isPlaying.value = PlayerController.isPlaying()
-//            }, 300)
-//
-//
-//
-//            PlayerController.onCompletion = {
-//                when (_repeatMode.value) {
-//                    RepeatMode.ONE -> {
-//                        _currSong.value?.let { playSong(it, context) }
-//                    }
-//                    else -> {
-//                        removeCurrentFromQueue()
-//                        playNextInQueue(context)
-//                    }
-//                }
-//            }
-//        } else {
-//            _isPlaying.value = false
-//            _errorMessage.value = "Gagal memutar lagu. Cek file atau perizinan."
-//        }
-    }
+}
 
     private fun pauseSong() {
         PlayerController.pause()
@@ -162,11 +133,9 @@ class NowPlayingViewModel(
 
     fun togglePlayPause() {
         if (_isPlaying.value == true) {
-            PlayerController.pause()
-            _isPlaying.value = false
+            pauseSong()
         } else {
-            PlayerController.resume()
-            _isPlaying.value = true
+            resumeSong()
         }
     }
 
@@ -179,12 +148,12 @@ class NowPlayingViewModel(
             }
 
             val db = AppDatabase.getDatabase(getApplication())
-            val userExists = db.userProfileDao().getUserById(userId) != null
             val songExists = db.songDao().getById(song.id) != null
 
-            if (!userExists || !songExists) {
-                Log.e("NowPlayingViewModel", "Cannot like: user or song not found in DB.")
-                return@launch
+            if (!songExists) {
+                db.songDao().insert(song)
+            //    Log.e("NowPlayingViewModel", "Cannot like: user or song not found in DB.")
+            //    return@launch
             }
 
             val isLiked = db.LikedSongDao().isSongLiked(userId, song.id)
@@ -360,6 +329,15 @@ class NowPlayingViewModel(
             } catch (e: Exception) {
                 Log.e("NowPlayingVM", "Error saat fetch lagu: ${e.message}")
             }
+        }
+    }
+
+    private suspend fun markSongAsRecentlyPlayed(song: Song) {
+        val updatedSong = song.copy(lastPlayedAt = System.currentTimeMillis())
+        if (songDao.getById(song.id) != null) {
+            songDao.update(updatedSong)
+        } else {
+            songDao.insert(updatedSong)
         }
     }
 

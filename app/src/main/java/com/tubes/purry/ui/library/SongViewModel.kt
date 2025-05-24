@@ -26,6 +26,8 @@ class SongViewModel(private val repository: SongRepository) : ViewModel() {
 
     val recentlyPlayed: LiveData<List<Song>> = repository.getRecentlyPlayed().asLiveData()
 
+    val librarySongs: LiveData<List<Song>> = repository.getLibrarySongs().asLiveData()
+
     fun markAsPlayed(song: Song) = viewModelScope.launch {
         val updatedSong = song.copy(lastPlayedAt = System.currentTimeMillis())
         repository.updateSong(updatedSong)

@@ -5,6 +5,7 @@ import android.content.res.AssetFileDescriptor
 import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.net.Uri
+import android.os.FileUtils
 import com.tubes.purry.data.model.Song
 import android.util.Log
 import androidx.core.net.toUri
@@ -68,19 +69,37 @@ object PlayerController {
                     true
                 }
 
-                if (!song.filePath.isNullOrBlank()) {
-                    if (song.filePath.startsWith("http")) {
-                        Log.d("PlayerController", "Streaming dari URL: ${song.filePath}")
-                        setDataSource(song.filePath)
-                    } else {
-                        Log.d("PlayerController", "Memutar dari file lokal: ${song.filePath}")
-                        setDataSource(song.filePath) // <- gunakan ini untuk path lokal
+                val path = song.filePath ?: ""
+                when {
+                    path.startsWith("http") -> {
+                        Log.d("PlayerController", "Streaming dari URL: $path")
+                        setDataSource(path)
                     }
-                } else {
-                    Log.e("PlayerController", "filePath kosong")
-                    isPreparing = false
-                    release()
-                    return false
+
+                    path.startsWith("content://") -> {
+                        Log.d("PlayerController", "Memutar dari content:// URI")
+                        val uri = Uri.parse(path)
+                        context.contentResolver.openAssetFileDescriptor(uri, "r")?.use { afd ->
+                            setDataSource(afd.fileDescriptor, afd.startOffset, afd.length)
+                        } ?: run {
+                            Log.e("PlayerController", "Gagal buka AssetFileDescriptor dari content://")
+                            isPreparing = false
+                            release()
+                            return false
+                        }
+                    }
+
+                    path.isNotBlank() -> {
+                        Log.d("PlayerController", "Memutar dari file lokal: $path")
+                        setDataSource(path)
+                    }
+
+                    else -> {
+                        Log.e("PlayerController", "filePath kosong atau tidak valid")
+                        isPreparing = false
+                        release()
+                        return false
+                    }
                 }
 
                 Log.d("PlayerController", "Memanggil prepareAsync()")

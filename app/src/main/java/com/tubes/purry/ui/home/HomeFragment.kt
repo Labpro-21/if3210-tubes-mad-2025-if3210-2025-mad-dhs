@@ -1,6 +1,7 @@
 package com.tubes.purry.ui.home
 
 import android.app.AlertDialog
+import android.content.Intent
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.os.Bundle
@@ -39,7 +40,6 @@ import com.tubes.purry.ui.chart.ChartAdapter
 
 import com.tubes.purry.data.model.RecommendationItem
 import com.tubes.purry.data.model.RecommendationType
-import com.tubes.purry.ui.chart.ChartAdapter
 import com.tubes.purry.ui.recommendation.RecommendationDetailActivity
 import com.tubes.purry.utils.SessionManager
 

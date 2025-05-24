@@ -22,4 +22,15 @@ class SongRepository(private val songDao: SongDao, private val likedSongDao: Lik
     fun getAllSongs(): Flow<List<Song>> {
         return songDao.getAllSongs()
     }
+    fun getLibrarySongs(): Flow<List<Song>> {
+        return songDao.getLibrarySongs()
+    }
+    suspend fun saveDownloadedSong(song: Song, filePath: String) {
+        val localVersion = song.copy(
+            isLocal = true,
+            filePath = filePath
+        )
+        songDao.insert(localVersion)
+    }
+
 }
