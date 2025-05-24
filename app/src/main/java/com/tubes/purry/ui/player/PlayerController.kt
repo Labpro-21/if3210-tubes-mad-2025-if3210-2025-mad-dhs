@@ -39,7 +39,6 @@ object PlayerController {
         currentlyPlaying = song
 
         try {
-            val appContext = context.applicationContext
             mediaPlayer = MediaPlayer().apply {
                 setAudioAttributes(
                     AudioAttributes.Builder()
@@ -69,18 +68,16 @@ object PlayerController {
                     true
                 }
 
-                try {
-                    if (!song.filePath.isNullOrBlank()) {
-                        Log.d("PlayerController", "Memanggil setDataSource dengan URL")
+                if (!song.filePath.isNullOrBlank()) {
+                    if (song.filePath.startsWith("http")) {
+                        Log.d("PlayerController", "Streaming dari URL: ${song.filePath}")
                         setDataSource(song.filePath)
                     } else {
-                        Log.e("PlayerController", "filePath kosong")
-                        isPreparing = false
-                        release()
-                        return false
+                        Log.d("PlayerController", "Memutar dari file lokal: ${song.filePath}")
+                        setDataSource(song.filePath) // <- gunakan ini untuk path lokal
                     }
-                } catch (e: Exception) {
-                    Log.e("PlayerController", "Gagal setDataSource: ${e.message}")
+                } else {
+                    Log.e("PlayerController", "filePath kosong")
                     isPreparing = false
                     release()
                     return false

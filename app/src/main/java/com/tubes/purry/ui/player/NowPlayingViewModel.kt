@@ -40,6 +40,8 @@ class NowPlayingViewModel(
 
     private val _errorMessage = MutableLiveData<String>()
     private var originalAllSongs: List<Song> = emptyList()
+    private var shuffledQueue: List<SongInQueue> = emptyList()
+
     private val _mainQueue = MutableLiveData<List<SongInQueue>>(emptyList())
     private val _manualQueue = MutableLiveData<MutableList<SongInQueue>?>(mutableListOf())
 
@@ -208,16 +210,16 @@ class NowPlayingViewModel(
 
     fun setQueueFromClickedSong(clicked: Song, allSongs: List<Song>, context: Context) {
         originalAllSongs = allSongs
-        val newMainQueue = mutableListOf(SongInQueue(clicked, false)).apply {
-            addAll(allSongs.filter { it.id != clicked.id }.map { SongInQueue(it, false) })
-        }
+
 //        val newMainQueue = mutableListOf<SongInQueue>()
+        val newMainQueue = allSongs.map { SongInQueue(it, fromManualQueue = false) }
 //        newMainQueue.add(SongInQueue(clicked, fromManualQueue = false))
 //        newMainQueue.addAll(allSongs.filter { it.id != clicked.id }.map { SongInQueue(it, false) })
 
         _manualQueue.value = mutableListOf()
         _mainQueue.value = newMainQueue
-        currentQueueIndex = 0
+        currentQueueIndex = newMainQueue.indexOfFirst { it.song.id == clicked.id }
+//        currentQueueIndex = 0
         playSong(clicked, context)
     }
 
@@ -250,27 +252,18 @@ class NowPlayingViewModel(
     }
 
     private fun playNextInQueue(context: Context) {
-        val manual = _manualQueue.value ?: mutableListOf()
-        if (manual.isNotEmpty()) {
-            val nextManual = manual.removeAt(0)
-            _manualQueue.value = manual
-            playSong(nextManual.song, context)
-            _isPlaying.postValue(true)
-            return
-        }
+        val queue = if (_isShuffling.value == true) shuffledQueue else _mainQueue.value.orEmpty()
+        if (queue.isEmpty()) return
 
-        val main = _mainQueue.value.orEmpty()
-        if (main.isEmpty()) return
-
-        if (currentQueueIndex < main.size - 1) {
+        if (currentQueueIndex < queue.size - 1) {
             currentQueueIndex++
-            playSong(main[currentQueueIndex].song, context)
+            playSong(queue[currentQueueIndex].song, context)
         } else if (_repeatMode.value == RepeatMode.ALL) {
             currentQueueIndex = 0
-            playSong(main[0].song, context)
+            playSong(queue[0].song, context)
         }
-        _isPlaying.postValue(true)
     }
+
 
     fun nextSong(context: Context, isManual: Boolean = true) {
         if (isManual && _repeatMode.value == RepeatMode.ONE) {
@@ -280,23 +273,18 @@ class NowPlayingViewModel(
     }
 
     fun previousSong(context: Context) {
-        val main = _mainQueue.value.orEmpty()
-        if (main.isEmpty()) return
+        val queue = if (_isShuffling.value == true) shuffledQueue else _mainQueue.value.orEmpty()
+        if (queue.isEmpty()) return
 
-        if (_isShuffling.value == true) {
-            val randomSong = main.random()
-            currentQueueIndex = main.indexOf(randomSong)
-            playSong(randomSong.song, context)
-        } else {
-            if (currentQueueIndex > 0) {
-                currentQueueIndex--
-                playSong(main[currentQueueIndex].song, context)
-            } else if (_repeatMode.value == RepeatMode.ALL && main.isNotEmpty()) {
-                currentQueueIndex = main.size - 1
-                playSong(main[currentQueueIndex].song, context)
-            }
+        if (currentQueueIndex > 0) {
+            currentQueueIndex--
+            playSong(queue[currentQueueIndex].song, context)
+        } else if (_repeatMode.value == RepeatMode.ALL && queue.isNotEmpty()) {
+            currentQueueIndex = queue.size - 1
+            playSong(queue[currentQueueIndex].song, context)
         }
     }
+
 
 
     fun clearQueue() {
@@ -312,21 +300,23 @@ class NowPlayingViewModel(
         _isShuffling.value = isNowShuffling
 
         val currentSong = _currSong.value ?: return
-        val newMainQueue = mutableListOf<SongInQueue>()
 
         if (isNowShuffling) {
-            val shuffled = originalAllSongs.shuffled().filter { it.id != currentSong.id }
-            newMainQueue.add(SongInQueue(currentSong,false))
-            newMainQueue.addAll(shuffled.map { SongInQueue(it,false) })
-        } else {
-            val ordered = originalAllSongs.filter { it.id != currentSong.id }
-            newMainQueue.add(SongInQueue(currentSong,false))
-            newMainQueue.addAll(ordered.map { SongInQueue(it,false) })
-        }
+            val shuffled = originalAllSongs.shuffled()
+            shuffledQueue = shuffled.map { SongInQueue(it, fromManualQueue = false) }
 
-        _mainQueue.value = newMainQueue
-        currentQueueIndex = 0
+            currentQueueIndex = shuffledQueue.indexOfFirst { it.song.id == currentSong.id }
+            _mainQueue.value = shuffledQueue
+        } else {
+            val ordered = originalAllSongs.map { SongInQueue(it, fromManualQueue = false) }
+            _mainQueue.value = ordered
+
+            currentQueueIndex = ordered.indexOfFirst { it.song.id == currentSong.id }
+            shuffledQueue = emptyList()
+        }
     }
+
+
 
     fun toggleRepeat() {
         _repeatMode.value = when (_repeatMode.value) {

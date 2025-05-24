@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface SongDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(song: Song)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -18,7 +18,7 @@ interface SongDao {
     @Delete
     suspend fun delete(song: Song)
 
-    @Query("SELECT * FROM songs WHERE isLocal = 1 ORDER BY id DESC LIMIT 10")
+    @Query("SELECT * FROM songs WHERE filePath IS NOT NULL ORDER BY title ASC")
     fun getNewSongs(): Flow<List<Song>>
 
     @Query("SELECT * FROM songs WHERE lastPlayedAt > 0 ORDER BY lastPlayedAt DESC LIMIT 10")
@@ -32,4 +32,7 @@ interface SongDao {
 
     @Query("SELECT COUNT(*) FROM songs WHERE lastPlayedAt > 0")
     fun getListenedSongsCount(): Flow<Int>
+
+    @Query("SELECT * FROM songs WHERE filePath = :path LIMIT 1")
+    suspend fun getSongByFilePath(path: String): Song?
 }
