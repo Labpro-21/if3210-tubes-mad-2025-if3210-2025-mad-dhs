@@ -79,7 +79,7 @@ class SoundCapsuleViewModel(
                 dailyChart = dailyChart
             )
 
-            exportService.exportToCsv(exportData)
+            exportService.exportPdfToMediaStore(exportData)
         } catch (e: Exception) {
             false
         }
@@ -111,7 +111,7 @@ class SoundCapsuleViewModel(
                 )
             }
 
-            exportService.exportAllDataToCsv(allExportData)
+            exportService.exportAllDataToPdfMediaStore(allExportData)
         } catch (e: Exception) {
             false
         }
