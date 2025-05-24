@@ -86,4 +86,6 @@
     <string name="delete_song_icon">Delete</string>
     <string name="artist_song_card">Artist</string>
     <string name="song_title_card">Song Title</string>
+    <string name="pilih_output_audio">Pilih Output Audio</string>
+    <string name="bluetooth_icon_desc">Bluetooth icon</string>
 </resources>

@@ -6,10 +6,13 @@ import android.content.pm.PackageManager
 import android.net.ConnectivityManager
 import android.os.Build
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
@@ -18,7 +21,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.tubes.purry.databinding.ActivityMainBinding
 import com.tubes.purry.ui.profile.ProfileViewModel
 import com.tubes.purry.ui.profile.ProfileViewModelFactory
-import com.tubes.purry.ui.player.NowPlayingViewModel
+import com.tubes.purry.utils.AudioOutputManager
 import com.tubes.purry.utils.NetworkStateReceiver
 import com.tubes.purry.utils.NetworkUtil
 import com.tubes.purry.utils.TokenExpirationService
@@ -127,7 +130,7 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
         binding.networkErrorBanner.visibility = View.GONE
     }
 
-    fun showMiniPlayer() {
+    private fun showMiniPlayer() {
         binding.miniPlayerContainer.apply {
             if (visibility != View.VISIBLE) {
                 alpha = 0f
@@ -137,16 +140,55 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
         }
     }
 
-    fun hideMiniPlayer() {
+    private fun hideMiniPlayer() {
         binding.miniPlayerContainer.visibility = View.GONE
     }
 
-    fun hideBottomNav() {
+    private fun hideBottomNav() {
         binding.navView.visibility = View.GONE
     }
 
-    fun showBottomNav() {
+    private fun showBottomNav() {
         binding.navView.visibility = View.VISIBLE
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.main_menu, menu)
+        return true
+    }
+
+    private fun showAudioDeviceDialog() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT)
+            != PackageManager.PERMISSION_GRANTED
+        ) {
+            Toast.makeText(this, "Izin Bluetooth belum diberikan.", Toast.LENGTH_SHORT).show()
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.BLUETOOTH_CONNECT),
+                1001
+            )
+            return
+        }
+
+        val devices = AudioOutputManager.getAvailableAudioDevices(this)
+        if (devices.isEmpty()) {
+            Toast.makeText(this, "Tidak ada perangkat audio Bluetooth yang tersedia.", Toast.LENGTH_LONG).show()
+            AudioOutputManager.openBluetoothSettings(this)
+            return
+        }
+
+        val dialog = com.tubes.purry.ui.outputdevice.SelectAudioDeviceDialog()
+        dialog.show(supportFragmentManager, "SelectAudioDeviceDialog")
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_audio_output -> {
+                showAudioDeviceDialog()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 
 
