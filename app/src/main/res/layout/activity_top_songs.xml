@@ -13,10 +13,10 @@
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
+            app:navigationIcon="@drawable/ic_arrow_back"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="@color/background_dark"
-            app:title="Top songs"
             app:titleTextColor="@color/white" />
 
     </com.google.android.material.appbar.AppBarLayout>

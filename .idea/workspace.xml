@@ -5,6 +5,34 @@
       <config />
     </shared>
     <layouts>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout-land/activity_login.xml">
+        <config>
+          <state>Landscape</state>
+          <theme>@style/Theme.Purrytify</theme>
+        </config>
+      </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout-land/activity_login1.xml">
+        <config>
+          <theme>@style/Theme.Purrytify</theme>
+        </config>
+      </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout-land/bottom_nav_item_color.xml">
+        <config>
+          <state>Landscape</state>
+          <theme>@style/Theme.Purrytify</theme>
+        </config>
+      </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout-land/fragment_profile.xml">
+        <config>
+          <state>Landscape</state>
+          <theme>@style/Theme.Purrytify</theme>
+        </config>
+      </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/activity_edit_profile.xml">
+        <config>
+          <theme>@style/Theme.Purrytify</theme>
+        </config>
+      </layout>
       <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/activity_login.xml">
         <config>
           <theme>@style/Theme.Purrytify</theme>
@@ -146,12 +174,8 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fb2d9b52-b320-4578-a27c-b77d399ccfa2" name="Changes" comment="feat: init analytics">
-      <change beforePath="$PROJECT_DIR$/app/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/app/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/profile/EditProfileActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/profile/EditProfileActivity.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/profile/MapsActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/profile/MapsActivity.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/activity_maps.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/activity_maps.xml" afterDir="false" />
+    <list default="true" id="fb2d9b52-b320-4578-a27c-b77d399ccfa2" name="Changes" comment="feat: responsive login">
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/layout-land/fragment_profile.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -212,12 +236,12 @@
     &quot;assignee&quot;: &quot;HenryofSkalitz1202&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/Labpro-21/if3210-tubes-mad-2025-if3210-2025-mad-dhs.git",
-    "accountId": "fedc41d2-603f-474a-b151-5c7c38bc36b1"
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/Labpro-21/if3210-tubes-mad-2025-if3210-2025-mad-dhs.git&quot;,
+    &quot;accountId&quot;: &quot;fedc41d2-603f-474a-b151-5c7c38bc36b1&quot;
   }
-}]]></component>
+}</component>
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$USER_HOME$/AppData/Local/Google/AndroidStudio2024.3/device-explorer/Medium Phone API 36/_/data/data/com.tubes.purry/shared_prefs/purrytify_encrypted_prefs.xml" root0="SKIP_INSPECTION" />
   </component>
@@ -247,7 +271,7 @@
     "git-widget-placeholder": "feat/analytics",
     "ignore.virus.scanning.warn.message": "true",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "D:/College/Semester 6/Mobile/Tubes1/if3210-tubes-mad-2025-if3210-2025-mad-dhs/app/src/main/java/com/tubes/purry/data/model/Song.kt",
+    "last_opened_file_path": "/Users/shazyataufik/Documents/ITB/Semester6/MADTubes2/app/src/main/res/layout-land",
     "run.code.analysis.last.selected.profile": "pProject Default",
     "settings.build.tools.auto.reload": "ALL",
     "settings.editor.selected.configurable": "reference.settingsdialog.project.gradle",
@@ -256,9 +280,14 @@
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/app/src/main/res/layout-land" />
+      <recent name="$PROJECT_DIR$/app/src/main/res/layout" />
+      <recent name="$PROJECT_DIR$/app/src/main/res" />
+      <recent name="$PROJECT_DIR$/app/src/main/res/drawable" />
       <recent name="D:\College\Semester 6\Mobile\Tugas Besar 1\app" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/app/src/main/res/layout-land" />
       <recent name="D:\College\Semester 6\Mobile\Tugas Besar 1\app\src\main\java\com\tubes\purry\ui\chart" />
       <recent name="C:\Users\edarr\Downloads\if3210-tubes-mad-2025-if3210-2025-mad-dhs\app\src\main\res\drawable" />
     </key>
@@ -489,7 +518,47 @@
       <option name="project" value="LOCAL" />
       <updated>1748093591903</updated>
     </task>
-    <option name="localTasksCounter" value="18" />
+    <task id="LOCAL-00018" summary="feat: edit profile maps">
+      <option name="closed" value="true" />
+      <created>1748095058735</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1748095058735</updated>
+    </task>
+    <task id="LOCAL-00019" summary="feat: export to pdf">
+      <option name="closed" value="true" />
+      <created>1748098990677</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1748098990677</updated>
+    </task>
+    <task id="LOCAL-00020" summary="fix: chart by country">
+      <option name="closed" value="true" />
+      <created>1748104305777</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1748104305777</updated>
+    </task>
+    <task id="LOCAL-00021" summary="fix: back buttons">
+      <option name="closed" value="true" />
+      <created>1748105261304</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1748105261304</updated>
+    </task>
+    <task id="LOCAL-00022" summary="feat: responsive login">
+      <option name="closed" value="true" />
+      <created>1748106589967</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1748106589967</updated>
+    </task>
+    <option name="localTasksCounter" value="23" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -504,11 +573,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="feat: edit and delete songs" />
-    <MESSAGE value="fix: direct login while token invalid" />
-    <MESSAGE value="fix: role/control to edit and delete songs" />
-    <MESSAGE value="migrate feat/search to feat/library-and-playerxml" />
-    <MESSAGE value="fix: resolve media player pcmWrite bug because of duplicate declaration in activity_main.xml" />
     <MESSAGE value="feat: added Song Detail and integrated to mini player&#10;chore: add verbose printing for future debugging&#10;fix: spacing for mini player from navbar" />
     <MESSAGE value="fix: fixed bug on play pause button, fixed bug on duration seeding to ms instead of seconds" />
     <MESSAGE value="merge feat/profile" />
@@ -529,7 +593,12 @@
     <MESSAGE value="feat: minor design fix" />
     <MESSAGE value="fix: liked songs bug" />
     <MESSAGE value="feat: init analytics" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat: init analytics" />
+    <MESSAGE value="feat: edit profile maps" />
+    <MESSAGE value="feat: export to pdf" />
+    <MESSAGE value="fix: chart by country" />
+    <MESSAGE value="fix: back buttons" />
+    <MESSAGE value="feat: responsive login" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat: responsive login" />
   </component>
   <component name="play_dynamic_filters_status">
     <option name="appIdToCheckInfo">

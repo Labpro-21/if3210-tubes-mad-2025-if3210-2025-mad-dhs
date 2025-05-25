@@ -101,17 +101,6 @@
                 app:layout_constraintTop_toBottomOf="@+id/txtProfileTitle"
                 tools:src="@drawable/profile" />
 
-            <ImageButton
-                android:id="@+id/btnEditPhoto"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:background="@drawable/circle_edit_button"
-                android:padding="6dp"
-                android:contentDescription="@string/circle_edit_button"
-                android:src="@drawable/ic_edit"
-                app:layout_constraintBottom_toBottomOf="@+id/imgProfile"
-                app:layout_constraintEnd_toEndOf="@+id/imgProfile" />
-
             <TextView
                 android:id="@+id/txtUsername"
                 android:layout_width="wrap_content"
