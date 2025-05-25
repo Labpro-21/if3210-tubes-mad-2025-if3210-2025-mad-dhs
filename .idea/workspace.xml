@@ -15,6 +15,11 @@
           <theme>@style/Theme.Purrytify</theme>
         </config>
       </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/activity_recommendation_detail.xml">
+        <config>
+          <theme>@style/Theme.Purrytify</theme>
+        </config>
+      </layout>
       <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/fragment_add_song_bottom_sheet.xml">
         <config>
           <theme>@style/Theme.Purrytify</theme>
@@ -71,43 +76,172 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fb2d9b52-b320-4578-a27c-b77d399ccfa2" name="Changes" comment="fix: update style">
-      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/local/LikedSongDao.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/local/UserProfileDao.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/model/LikedSong.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/player/NowPlayingViewModelFactory.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/utils/SeedingUtils.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/utils/TokenUtils.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_heart_filled.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/raw/monokrom_audio.mp3" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/raw/monokrom_cover.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/raw/tak_ingin_pisah_lagi_audio.mp3" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/raw/tak_ingin_pisah_lagi_cover.png" afterDir="false" />
+    <list default="true" id="fb2d9b52-b320-4578-a27c-b77d399ccfa2" name="Changes" comment="merge">
+      <change afterPath="$PROJECT_DIR$/.idea/deviceManager.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_20_05_25_11_30_[Changes]/shelved.patch" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_20_05_25_11_30__Changes_.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_25_05_25_08_04_[Changes]/shelved.patch" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_25_05_25_08_04_[Changes]1/shelved.patch" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_25_05_25_08_04__Changes_.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_25_05_25_09_26_[Changes]/shelved.patch" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_25_05_25_09_26__Changes_.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_25_05_25_09_37_[Changes]/shelved.patch" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_25_05_25_09_37__Changes_.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app.db" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/google-services.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/local/AnalyticsDao.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/local/AudioDevice.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/model/Analytics.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/model/ChartItem.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/model/OnlineSong.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/model/ProfileUpdateRequest.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/model/RawSong.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/model/RecommendationItem.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/repository/AnalyticsRepository.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/repository/ChartRepository.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/analytics/AnalyticsAdapter.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/analytics/AnalyticsExportService.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/analytics/MonthDetailActivity.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/analytics/SoundCapsuleActivity.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/analytics/SoundCapsuleViewModel.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/analytics/TimeListenedDetailActivity.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/analytics/TopArtistsActivity.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/analytics/TopSongsActivity.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/chart/ChartAdapter.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/chart/ChartViewModel.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/chart/ChartViewModelFactory.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/chart/OnlineSongListAdapter.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/chart/TopChartDetailFragment.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/home/RecommendationAdapter.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/player/AudioDeviceAdapter.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/player/AudioDeviceBottomSheet.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/player/AudioRoutingViewModel.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/player/NowPlayingManager.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/profile/EditProfileActivity.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/profile/MapsActivity.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/qr/ScanQRActivity.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/recommendation/RecommendationDetailActivity.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/recommendation/RecommendationSongAdapter.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/utils/AudioRoutingManager.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/utils/DownloadUtils.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/utils/FileUtil.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/utils/MusicNotificationReceiver.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/utils/MusicNotificationService.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/utils/PermissionManager.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/utils/SongUtils.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/bg_circle_gray.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/bg_circle_green.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/bottom_sheet_background.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/circle_button_background.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/cov_daily_mix_1.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/cov_discover_weekly.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/cov_liked_mix.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/cov_on_repeat.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/cov_playlist_around.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/cov_playlist_global.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_analytics.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_arrow_back.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_arrow_right.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_audio_device_unknown.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_chart.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_check_circle.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_download.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_downloaded.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_export.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_headphones_bluetooth.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_headphones_wired.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_music_note.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_phone_speaker.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_qr_scan.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_refresh.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_share.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_speaker_bluetooth.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_usb_audio.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/rounded_corner_12dp.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/rounded_corner_background.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/top_50_country_cover.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/top_50_global_cover.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/layout-land/activity_edit_profile.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/layout-land/activity_login.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/layout-land/activity_main.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/layout-land/activity_maps.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/layout-land/activity_month_detail.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/layout-land/activity_recommendation_detail.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/layout-land/activity_sound_capsule.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/layout-land/activity_time_listened_detail.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/layout-land/activity_top_artists.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/layout-land/activity_top_songs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/layout-land/fragment_add_song_bottom_sheet.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/layout-land/fragment_home.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/layout-land/fragment_profile.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/layout-land/fragment_song_detail.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/layout-land/fragment_top_chart_detail.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/layout/activity_edit_profile.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/layout/activity_maps.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/layout/activity_month_detail.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/layout/activity_recommendation_detail.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/layout/activity_sound_capsule.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/layout/activity_time_listened_detail.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/layout/activity_top_artists.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/layout/activity_top_songs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/layout/bottom_sheet_audio_device.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/layout/fragment_top_chart_detail.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/layout/fragment_trending_songs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/layout/item_audio_device.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/layout/item_chart_card.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/layout/item_recommendation.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/layout/item_sound_capsule_month.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/layout/item_top_artist.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/layout/item_top_song.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/menu/song_options_menu.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/xml/file_paths.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/assetWizardSettings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/assetWizardSettings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/deploymentTargetSelector.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/navEditor.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/navEditor.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/app/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/app/build.gradle.kts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/MainActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/MainActivity.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/PurrytifyApplication.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/PurrytifyApplication.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/local/AppDatabase.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/local/AppDatabase.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/model/ProfileData.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/model/ProfileData.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/repository/AuthRepository.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/repository/AuthRepository.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/local/LikedSongDao.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/local/LikedSongDao.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/local/SongDao.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/local/SongDao.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/local/UserProfileDao.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/local/UserProfileDao.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/model/Song.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/model/Song.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/remote/ApiService.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/remote/ApiService.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/repository/ProfileRepository.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/repository/ProfileRepository.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/repository/SongRepository.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/repository/SongRepository.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/auth/LoginActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/auth/LoginActivity.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/detail/SongDetailFragment.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/detail/SongDetailFragment.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/home/HomeFragment.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/home/HomeFragment.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/library/AddSongBottomSheetFragment.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/library/AddSongBottomSheetFragment.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/library/EditSongBottomSheetFragment.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/library/EditSongBottomSheetFragment.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/library/LibraryFragment.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/library/LibraryFragment.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/library/SongListAdapter.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/library/SongListAdapter.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/library/SongViewModel.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/library/SongViewModel.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/library/SongViewModelFactory.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/library/SongViewModelFactory.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/player/MiniPlayerFragment.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/player/MiniPlayerFragment.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/player/NowPlayingViewModel.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/player/NowPlayingViewModel.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/player/NowPlayingViewModelFactory.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/player/NowPlayingViewModelFactory.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/player/PlayerController.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/player/PlayerController.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/profile/ProfileFragment.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/profile/ProfileFragment.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/profile/ProfileViewModel.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/profile/ProfileViewModel.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/profile/ProfileViewModelFactory.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/profile/ProfileViewModelFactory.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/utils/SessionManager.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/utils/SessionManager.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/fragment_mini_player.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/fragment_mini_player.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/utils/AudioMetadata.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/utils/AudioMetadata.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/utils/AudioUtil.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/utils/AudioUtil.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/utils/TokenExpirationService.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/utils/TokenExpirationService.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/activity_main.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/activity_main.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/fragment_home.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/fragment_home.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/fragment_profile.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/fragment_profile.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/fragment_song_detail.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/fragment_song_detail.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/item_song_card.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/item_song_card.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/item_song_list.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/item_song_list.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/navigation/mobile_navigation.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/navigation/mobile_navigation.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/values/colors.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/values/colors.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/res/values/strings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/values/strings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradle/libs.versions.toml" beforeDir="false" afterPath="$PROJECT_DIR$/gradle/libs.versions.toml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/settings.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/settings.gradle.kts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -155,6 +289,11 @@
     </option>
   </component>
   <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="feat/rec-tomini" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="GitHubPullRequestSearchHistory">{
@@ -162,13 +301,13 @@
     &quot;state&quot;: &quot;OPEN&quot;,
     &quot;assignee&quot;: &quot;HenryofSkalitz1202&quot;
   }
-}</component>
+}}</component>
   <component name="GithubPullRequestsUISettings">{
-  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;selectedUrlAndAccountId&quot;: {
     &quot;url&quot;: &quot;https://github.com/Labpro-21/if3210-tubes-mad-2025-if3210-2025-mad-dhs.git&quot;,
     &quot;accountId&quot;: &quot;7fc37d1c-ed82-4f3d-8fd0-e1abf17a0517&quot;
-  }
-}</component>
+    }
+    }</component>
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$USER_HOME$/AppData/Local/Google/AndroidStudio2024.3/device-explorer/Medium Phone API 36/_/data/data/com.tubes.purry/shared_prefs/purrytify_encrypted_prefs.xml" root0="SKIP_INSPECTION" />
   </component>
@@ -195,7 +334,7 @@
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
     "com.google.services.firebase.aqiPopupShown": "true",
-    "git-widget-placeholder": "Merging feat/library-and-playerxml",
+    "git-widget-placeholder": "Merging main",
     "ignore.virus.scanning.warn.message": "true",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "D:/College/Semester 6/Mobile/Tubes1/if3210-tubes-mad-2025-if3210-2025-mad-dhs/app/src/main/java/com/tubes/purry/data/model/Song.kt",
@@ -206,13 +345,26 @@
   }
 }]]></component>
   <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/app/src/main/res/layout-land" />
+      <recent name="$PROJECT_DIR$/app/src/main/res/layout" />
+      <recent name="$PROJECT_DIR$/app/src/main/res" />
+      <recent name="$PROJECT_DIR$/app/src/main/res/drawable" />
+      <recent name="D:\College\Semester 6\Mobile\Tugas Besar 1\app\src\main\res\layout-land" />
+      <recent name="D:\College\Semester 6\Mobile\Tugas Besar 1\app\src\main\res\drawable" />
+      <recent name="D:\College\Semester 6\Mobile\Tugas Besar 1\app" />
+    </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/app/src/main/res/layout-land" />
+      <recent name="D:\College\Semester 6\Mobile\Tugas Besar 1\app\src\main\res\drawable" />
+      <recent name="D:\College\Semester 6\Mobile\Tugas Besar 1\app\src\main\java\com\tubes\purry\ui\chart" />
       <recent name="C:\Users\edarr\Downloads\if3210-tubes-mad-2025-if3210-2025-mad-dhs\app\src\main\res\drawable" />
     </key>
     <key name="android.template.854076717">
       <recent name="com.tubes.purry" />
     </key>
     <key name="MoveKotlinTopLevelDeclarationsDialog.RECENTS_KEY">
+      <recent name="com.tubes.purry.ui.chart" />
       <recent name="com.tubes.purry.ui.detail" />
       <recent name="com.tubes.purry.ui" />
     </key>
@@ -431,14 +583,15 @@
     <MESSAGE value="fix: styling" />
     <MESSAGE value="refactor: unneeded files and styling" />
     <MESSAGE value="fix: update style" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix: update style" />
+    <MESSAGE value="merge" />
+    <option name="LAST_COMMIT_MESSAGE" value="merge" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="kotlin-function">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/player/NowPlayingViewModel.kt</url>
-          <line>8</line>
+          <line>15</line>
           <properties class="com.tubes.purry.ui.player.NowPlayingViewModel">
             <option name="EMULATED" value="true" />
             <option name="WATCH_EXIT" value="false" />
@@ -447,7 +600,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="kotlin-line">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/local/AppDatabase.kt</url>
-          <line>78</line>
+          <line>80</line>
           <option name="timeStamp" value="2" />
         </line-breakpoint>
       </breakpoints>
@@ -458,12 +611,12 @@
       <map>
         <entry key="com.tubes.purry">
           <value>
-            <CheckInfo lastCheckTimestamp="1744472887622" />
+            <CheckInfo lastCheckTimestamp="1748193056606" />
           </value>
         </entry>
         <entry key="com.tubes.purry.test">
           <value>
-            <CheckInfo lastCheckTimestamp="1744472887702" />
+            <CheckInfo lastCheckTimestamp="1748193056668" />
           </value>
         </entry>
       </map>

@@ -12,7 +12,6 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -23,6 +22,7 @@ import com.tubes.purry.ui.player.MiniPlayerFragment
 import com.tubes.purry.ui.player.NowPlayingViewModel
 import com.tubes.purry.utils.SessionManager
 import androidx.core.graphics.toColorInt
+import com.tubes.purry.PurrytifyApplication
 
 class LibraryFragment : Fragment() {
 
@@ -35,7 +35,6 @@ class LibraryFragment : Fragment() {
     }
     private lateinit var nowPlayingViewModel: NowPlayingViewModel
     private lateinit var sessionManager: SessionManager
-//    private var currentUserId: Int? = null
     private var allSongs: List<Song> = emptyList()
     private var likedSongs: List<Song> = emptyList()
 
@@ -49,6 +48,35 @@ class LibraryFragment : Fragment() {
     ): View {
         _binding = FragmentLibraryBinding.inflate(inflater, container, false)
         return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        nowPlayingViewModel = (requireActivity().application as PurrytifyApplication).nowPlayingViewModel
+        sessionManager = SessionManager(requireContext())
+
+        setupRecyclerView()
+        setupSearchBar()
+        setupFilterButtons()
+        observeSongs()
+
+        val userId = sessionManager.getUserId()
+        if (userId != null) {
+            observeLikedSongs(userId)
+        }
+
+        nowPlayingViewModel.currSong.observe(viewLifecycleOwner) {
+            applyFilters()
+        }
+        nowPlayingViewModel.isLiked.observe(viewLifecycleOwner) {
+            applyFilters()
+        }
+
+        enableSwipeToAddToQueue(binding.rvLibrarySongs, songListAdapter, nowPlayingViewModel)
+
+        binding.btnAddSong.setOnClickListener {
+            showAddSongBottomSheet()
+        }
     }
 
     private fun setupRecyclerView() {
@@ -65,7 +93,7 @@ class LibraryFragment : Fragment() {
     }
 
     private fun observeSongs() {
-        viewModel.newSongs.observe(viewLifecycleOwner) { songs ->
+        viewModel.librarySongs.observe(viewLifecycleOwner) { songs ->
             allSongs = songs
             applyFilters()
         }
@@ -78,46 +106,34 @@ class LibraryFragment : Fragment() {
         }
     }
 
-
     private fun setupSearchBar() {
         binding.searchBarLibrary.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-                // Not needed
-            }
-
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 currentSearchQuery = s.toString()
                 applyFilters()
             }
-
             override fun afterTextChanged(s: Editable?) {}
         })
 
-        // Clear search button
         binding.btnClearSearch.setOnClickListener {
             binding.searchBarLibrary.text?.clear()
             binding.btnClearSearch.visibility = View.GONE
         }
 
-        // Only show clear button when search has text
         binding.searchBarLibrary.setOnFocusChangeListener { _, hasFocus ->
-            if (hasFocus && binding.searchBarLibrary.text?.isNotEmpty() == true) {
-                binding.btnClearSearch.visibility = View.VISIBLE
-            } else if (!hasFocus && binding.searchBarLibrary.text?.isEmpty() == true) {
-                binding.btnClearSearch.visibility = View.GONE
-            }
+            binding.btnClearSearch.visibility =
+                if (hasFocus && binding.searchBarLibrary.text?.isNotEmpty() == true) View.VISIBLE else View.GONE
         }
     }
 
     private fun setupFilterButtons() {
-        // All songs button
         binding.btnAll.setOnClickListener {
             isShowingLikedOnly = false
             updateButtonAppearance()
             applyFilters()
         }
 
-        // liked songs button
         binding.btnLiked.setOnClickListener {
             isShowingLikedOnly = true
             updateButtonAppearance()
@@ -128,7 +144,6 @@ class LibraryFragment : Fragment() {
     }
 
     private fun updateButtonAppearance() {
-        // Update the background color of the buttons based on selected state
         if (isShowingLikedOnly) {
             binding.btnAll.backgroundTintList = requireContext().getColorStateList(R.color.dark_gray)
             binding.btnLiked.backgroundTintList = requireContext().getColorStateList(R.color.green)
@@ -140,45 +155,25 @@ class LibraryFragment : Fragment() {
 
     private fun applyFilters() {
         val searchText = currentSearchQuery.trim().lowercase()
-
         val baseList = if (isShowingLikedOnly) likedSongs else allSongs
-        var filteredList = baseList
-
-        // apply search filter if text exists
-        if (searchText.isNotEmpty()) {
-            filteredList = filteredList.filter { song ->
-                song.title.lowercase().contains(searchText) ||
-                        song.artist.lowercase().contains(searchText)
-            }
-
+        val filteredList = if (searchText.isNotEmpty()) {
             binding.btnClearSearch.visibility = View.VISIBLE
+            baseList.filter { it.title.lowercase().contains(searchText) || it.artist.lowercase().contains(searchText) }
         } else {
             binding.btnClearSearch.visibility = View.GONE
+            baseList
         }
-
-        // Update the adapter and empty state
         songListAdapter.submitList(filteredList)
         updateEmptyState(filteredList)
     }
 
     private fun updateEmptyState(songs: List<Song>) {
-        if (songs.isEmpty()) {
-            binding.emptyLibraryState.visibility = View.VISIBLE
-
-            // Different message depending on current state
-            when {
-                currentSearchQuery.isNotEmpty() -> {
-                    binding.textEmptyLibrary.text = getString(R.string.no_search_results)
-                }
-                isShowingLikedOnly -> {
-                    binding.textEmptyLibrary.text = getString(R.string.no_liked_songs)
-                }
-                else -> {
-                    binding.textEmptyLibrary.text = getString(R.string.empty_library)
-                }
-            }
-        } else {
-            binding.emptyLibraryState.visibility = View.GONE
+        binding.emptyLibraryState.visibility = if (songs.isEmpty()) View.VISIBLE else View.GONE
+        binding.textEmptyLibrary.text = when {
+            songs.isNotEmpty() -> ""
+            currentSearchQuery.isNotEmpty() -> getString(R.string.no_search_results)
+            isShowingLikedOnly -> getString(R.string.no_liked_songs)
+            else -> getString(R.string.empty_library)
         }
     }
 
@@ -186,22 +181,6 @@ class LibraryFragment : Fragment() {
         nowPlayingViewModel.setQueueFromClickedSong(song, allSongs, requireContext())
         nowPlayingViewModel.playSong(song, requireContext())
         viewModel.markAsPlayed(song)
-
-        val fragmentManager = requireActivity().supportFragmentManager
-        val existingFragment = fragmentManager.findFragmentById(R.id.miniPlayerContainer)
-
-        if (existingFragment == null) {
-            fragmentManager.beginTransaction()
-                .replace(R.id.miniPlayerContainer, MiniPlayerFragment())
-                .commit()
-        }
-
-        val container = requireActivity().findViewById<FrameLayout>(R.id.miniPlayerContainer)
-        if (container.visibility != View.VISIBLE) {
-            container.alpha = 0f
-            container.visibility = View.VISIBLE
-            container.animate().alpha(1f).setDuration(250).start()
-        }
     }
 
     private fun showAddSongBottomSheet() {
@@ -224,28 +203,6 @@ class LibraryFragment : Fragment() {
             }
             .setNegativeButton("No", null)
             .show()
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        nowPlayingViewModel = ViewModelProvider(requireActivity())[NowPlayingViewModel::class.java]
-        sessionManager = SessionManager(requireContext())
-
-        setupRecyclerView()
-        setupSearchBar()
-        setupFilterButtons()
-        observeSongs()
-
-        val userId = sessionManager.getUserId()
-        if (userId != null) {
-            observeLikedSongs(userId)
-        }
-
-        enableSwipeToAddToQueue(binding.rvLibrarySongs, songListAdapter, nowPlayingViewModel)
-
-        binding.btnAddSong.setOnClickListener {
-            showAddSongBottomSheet()
-        }
     }
 
     private fun enableSwipeToAddToQueue(
@@ -293,7 +250,6 @@ class LibraryFragment : Fragment() {
         })
         itemTouchHelper.attachToRecyclerView(recyclerView)
     }
-
 
     override fun onDestroyView() {
         super.onDestroyView()

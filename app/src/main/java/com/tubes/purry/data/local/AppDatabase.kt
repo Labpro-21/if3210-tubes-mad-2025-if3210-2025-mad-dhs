@@ -14,12 +14,14 @@ import com.tubes.purry.R
 import com.tubes.purry.R.raw.terlintas
 import com.tubes.purry.data.model.LikedSong
 import com.tubes.purry.data.model.ProfileData
+import com.tubes.purry.data.model.ListeningSession
 
-@Database(entities = [Song::class, LikedSong::class, ProfileData::class], version = 2)
+@Database(entities = [Song::class, LikedSong::class, ProfileData::class, ListeningSession::class], version = 8)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun songDao(): SongDao
     abstract fun userProfileDao(): UserProfileDao
     abstract fun LikedSongDao(): LikedSongDao
+    abstract fun analyticsDao(): AnalyticsDao
 
     companion object {
         @Volatile private var INSTANCE: AppDatabase? = null
@@ -68,54 +70,57 @@ abstract class AppDatabase : RoomDatabase() {
             """.trimIndent())
 
             CoroutineScope(Dispatchers.IO).launch {
-                INSTANCE?.songDao()?.insertAll(predefinedSongs())
+//                INSTANCE?.songDao()?.insertAll(predefinedSongs())
                 Log.d("AppDatabase", "Seeding done.")
             }
         }
 
-        private fun predefinedSongs(): List<Song> = listOf(
-            Song(
-                id = "1",
-                title = "Katakan Saja",
-                artist = "Adikara",
-                coverResId = R.drawable.katakan_saja,
-                coverPath = null,
-                filePath = null,
-                resId = R.raw.katakan_saja,
-                duration = 239000,
-                isLiked = false,
-                isLocal = true,
-                lastPlayedAt = 0L,
-                uploadedBy = -1
-            ),
-            Song(
-                id = "2",
-                title = "Primadona",
-                artist = "Adikara",
-                coverResId = R.drawable.primadona,
-                coverPath = null,
-                filePath = null,
-                resId = R.raw.primadona,
-                duration = 247000,
-                isLiked = false,
-                isLocal = true,
-                lastPlayedAt = 0L,
-                uploadedBy = -1
-            ),
-            Song(
-                id = "3",
-                title = "Terlintas",
-                artist = "Bernadya",
-                coverResId = R.drawable.terlintas,
-                coverPath = null,
-                filePath = null,
-                resId = terlintas,
-                duration = 235000,
-                isLiked = false,
-                isLocal = true,
-                lastPlayedAt = 0L,
-                uploadedBy = -1
-            )
-        )
+//        private fun predefinedSongs(): List<Song> = listOf(
+//            Song(
+//                id = "1",
+//                serverId = null,
+//                title = "Katakan Saja",
+//                artist = "Adikara",
+//                coverResId = R.drawable.katakan_saja,
+//                coverPath = null,
+//                filePath = null,
+//                resId = R.raw.katakan_saja,
+//                duration = 239000,
+//                isLiked = false,
+//                isLocal = true,
+//                lastPlayedAt = 0L,
+//                uploadedBy = -1
+//            ),
+//            Song(
+//                id = "2",
+//                serverId = null,
+//                title = "Primadona",
+//                artist = "Adikara",
+//                coverResId = R.drawable.primadona,
+//                coverPath = null,
+//                filePath = null,
+//                resId = R.raw.primadona,
+//                duration = 247000,
+//                isLiked = false,
+//                isLocal = true,
+//                lastPlayedAt = 0L,
+//                uploadedBy = -1
+//            ),
+//            Song(
+//                id = "3",
+//                serverId = null,
+//                title = "Terlintas",
+//                artist = "Bernadya",
+//                coverResId = R.drawable.terlintas,
+//                coverPath = null,
+//                filePath = null,
+//                resId = terlintas,
+//                duration = 235000,
+//                isLiked = false,
+//                isLocal = true,
+//                lastPlayedAt = 0L,
+//                uploadedBy = -1
+//            )
+//        )
     }
 }

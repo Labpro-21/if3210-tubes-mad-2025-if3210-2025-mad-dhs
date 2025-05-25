@@ -11,6 +11,7 @@ import android.widget.Toast
 import com.tubes.purry.data.model.RefreshTokenRequest
 import com.tubes.purry.data.remote.ApiClient
 import com.tubes.purry.ui.auth.LoginActivity
+import com.tubes.purry.ui.player.PlayerController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -20,7 +21,7 @@ import java.util.TimerTask
 class TokenExpirationService : Service() {
 
     private val timer = Timer()
-    private val verificationInterval = 60000L // Check every 1 minute
+    private val verificationInterval = 30 * 60 * 1000L // Check every 1 minute
     private lateinit var sessionManager: SessionManager
 
     companion object {
@@ -71,6 +72,7 @@ class TokenExpirationService : Service() {
 
     private fun logoutAndRedirect() {
         sessionManager.clearTokens()
+        PlayerController.release()
 
         val intent = Intent(this, LoginActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -103,6 +105,7 @@ class TokenExpirationService : Service() {
                         sessionManager.saveRefreshToken(newRefreshToken)
                     }
                 } else {
+                    Log.e("TokenCheck", "Refresh gagal. response code: ${response.code()} body: ${response.errorBody()?.string()}")
                     logoutUser()
                 }
             } catch (e: Exception) {
@@ -114,6 +117,7 @@ class TokenExpirationService : Service() {
     private fun logoutUser() {
         // Clear tokens
         sessionManager.clearTokens()
+        PlayerController.release()
 
         // Redirect to login screen
         Handler(Looper.getMainLooper()).post {

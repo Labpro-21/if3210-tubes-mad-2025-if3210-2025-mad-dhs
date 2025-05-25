@@ -134,7 +134,7 @@
                                             <option name="values">
                                               <map>
                                                 <entry key="color" value="000000" />
-                                                <entry key="imagePath" value="D:\mobdevasser\album.png" />
+                                                <entry key="imagePath" value="D:\College\mobile\playlist_global_cover.png" />
                                               </map>
                                             </option>
                                           </PersistentState>
@@ -167,8 +167,8 @@
                                   <option name="values">
                                     <map>
                                       <entry key="assetType" value="IMAGE" />
-                                      <entry key="imageAsset" value="D:\mobdevasser\album.png" />
-                                      <entry key="outputName" value="ic_launcher_album" />
+                                      <entry key="imageAsset" value="D:\College\mobile\playlist_global_cover.png" />
+                                      <entry key="outputName" value="cov_top50_global" />
                                     </map>
                                   </option>
                                 </PersistentState>
@@ -319,8 +319,8 @@
                         <option name="values">
                           <map>
                             <entry key="assetSourceType" value="FILE" />
-                            <entry key="outputName" value="ic_more_vert" />
-                            <entry key="sourceFile" value="D:\College\mobile\More.svg" />
+                            <entry key="outputName" value="ic_qr_scan" />
+                            <entry key="sourceFile" value="D:\College\mobile\ic_qr_scan.svg" />
                           </map>
                         </option>
                       </PersistentState>

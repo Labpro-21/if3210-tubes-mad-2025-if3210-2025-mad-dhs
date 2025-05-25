@@ -1,15 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.tubes.purry">
+
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-        android:maxSdkVersion="28"/>
-    <!--    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />-->
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
-        android:maxSdkVersion="32"/>
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32"/>
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" tools:ignore="ScopedStorage" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
+    <uses-feature android:name="android.hardware.location.gps" android:required="false" />
+    <uses-feature android:name="android.hardware.location.network" android:required="false" />
+
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+
+    <!-- Bluetooth permissions for device detection and connection -->
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+
+    <!-- For Android 12+ (API 31+) -->
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
+
+    <!-- Audio recording permission (sometimes needed for audio routing) -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
+    <!-- Audio focus and media permissions -->
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+
+    <!-- Location permission for Bluetooth LE scanning (Android 6.0+) -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
+
+    <uses-feature
+        android:name="android.hardware.bluetooth"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.bluetooth_le"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.audio.output"
+        android:required="true" />
 
     <application
         android:name=".PurrytifyApplication"
@@ -21,6 +67,31 @@
         android:theme="@style/Theme.Purrytify"
         android:usesCleartextTraffic="true">
 
+<!--        <activity-->
+<!--            android:name=".MainActivity"-->
+<!--            android:exported="true"/>-->
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyBbWyagxLmhIKXZT7l80j-wTZYXdOISyWc" />
+
+        <activity android:name=".MainActivity" android:launchMode="singleTop" android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="purrytify" android:host="song" />
+            </intent-filter>
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="https"
+                    android:host="purrytify.page.link" />
+            </intent-filter>
+        </activity>
+
         <activity
             android:name=".ui.auth.LoginActivity"
             android:exported="true">
@@ -31,18 +102,85 @@
         </activity>
 
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.profile.EditProfileActivity"
             android:exported="false" />
 
-        <service android:name=".utils.TokenExpirationService" />
+        <activity
+            android:name=".ui.profile.MapsActivity"
+            android:exported="false" />
 
-<!--        <receiver-->
-<!--            android:name=".utils.NetworkStateReceiver"-->
-<!--            android:exported="false">-->
-<!--            <intent-filter>-->
-<!--                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />-->
-<!--            </intent-filter>-->
-<!--        </receiver>-->
+        <activity android:name=".ui.chart.TopChartDetailFragment"
+            android:exported="false"
+            tools:ignore="Instantiatable" />
+
+        <activity
+            android:name=".ui.recommendation.RecommendationDetailActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.analytics.SoundCapsuleActivity"
+            android:exported="false"
+             />
+
+        <activity
+            android:name=".ui.analytics.MonthDetailActivity"
+            android:exported="false"
+             />
+
+        <activity
+            android:name=".ui.analytics.TimeListenedDetailActivity"
+            android:exported="false"
+             />
+
+        <activity
+            android:name=".ui.analytics.TopSongsActivity"
+            android:exported="false"
+             />
+
+        <activity
+            android:name=".ui.analytics.TopArtistsActivity"
+            android:exported="false"
+             />
+
+        <activity android:name=".ui.qr.ScanQRActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="purrytify" android:host="scan" />
+            </intent-filter>
+        </activity>
+
+
+        <!-- File Provider for camera -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.tubes.purry.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
+        <service android:name=".utils.TokenExpirationService" />
+        <service
+            android:name=".utils.MusicNotificationService"
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback" />
+
+        <receiver
+            android:name=".utils.MusicNotificationReceiver"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.tubes.purry.ACTION_PLAY" />
+                <action android:name="com.tubes.purry.ACTION_PAUSE" />
+                <action android:name="com.tubes.purry.ACTION_NEXT" />
+                <action android:name="com.tubes.purry.ACTION_PREV" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

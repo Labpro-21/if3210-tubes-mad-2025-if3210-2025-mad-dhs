@@ -4,19 +4,15 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.tubes.purry.PurrytifyApplication
 import com.tubes.purry.R
 import com.tubes.purry.databinding.FragmentMiniPlayerBinding
-import androidx.core.net.toUri
-import androidx.lifecycle.lifecycleScope
-import com.tubes.purry.data.local.AppDatabase
-import com.tubes.purry.data.model.LikedSong
-import com.tubes.purry.ui.profile.ProfileViewModel
-import com.tubes.purry.ui.profile.ProfileViewModelFactory
-import kotlinx.coroutines.launch
+import android.util.Log
+import androidx.navigation.fragment.NavHostFragment
 
 class MiniPlayerFragment : Fragment() {
     private lateinit var viewModel: NowPlayingViewModel
@@ -33,40 +29,32 @@ class MiniPlayerFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val appContext = requireContext().applicationContext
-        val likedSongDao = AppDatabase.getDatabase(appContext).LikedSongDao()
-        val songDao = AppDatabase.getDatabase(appContext).songDao()
-
-        val profileViewModelFactory = ProfileViewModelFactory(requireContext())
-        val profileViewModel = ViewModelProvider(requireActivity(), profileViewModelFactory)[ProfileViewModel::class.java]
-
-        val factory = NowPlayingViewModelFactory(likedSongDao, songDao, profileViewModel)
-        viewModel = ViewModelProvider(requireActivity(), factory)[NowPlayingViewModel::class.java]
+        viewModel = (requireActivity().application as PurrytifyApplication).nowPlayingViewModel
 
         viewModel.currSong.observe(viewLifecycleOwner) { song ->
+            Log.d("MiniPlayerFragment", "currSong updated: ${song?.title}")
             if (song != null) {
+                binding.root.visibility = View.VISIBLE
                 binding.textTitle.text = song.title
                 binding.textArtist.text = song.artist
 
-                when {
-                    song.coverResId != null -> {
-                        Glide.with(binding.root)
-                            .load(song.coverResId)
-                            .diskCacheStrategy(DiskCacheStrategy.ALL)
-                            .into(binding.imageCover)
-                    }
-                    !song.coverPath.isNullOrEmpty() -> {
-                        Glide.with(binding.root)
-                            .load(song.coverPath.toUri())
-                            .diskCacheStrategy(DiskCacheStrategy.ALL)
-                            .into(binding.imageCover)
-                    }
-                    else -> {
-                        Glide.with(binding.root)
-                            .load(R.drawable.album_default) // 👈 fallback image
-                            .into(binding.imageCover)
-                    }
+                val image = when {
+                    song.coverResId != null -> song.coverResId
+                    !song.coverPath.isNullOrEmpty() -> song.coverPath.toUri()
+                    else -> R.drawable.album_default
                 }
+
+                Glide.with(binding.root)
+                    .load(image)
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .into(binding.imageCover)
+
+                // ✅ Update icon like sesuai properti di currSong juga
+                binding.btnFavorite.setImageResource(
+                    if (song.isLiked) R.drawable.ic_heart_filled else R.drawable.ic_heart_outline
+                )
+            } else {
+                binding.root.visibility = View.GONE
             }
         }
 
@@ -77,16 +65,13 @@ class MiniPlayerFragment : Fragment() {
         }
 
         viewModel.isLiked.observe(viewLifecycleOwner) { isLiked ->
-            if (isLiked) {
-                binding.btnFavorite.setImageResource(R.drawable.ic_heart_filled)
-            } else {
-                binding.btnFavorite.setImageResource(R.drawable.ic_heart_outline)
-            }
+            binding.btnFavorite.setImageResource(
+                if (isLiked) R.drawable.ic_heart_filled else R.drawable.ic_heart_outline
+            )
         }
 
         binding.btnFavorite.setOnClickListener {
-            val currentSong = viewModel.currSong.value
-            currentSong?.let { song ->
+            viewModel.currSong.value?.let { song ->
                 viewModel.toggleLike(song)
             }
         }
@@ -95,13 +80,43 @@ class MiniPlayerFragment : Fragment() {
             viewModel.togglePlayPause()
         }
 
+        var lastClickTime = 0L
         binding.root.setOnClickListener {
-            val navHostFragment = requireActivity()
-                .supportFragmentManager
-                .findFragmentById(R.id.nav_host_fragment) as? androidx.navigation.fragment.NavHostFragment
+            val now = System.currentTimeMillis()
+            if (now - lastClickTime < 800) return@setOnClickListener
+            lastClickTime = now
 
-            val navController = navHostFragment?.navController
-            navController?.navigate(R.id.songDetailFragment)
+            try {
+                val currentSong = viewModel.currSong.value
+                if (currentSong == null) {
+                    Log.w("MiniPlayerFragment", "No current song to show details for")
+                    return@setOnClickListener
+                }
+
+                val navHostFragment = requireActivity()
+                    .supportFragmentManager
+                    .findFragmentById(R.id.nav_host_fragment) as? NavHostFragment
+                val navController = navHostFragment?.navController
+
+                if (navController == null || navController.currentDestination?.id == R.id.songDetailFragment) {
+                    Log.e("MiniPlayerFragment", "NavController not ready or already in detail")
+                    return@setOnClickListener
+                }
+
+                val bundle = Bundle().apply {
+                    putString("songId", currentSong.id)
+                    putBoolean("isLocal", currentSong.isLocal)
+                    putString("id", currentSong.id)
+                    currentSong.serverId?.let { putInt("serverId", it) }
+                }
+
+                Log.d("MiniPlayerFragment", "Navigating to song detail for: ${currentSong.title}")
+                navController.navigate(R.id.songDetailFragment, bundle)
+
+            } catch (e: Exception) {
+                Log.e("MiniPlayerFragment", "Navigation error: ${e.message}", e)
+            }
         }
     }
+
 }

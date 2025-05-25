@@ -20,10 +20,13 @@ class SongViewModel(private val repository: SongRepository) : ViewModel() {
     fun deleteSong(song: Song) = viewModelScope.launch {
         repository.deleteSong(song)
     }
+    val allSongs: LiveData<List<Song>> = repository.getAllSongs().asLiveData()
 
     val newSongs: LiveData<List<Song>> = repository.getNewSongs().asLiveData()
 
     val recentlyPlayed: LiveData<List<Song>> = repository.getRecentlyPlayed().asLiveData()
+
+    val librarySongs: LiveData<List<Song>> = repository.getLibrarySongs().asLiveData()
 
     fun markAsPlayed(song: Song) = viewModelScope.launch {
         val updatedSong = song.copy(lastPlayedAt = System.currentTimeMillis())
@@ -31,6 +34,6 @@ class SongViewModel(private val repository: SongRepository) : ViewModel() {
     }
 
     fun getLikedSongsByUser(userId: Int): LiveData<List<Song>> {
-        return repository.getLikedSongsByUser(userId).asLiveData()
+        return repository.getLikedSongsByUser(userId)
     }
 }

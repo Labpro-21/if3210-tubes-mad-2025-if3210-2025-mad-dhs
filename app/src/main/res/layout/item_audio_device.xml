@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:padding="16dp"
+    android:background="?attr/selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true">
+
+    <!-- Device Icon -->
+    <ImageView
+        android:id="@+id/iv_device_icon"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:src="@drawable/ic_headphones_bluetooth"
+        app:tint="@android:color/white"
+        android:layout_marginEnd="16dp" />
+
+    <!-- Device Info -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tv_device_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Device Name"
+            android:textSize="16sp"
+            android:textColor="@android:color/white"
+            android:maxLines="1"
+            android:ellipsize="end" />
+
+        <TextView
+            android:id="@+id/tv_device_status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Connected"
+            android:textSize="14sp"
+            android:textColor="@android:color/darker_gray"
+            android:layout_marginTop="2dp" />
+
+    </LinearLayout>
+
+    <!-- Active Indicator -->
+    <ImageView
+        android:id="@+id/iv_active_indicator"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/ic_check_circle"
+        app:tint="@color/green"
+        android:visibility="gone" />
+
+</LinearLayout>

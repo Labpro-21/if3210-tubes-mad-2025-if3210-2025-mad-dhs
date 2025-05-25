@@ -8,7 +8,7 @@ import com.tubes.purry.data.model.ProfileData
 
 @Dao
 interface UserProfileDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertOrUpdate(profile: ProfileData)
 
     @Query("SELECT * FROM user_profile LIMIT 1")
@@ -16,4 +16,7 @@ interface UserProfileDao {
 
     @Query("DELETE FROM user_profile")
     suspend fun clearProfile()
+
+    @Query("SELECT * FROM user_profile WHERE id = :id LIMIT 1")
+    suspend fun getUserById(id: Int): ProfileData?
 }

@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@color/black">
+
+    <!-- Judul -->
+    <TextView
+        android:id="@+id/textTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginBottom="16dp"
+        android:fontFamily="sans-serif-medium"
+        android:text="@string/upload_song"
+        android:textColor="@android:color/white"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <!-- Konten utama dibagi horizontal -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <!-- Kiri: Gambar -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <ImageView
+                android:id="@+id/imgUpload"
+                android:layout_width="144dp"
+                android:layout_height="144dp"
+                android:layout_marginEnd="8dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/photo_upload"
+                android:contentDescription="@string/photo_upload"/>
+
+            <ImageView
+                android:id="@+id/btnUploadFile"
+                android:layout_width="144dp"
+                android:layout_height="144dp"
+                android:layout_marginStart="16dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/file_upload"
+                android:contentDescription="@string/file_upload"/>
+        </LinearLayout>
+
+        <!-- Kanan: Formulir -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:paddingStart="16dp"
+            android:paddingTop="8dp">
+
+            <!-- Label Title -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/title_add_edit_song"
+                android:textColor="@android:color/white"
+                android:textStyle="bold"
+                android:layout_marginTop="8dp"/>
+
+            <!-- Input Title -->
+            <EditText
+                android:id="@+id/inputTitle"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@drawable/add_song_edit_text_border"
+                android:hint="@string/song_title_add_edit_song"
+                android:padding="8dp"
+                android:textSize="12sp"
+                android:textColor="@android:color/white"
+                android:textColorHint="@color/white_gray"
+                android:layout_marginTop="4dp"/>
+
+            <!-- Label Artist -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/artist_add_edit_song"
+                android:textColor="@android:color/white"
+                android:textStyle="bold"
+                android:layout_marginTop="16dp"/>
+
+            <!-- Input Artist -->
+            <EditText
+                android:id="@+id/inputArtist"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@drawable/add_song_edit_text_border"
+                android:hint="@string/artist_name_add_edit_song"
+                android:padding="8dp"
+                android:textSize="12sp"
+                android:textColor="@android:color/white"
+                android:textColorHint="@color/white_gray"
+                android:layout_marginTop="4dp"/>
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Tombol Bawah -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="end"
+        android:layout_marginTop="16dp"
+        android:orientation="horizontal">
+
+        <Button
+            style="@style/CustomButton"
+            android:id="@+id/btnCancel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:backgroundTint="@color/gray"
+            android:fontFamily="sans-serif-medium"
+            android:text="@string/cancel"
+            android:textSize="16sp"
+            android:textAllCaps="false"
+            app:cornerRadius="48dp"/>
+
+        <Button
+            style="@style/CustomButton"
+            android:id="@+id/btnSave"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_weight="1"
+            android:background="@drawable/button_green_background"
+            android:fontFamily="sans-serif-medium"
+            android:text="@string/save"
+            android:textSize="16sp"
+            android:textAllCaps="false"
+            app:cornerRadius="48dp"/>
+    </LinearLayout>
+</LinearLayout>

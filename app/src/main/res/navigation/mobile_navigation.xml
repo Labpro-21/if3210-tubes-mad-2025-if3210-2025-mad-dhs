@@ -15,7 +15,11 @@
         android:id="@+id/navigation_home"
         android:name="com.tubes.purry.ui.home.HomeFragment"
         android:label="@string/title_home"
-        tools:layout="@layout/fragment_home" />
+        tools:layout="@layout/fragment_home">
+        <action
+            android:id="@+id/action_navigation_home_to_songDetailFragment"
+            app:destination="@id/songDetailFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/editSongFragment"
@@ -24,8 +28,9 @@
         tools:layout="@layout/fragment_add_song_bottom_sheet">
 
         <argument
-            android:name="song"
-            app:argType="com.tubes.purry.data.model.Song" />
+            android:name="id"
+            app:argType="string"
+            app:nullable="true" />
     </fragment>
 
     <fragment
@@ -50,13 +55,44 @@
     <fragment
         android:id="@+id/songDetailFragment"
         android:name="com.tubes.purry.ui.detail.SongDetailFragment"
-        android:label="Now Playing"
-        tools:layout="@layout/fragment_song_detail">
+        android:label="Song Detail">
+        <argument
+            android:name="songId"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="songIdInt"
+            app:argType="integer"
+            android:defaultValue="-1" />
+        <argument
+            android:name="isLocal"
+            app:argType="boolean"
+            android:defaultValue="false" />
+        <argument
+            android:name="serverId"
+            app:argType="integer"
+            android:defaultValue="-1" />
+        <argument
+            android:name="id"
+            app:argType="string"
+            app:nullable="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/topChartDetailFragment"
+        android:name="com.tubes.purry.ui.chart.TopChartDetailFragment"
+        android:label="Top Chart"
+        tools:layout="@layout/fragment_top_chart_detail">
+        <argument
+            android:name="isGlobal"
+            app:argType="boolean"
+            android:defaultValue="true" />
     </fragment>
 
     <action
         android:id="@+id/action_global_songDetailFragment"
         app:destination="@id/songDetailFragment"
         app:launchSingleTop="true" />
+
 
 </navigation>
