@@ -80,7 +80,7 @@ class TopChartDetailFragment : Fragment() {
             chartViewModel.fetchSongs(isGlobal, countryCode)
         }
 //        val chartTitle = if (isGlobal) "Top 50 GLOBAL" else "Top 50 INDONESIA"
-        val coverRes = if (isGlobal) R.drawable.top_50_global_cover else R.drawable.top_50_country_cover
+        val coverRes = if (isGlobal) R.drawable.cov_playlist_global else R.drawable.cov_playlist_around
         sessionManager = SessionManager(requireContext())
 
         binding.toolbar.setNavigationOnClickListener {

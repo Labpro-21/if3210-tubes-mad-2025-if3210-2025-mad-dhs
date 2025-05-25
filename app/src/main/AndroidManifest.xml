@@ -5,6 +5,8 @@
 
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
@@ -130,9 +132,14 @@
         </provider>
 
         <service android:name=".utils.TokenExpirationService" />
+        <service
+            android:name=".utils.MusicNotificationService"
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback" />
 
 
-<!--        <receiver-->
+
+        <!--        <receiver-->
 <!--            android:name=".utils.NetworkStateReceiver"-->
 <!--            android:exported="false">-->
 <!--            <intent-filter>-->

@@ -1,6 +1,7 @@
 package com.tubes.purry.ui.player
 
 import android.content.Context
+import android.content.Intent
 import android.content.res.AssetFileDescriptor
 import android.media.AudioAttributes
 import android.media.MediaPlayer
@@ -10,6 +11,7 @@ import com.tubes.purry.data.model.Song
 import android.util.Log
 import androidx.core.net.toUri
 import com.tubes.purry.ui.player.NowPlayingViewModel.RepeatMode
+import com.tubes.purry.utils.MusicNotificationService
 
 
 object PlayerController {
@@ -20,6 +22,10 @@ object PlayerController {
 
     var onCompletion: (() -> Unit)? = null
     var onPrepared: (() -> Unit)? = null
+
+    fun getCurrentSong(): Song? {
+        return currentlyPlaying
+    }
 
     fun play(song: Song, context: Context): Boolean {
         Log.d("PlayerController", "Masuk play(), judul: ${song.title}, url: ${song.filePath}")
@@ -59,6 +65,9 @@ object PlayerController {
                     isPrepared = true
                     start()
                     onPrepared?.invoke()
+
+                    val notifIntent = Intent(context, MusicNotificationService::class.java)
+                    context.startService(notifIntent)
                 }
 
                 setOnCompletionListener {

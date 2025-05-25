@@ -19,7 +19,6 @@ import com.google.firebase.dynamiclinks.ktx.dynamicLinks
 import com.google.firebase.ktx.Firebase
 import com.tubes.purry.data.local.AppDatabase
 import com.tubes.purry.databinding.ActivityMainBinding
-import com.tubes.purry.ui.home.HomeFragmentDirections
 import com.tubes.purry.ui.player.NowPlayingViewModel
 import com.tubes.purry.ui.player.NowPlayingViewModelFactory
 import com.tubes.purry.ui.profile.ProfileViewModel
@@ -27,6 +26,7 @@ import com.tubes.purry.ui.profile.ProfileViewModelFactory
 import com.tubes.purry.utils.NetworkStateReceiver
 import com.tubes.purry.utils.NetworkUtil
 import com.tubes.purry.utils.TokenExpirationService
+import com.tubes.purry.ui.player.NowPlayingManager
 
 class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListener {
 
@@ -115,6 +115,8 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
                 profileViewModel)
         )[NowPlayingViewModel::class.java]
 
+        NowPlayingManager.viewModel = nowPlayingViewModel
+
         Firebase.dynamicLinks
             .getDynamicLink(intent)
             .addOnSuccessListener { pendingDynamicLinkData ->
@@ -160,7 +162,6 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
                     putInt("songId", songId)
                 }
 
-                // ✅ Gunakan NavOptions agar tidak menumpuk fragment
                 val navOptions = androidx.navigation.NavOptions.Builder()
                     .setLaunchSingleTop(true)
                     .setPopUpTo(navController.graph.startDestinationId, false)
