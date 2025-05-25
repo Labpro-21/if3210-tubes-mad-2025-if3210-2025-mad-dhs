@@ -5,12 +5,14 @@ import android.os.Bundle
 import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.lifecycleScope
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
+import com.tubes.purry.R
 import com.tubes.purry.databinding.ActivityTimeListenedDetailBinding
 import com.tubes.purry.utils.SessionManager
 import kotlinx.coroutines.launch
@@ -31,6 +33,9 @@ class TimeListenedDetailActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityTimeListenedDetailBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        val toolbar = findViewById<Toolbar>(R.id.toolbar)
+        setSupportActionBar(toolbar)
 
         sessionManager = SessionManager(this)
         currentMonth = intent.getStringExtra("month") ?: getCurrentMonth()

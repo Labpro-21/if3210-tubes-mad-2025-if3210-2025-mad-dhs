@@ -95,7 +95,7 @@ class RecommendationDetailActivity : AppCompatActivity() {
         )
         val title = intent.getStringExtra("title") ?: "Recommendation"
         val description = intent.getStringExtra("description") ?: ""
-        val imageRes = intent.getIntExtra("image_res", R.drawable.cov_playlist_global)
+        val imageRes = intent.getIntExtra("image_res", R.drawable.cov_daily_mix_1)
 
         // Set UI
         binding.ivRecommendationCover.setImageResource(imageRes)
@@ -141,39 +141,54 @@ class RecommendationDetailActivity : AppCompatActivity() {
 
         if (userId != null) {
             db.LikedSongDao().getLikedSongsByUser(userId).asLiveData().observe(this) { likedSongs ->
-                lifecycleScope.launch {
-                    try {
-                        val onlineSongs = ApiClient.apiService.getTopSongsGlobal()
+                songViewModel.allSongs.observe(this) { allLocalSongs ->
+                    lifecycleScope.launch {
+                        try {
+                            val onlineSongs = ApiClient.apiService.getTopSongsGlobal()
 
-                        val similarOnlineSongs = mutableListOf<Song>()
+                            val similarSongs = mutableListOf<Song>()
 
-                        for (likedSong in likedSongs) {
-                            val matchingSongs = onlineSongs.filter { onlineSong ->
-                                val titleMatch = onlineSong.title.contains(likedSong.title, ignoreCase = true) ||
-                                        likedSong.title.contains(onlineSong.title, ignoreCase = true)
-                                val artistMatch = onlineSong.artist.contains(likedSong.artist, ignoreCase = true) ||
-                                        likedSong.artist.contains(onlineSong.artist, ignoreCase = true)
-                                titleMatch || artistMatch
+                            for (likedSong in likedSongs) {
+                                // Search in online songs
+                                val matchingOnlineSongs = onlineSongs.filter { onlineSong ->
+                                    val titleMatch = onlineSong.title.contains(likedSong.title, ignoreCase = true) ||
+                                            likedSong.title.contains(onlineSong.title, ignoreCase = true)
+                                    val artistMatch = onlineSong.artist.contains(likedSong.artist, ignoreCase = true) ||
+                                            likedSong.artist.contains(onlineSong.artist, ignoreCase = true)
+                                    titleMatch || artistMatch
+                                }
+
+                                // Search in local songs (exclude already liked songs)
+                                val likedSongIds = likedSongs.map { it.id }.toSet()
+                                val matchingLocalSongs = allLocalSongs.filter { localSong ->
+                                    localSong.id !in likedSongIds && (
+                                            (localSong.title.contains(likedSong.title, ignoreCase = true) ||
+                                                    likedSong.title.contains(localSong.title, ignoreCase = true)) ||
+                                                    (localSong.artist.contains(likedSong.artist, ignoreCase = true) ||
+                                                            likedSong.artist.contains(localSong.artist, ignoreCase = true))
+                                            )
+                                }
+
+                                similarSongs.addAll(matchingOnlineSongs.map { it.toTemporarySong() })
+                                similarSongs.addAll(matchingLocalSongs)
                             }
 
-                            similarOnlineSongs.addAll(matchingSongs.map { it.toTemporarySong() })
+                            val uniqueSimilarSongs = similarSongs.distinctBy { it.id }
+                            val mixedSongs = (likedSongs + uniqueSimilarSongs).distinctBy {
+                                "${it.title.lowercase()}-${it.artist.lowercase()}"
+                            }.take(25)
+
+                            currentSongs = mixedSongs
+                            adapter.submitList(mixedSongs)
+
+                            Log.d("RecommendationDetail",
+                                "Loaded ${likedSongs.size} liked songs + ${uniqueSimilarSongs.size} similar songs (online + local)")
+
+                        } catch (e: Exception) {
+                            Log.e("RecommendationDetail", "Error loading similar songs", e)
+                            currentSongs = likedSongs
+                            adapter.submitList(likedSongs)
                         }
-
-                        val uniqueSimilarSongs = similarOnlineSongs.distinctBy { it.id }
-                        val mixedSongs = (likedSongs + uniqueSimilarSongs).distinctBy {
-                            "${it.title.lowercase()}-${it.artist.lowercase()}"
-                        }.take(25)
-
-                        currentSongs = mixedSongs
-                        adapter.submitList(mixedSongs)
-
-                        Log.d("RecommendationDetail",
-                            "Loaded ${likedSongs.size} liked songs + ${uniqueSimilarSongs.size} similar online songs")
-
-                    } catch (e: Exception) {
-                        Log.e("RecommendationDetail", "Error loading similar online songs", e)
-                        currentSongs = likedSongs
-                        adapter.submitList(likedSongs)
                     }
                 }
             }

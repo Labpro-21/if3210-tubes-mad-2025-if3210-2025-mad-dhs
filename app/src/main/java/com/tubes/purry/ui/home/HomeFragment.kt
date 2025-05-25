@@ -221,8 +221,8 @@ class HomeFragment : Fragment() {
                 isGlobal = true
             ),
             ChartItem(
-                title = "Top 50 Indonesia",
-                description = "Most played in Indonesia",
+                title = "Top 50 Country",
+                description = "Most played in Your Country",
                 imageRes = R.drawable.cov_playlist_around,
                 isGlobal = false
             )

@@ -4,8 +4,10 @@ import android.os.Bundle
 import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.tubes.purry.R
 import com.tubes.purry.databinding.ActivityTopSongsBinding
 import com.tubes.purry.utils.SessionManager
 import kotlinx.coroutines.launch
@@ -27,6 +29,9 @@ class TopSongsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityTopSongsBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        val toolbar = findViewById<Toolbar>(R.id.toolbar)
+        setSupportActionBar(toolbar)
 
         sessionManager = SessionManager(this)
         currentMonth = intent.getStringExtra("month") ?: getCurrentMonth()
@@ -74,10 +79,9 @@ class TopSongsActivity : AppCompatActivity() {
                     showNoData()
                 } else {
                     // Update header
-                    binding.tvSummary.text = "You played ${analytics.totalSongsPlayed} different songs this month."
-
+                    binding.tvSummary.text = "You played ${analytics.totalSongsPlayed} different songs this month.\nHere are your Top 5 Songs"
                     // Update list
-                    adapter.submitList(topSongs)
+                    adapter.submitList(topSongs.take(5))
                     binding.contentLayout.visibility = View.VISIBLE
                     binding.tvNoData.visibility = View.GONE
                 }
