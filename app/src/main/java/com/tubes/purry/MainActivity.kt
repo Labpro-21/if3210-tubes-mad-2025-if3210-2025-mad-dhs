@@ -6,6 +6,7 @@ import android.net.ConnectivityManager
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
@@ -20,22 +21,13 @@ import com.tubes.purry.ui.profile.ProfileViewModelFactory
 import com.tubes.purry.utils.NetworkStateReceiver
 import com.tubes.purry.utils.NetworkUtil
 import com.tubes.purry.utils.TokenExpirationService
+import com.tubes.purry.utils.PermissionManager
 
 class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListener {
 
     private lateinit var binding: ActivityMainBinding
     private val networkStateReceiver = NetworkStateReceiver()
-
-//    private val permissionLauncher = registerForActivityResult(
-//        ActivityResultContracts.RequestMultiplePermissions()
-//    ) { permissions ->
-//        val granted = permissions.values.all { it }
-//        if (granted) {
-//            seedAssets(this)
-//        } else {
-//            Toast.makeText(this, "Permissions required to access media files.", Toast.LENGTH_LONG).show()
-//        }
-//    }
+    private val permissionManager = PermissionManager()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,6 +47,15 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
             supportFragmentManager.beginTransaction()
                 .replace(R.id.miniPlayerContainer, com.tubes.purry.ui.player.MiniPlayerFragment())
                 .commit()
+        }
+
+        // Request necessary permissions
+        if (!permissionManager.checkBluetoothPermissions(this)) {
+            permissionManager.requestBluetoothPermissions(this)
+        }
+
+        if (!permissionManager.checkAudioPermissions(this)) {
+            permissionManager.requestAudioPermissions(this)
         }
 
         // Observe destination changes to hide/show mini player
@@ -108,14 +109,36 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
                 }
             }
             .addOnFailureListener {
-                // Opsional: log error
+                // Optional: log error
             }
 
-
         handleIntentNavigation(intent)
+    }
 
-        // Trigger seeding
-        // checkPermissionsAndSeed()
+    // FIXED: Moved this method outside of onCreate()
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        permissionManager.handlePermissionResult(
+            requestCode,
+            grantResults,
+            onBluetoothGranted = {
+                Toast.makeText(this, "Bluetooth permissions granted", Toast.LENGTH_SHORT).show()
+            },
+            onBluetoothDenied = {
+                Toast.makeText(this, "Bluetooth permissions required for external audio devices", Toast.LENGTH_LONG).show()
+            },
+            onAudioGranted = {
+                Toast.makeText(this, "Audio permissions granted", Toast.LENGTH_SHORT).show()
+            },
+            onAudioDenied = {
+                Toast.makeText(this, "Audio permissions required for output control", Toast.LENGTH_LONG).show()
+            }
+        )
     }
 
     override fun onNewIntent(intent: Intent?) {
@@ -138,14 +161,12 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
         }
     }
 
-
     private fun handleDeepLink(data: Intent?) {
         val data: Uri? = intent?.data
         if (data != null && data.scheme == "purrytify" && data.host == "song") {
             val songId = data.lastPathSegment?.toIntOrNull()
             if (songId != null) {
                 val navController = findNavController(R.id.nav_host_fragment)
-
                 val bundle = Bundle().apply {
                     putInt("songId", songId)
                 }
@@ -153,7 +174,6 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
             }
         }
     }
-
 
     private fun handleIntentNavigation(intent: Intent?) {
         intent?.getStringExtra("navigateTo")?.let { destination ->
@@ -166,21 +186,6 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
             }
         }
     }
-
-//    private fun checkPermissionsAndSeed() {
-//        val permissionsToRequest = mutableListOf<String>().apply {
-//            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2) {
-//                add(Manifest.permission.READ_EXTERNAL_STORAGE)
-//            }
-//        }
-//
-//        if (permissionsToRequest.isEmpty() ||
-//            permissionsToRequest.all { ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED }) {
-//            seedAssets(this)
-//        } else {
-//            permissionLauncher.launch(permissionsToRequest.toTypedArray())
-//        }
-//    }
 
     override fun onNetworkAvailable() = runOnUiThread { hideNetworkErrorBanner() }
     override fun onNetworkUnavailable() = runOnUiThread { showNetworkErrorBanner() }

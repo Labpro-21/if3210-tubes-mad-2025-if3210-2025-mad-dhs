@@ -116,7 +116,6 @@ object PlayerController {
         }
     }
 
-
     fun pause() {
         if (isPlaying()) {
             mediaPlayer?.pause()
@@ -128,6 +127,23 @@ object PlayerController {
         if (!isPlaying() && isPrepared) {
             mediaPlayer?.start()
             Log.d("PlayerController", "Playback resumed")
+        }
+    }
+
+    // NEW: Added stop() method
+    fun stop() {
+        try {
+            if (mediaPlayer != null) {
+                if (isPlaying()) {
+                    mediaPlayer?.stop()
+                }
+                Log.d("PlayerController", "Playback stopped")
+            }
+            // Don't release here, just stop
+            isPrepared = false
+            isPreparing = false
+        } catch (e: Exception) {
+            Log.e("PlayerController", "Stop error: ${e.message}")
         }
     }
 
@@ -156,5 +172,10 @@ object PlayerController {
         if (isPrepared) {
             mediaPlayer?.seekTo(position)
         }
+    }
+
+    // NEW: Added getCurrentSong() method
+    fun getCurrentSong(): Song? {
+        return currentlyPlaying
     }
 }
