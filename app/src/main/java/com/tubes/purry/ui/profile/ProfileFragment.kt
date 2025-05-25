@@ -79,11 +79,6 @@ class ProfileFragment : Fragment() {
             navigateToEditProfile()
         }
 
-        // Set up edit photo button
-        binding.btnEditPhoto.setOnClickListener {
-            navigateToEditProfile()
-        }
-
         // ===== ADD SOUND CAPSULE BUTTON CLICK =====
         binding.cardSoundCapsule.setOnClickListener {
             openSoundCapsule()

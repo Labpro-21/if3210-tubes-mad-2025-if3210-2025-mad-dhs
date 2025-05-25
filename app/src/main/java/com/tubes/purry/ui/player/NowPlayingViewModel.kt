@@ -2,6 +2,10 @@ package com.tubes.purry.ui.player
 
 import android.app.Application
 import android.content.Context
+import android.content.Intent
+import android.media.AudioManager
+import android.media.AudioDeviceInfo
+import android.os.Build
 import androidx.lifecycle.*
 import com.tubes.purry.data.local.AppDatabase
 import com.tubes.purry.data.local.LikedSongDao
@@ -14,6 +18,8 @@ import android.os.Looper
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import com.tubes.purry.data.model.AudioDevice
 import com.tubes.purry.data.model.Song
 import com.tubes.purry.ui.profile.ProfileViewModel
 import com.tubes.purry.utils.SessionManager
@@ -55,6 +61,33 @@ class NowPlayingViewModel(
 
     private val _songDuration = MutableLiveData<Int>(0)
     val songDuration: LiveData<Int> = _songDuration
+
+    // Add AudioRoutingViewModel integration
+    private val audioRoutingViewModel = AudioRoutingViewModel(application)
+
+    init {
+        setupAudioRoutingIntegration()
+    }
+
+    private fun setupAudioRoutingIntegration() {
+        // Set up the callback for MediaPlayer restart
+        audioRoutingViewModel.onMediaPlayerRestartNeeded = { context, device ->
+            Log.d("NowPlayingViewModel", "🔄 Audio routing changed to: ${device.name}, restarting MediaPlayer")
+            restartMediaPlayerForAudioRouting(context)
+        }
+
+        // Observe active device changes
+        audioRoutingViewModel.activeDevice.observeForever { activeDevice ->
+            activeDevice?.let { device ->
+                Log.d("NowPlayingViewModel", "🎧 Active audio device: ${device.name}")
+                // You can update UI or perform other actions here
+            }
+        }
+    }
+
+    fun getAudioRoutingViewModel(): AudioRoutingViewModel {
+        return audioRoutingViewModel
+    }
 
     enum class RepeatMode { NONE, ONE, ALL }
 
@@ -249,7 +282,6 @@ class NowPlayingViewModel(
         }
     }
 
-    // ===== PERBAIKAN DURASI - PAUSE/RESUME METHODS =====
     private fun pauseSong() {
         PlayerController.pause()
         _isPlaying.value = false
@@ -419,7 +451,6 @@ class NowPlayingViewModel(
         }
     }
 
-    // ===== PERBAIKAN DURASI - CLEAR QUEUE DENGAN TRACKING =====
     fun clearQueue() {
         // ===== END ANALYTICS SESSION BEFORE CLEARING =====
         endCurrentAnalyticsSession()
@@ -459,13 +490,6 @@ class NowPlayingViewModel(
         }
     }
 
-    // Tambahkan method ini ke NowPlayingViewModel Anda, gantikan method yang ada
-
-    // ===== FIXED SONG FETCHING METHODS =====
-
-    /**
-     * Fetch song by UUID/String ID (untuk lagu lokal)
-     */
     fun fetchSongByUUID(uuid: String, context: Context) {
         Log.d("NowPlayingVM", "fetchSongByUUID called with: $uuid")
         viewModelScope.launch {
@@ -592,6 +616,109 @@ class NowPlayingViewModel(
         return "%d:%02d".format(minutes, seconds)
     }
 
+    fun restartMediaPlayerForAudioRouting(context: Context) {
+        val currentSong = _currSong.value
+        if (currentSong == null) {
+            Log.d("NowPlayingViewModel", "⚠️ No current song to restart")
+            return
+        }
+
+        Log.d("NowPlayingViewModel", "🔄 Restarting MediaPlayer for audio routing change")
+
+        // Save current playback state
+        val wasPlaying = _isPlaying.value == true
+        val currentPosition = if (PlayerController.isPlaying()) {
+            PlayerController.getCurrentPosition()
+        } else 0
+
+        Log.d("NowPlayingViewModel", "💾 Saved state - Position: $currentPosition, Playing: $wasPlaying")
+
+        try {
+            // Stop current playback gracefully
+            if (PlayerController.isPlaying()) {
+                PlayerController.pause()
+            }
+
+            // Small delay to ensure audio routing is stable
+            Handler(Looper.getMainLooper()).postDelayed({
+
+                Log.d("NowPlayingViewModel", "🎵 Restarting playback...")
+
+                // Restart playback
+                val success = PlayerController.play(currentSong, context)
+
+                if (success) {
+                    // Set up callback to restore state when MediaPlayer is ready
+                    PlayerController.onPrepared = {
+                        Log.d("NowPlayingViewModel", "🎵 MediaPlayer prepared, restoring state")
+
+                        // Restore position
+                        if (currentPosition > 0 && currentPosition < PlayerController.getDuration()) {
+                            PlayerController.seekTo(currentPosition)
+                            Log.d("NowPlayingViewModel", "⏭️ Restored position: $currentPosition")
+                        }
+
+                        // Restore play state
+                        if (wasPlaying) {
+                            PlayerController.resume()
+                            _isPlaying.postValue(true)
+                            Log.d("NowPlayingViewModel", "▶️ Resumed playback")
+                        } else {
+                            PlayerController.pause()
+                            _isPlaying.postValue(false)
+                            Log.d("NowPlayingViewModel", "⏸️ Kept paused state")
+                        }
+
+                        // Update duration if needed
+                        val duration = PlayerController.getDuration()
+                        if (duration > 0) {
+                            _currSong.postValue(_currSong.value?.copy(duration = duration))
+                        }
+
+                        // Notify audio routing that restart is complete
+                        audioRoutingViewModel.onMediaPlayerRestarted()
+                    }
+
+                    Log.d("NowPlayingViewModel", "✅ MediaPlayer restart initiated successfully")
+                } else {
+                    Log.e("NowPlayingViewModel", "❌ Failed to restart MediaPlayer")
+                    _isPlaying.postValue(false)
+                    _errorMessage.postValue("Failed to restart playback after audio routing change")
+                }
+
+            }, 300) // Increased delay for better stability
+
+        } catch (e: Exception) {
+            Log.e("NowPlayingViewModel", "❌ Error restarting MediaPlayer: ${e.message}")
+            _isPlaying.postValue(false)
+            _errorMessage.postValue("Error restarting playback: ${e.message}")
+        }
+    }
+
+    fun selectAudioDevice(device: AudioDevice): Boolean {
+        return audioRoutingViewModel.selectAudioDevice(device)
+    }
+
+    /**
+     * Get available audio devices
+     */
+    fun getAvailableAudioDevices(): LiveData<List<AudioDevice>> {
+        return audioRoutingViewModel.availableDevices
+    }
+
+    /**
+     * Get active audio device
+     */
+    fun getActiveAudioDevice(): LiveData<AudioDevice?> {
+        return audioRoutingViewModel.activeDevice
+    }
+
+    /**
+     * Auto-select best available audio device
+     */
+    fun autoSelectBestAudioDevice(): Boolean {
+        return audioRoutingViewModel.autoSelectBestDevice()
+    }
     override fun onCleared() {
         super.onCleared()
         stopPositionTracking()

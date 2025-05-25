@@ -30,11 +30,13 @@ import com.tubes.purry.utils.NetworkUtil
 import com.tubes.purry.utils.TokenExpirationService
 import com.tubes.purry.ui.player.NowPlayingManager
 import com.tubes.purry.ui.qr.ScanQRActivity
+import com.tubes.purry.utils.PermissionManager
 
 class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListener {
 
     private lateinit var binding: ActivityMainBinding
     private val networkStateReceiver = NetworkStateReceiver()
+    private val permissionManager = PermissionManager()
     private lateinit var nowPlayingViewModel: NowPlayingViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -59,6 +61,16 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
             .replace(R.id.miniPlayerContainer, MiniPlayerFragment())
             .commit()
 
+        // Request necessary permissions
+        if (!permissionManager.checkBluetoothPermissions(this)) {
+            permissionManager.requestBluetoothPermissions(this)
+        }
+
+        if (!permissionManager.checkAudioPermissions(this)) {
+            permissionManager.requestAudioPermissions(this)
+        }
+
+        // Observe destination changes to hide/show mini player
         val navView = findViewById<BottomNavigationView?>(R.id.navView)
         val navController = supportFragmentManager.findFragmentById(R.id.nav_host_fragment)
             ?.findNavController() ?: throw IllegalStateException("NavController not found")
@@ -104,9 +116,13 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
                     binding.root.post { handleDeepLink(deepLink) }
                 }
             }
+            .addOnFailureListener {
+                // Optional: log error
+            }
 
         handleIntentNavigation(intent)
         binding.root.post { handleDeepLink(intent?.data) }
+    }
 
         binding.menuHome?.setOnClickListener {
             val navController = findNavController(R.id.nav_host_fragment)
@@ -130,6 +146,30 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
             val intent = Intent(this, ScanQRActivity::class.java)
             startActivity(intent)
         }
+    // FIXED: Moved this method outside of onCreate()
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        permissionManager.handlePermissionResult(
+            requestCode,
+            grantResults,
+            onBluetoothGranted = {
+                Toast.makeText(this, "Bluetooth permissions granted", Toast.LENGTH_SHORT).show()
+            },
+            onBluetoothDenied = {
+                Toast.makeText(this, "Bluetooth permissions required for external audio devices", Toast.LENGTH_LONG).show()
+            },
+            onAudioGranted = {
+                Toast.makeText(this, "Audio permissions granted", Toast.LENGTH_SHORT).show()
+            },
+            onAudioDenied = {
+                Toast.makeText(this, "Audio permissions required for output control", Toast.LENGTH_LONG).show()
+            }
+        )
     }
 
     override fun onNewIntent(intent: Intent?) {

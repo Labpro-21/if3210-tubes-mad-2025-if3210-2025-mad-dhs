@@ -2,15 +2,18 @@ package com.tubes.purry.ui.analytics
 
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.lifecycleScope
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
+import com.tubes.purry.R
 import com.tubes.purry.databinding.ActivityTimeListenedDetailBinding
 import com.tubes.purry.utils.SessionManager
 import kotlinx.coroutines.launch
@@ -31,6 +34,9 @@ class TimeListenedDetailActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityTimeListenedDetailBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        val toolbar = findViewById<Toolbar>(R.id.toolbar)
+        setSupportActionBar(toolbar)
 
         sessionManager = SessionManager(this)
         currentMonth = intent.getStringExtra("month") ?: getCurrentMonth()
@@ -102,8 +108,16 @@ class TimeListenedDetailActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             try {
+                Log.d("TimeListened", "🔍 Loading time data for user $userId, month $currentMonth")
                 val analytics = viewModel.getMonthlyAnalytics(userId, currentMonth)
                 val dailyChart = viewModel.getDailyChart(userId, currentMonth)
+
+                Log.d("TimeListened", "📊 Analytics: ${analytics.totalMinutesListened} minutes")
+                Log.d("TimeListened", "📈 Daily chart data points: ${dailyChart.size}")
+
+                dailyChart.forEach { data ->
+                    Log.d("TimeListened", "Chart data: Day ${data.day} = ${data.minutes} minutes")
+                }
 
                 if (analytics.totalMinutesListened == 0L) {
                     showNoData()
@@ -113,6 +127,8 @@ class TimeListenedDetailActivity : AppCompatActivity() {
                     binding.tvNoData.visibility = View.GONE
                 }
             } catch (e: Exception) {
+                Log.e("TimeListened", "❌ Error loading time data: ${e.message}", e)
+                showError("Failed to load data: ${e.message}")
                 showError("Failed to load data: ${e.message}")
             } finally {
                 binding.progressBar.visibility = View.GONE
