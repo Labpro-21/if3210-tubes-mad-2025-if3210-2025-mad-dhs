@@ -59,15 +59,15 @@ class MonthDetailActivity : AppCompatActivity() {
             openTimeListenedDetail()
         }
 
-        binding.cardTopArtists.setOnClickListener {
+        binding.cardTopArtists?.setOnClickListener {
             openTopArtistsDetail()
         }
 
-        binding.cardTopSongs.setOnClickListener {
+        binding.cardTopSongs?.setOnClickListener {
             openTopSongsDetail()
         }
 
-        binding.btnExport.setOnClickListener {
+        binding.btnExport?.setOnClickListener {
             exportCurrentMonth()
         }
     }
@@ -106,64 +106,70 @@ class MonthDetailActivity : AppCompatActivity() {
 
         // Top artist
         if (analytics.topArtist != null) {
-            binding.tvTopArtist.text = analytics.topArtist
-            binding.tvTopArtistPlays.text = "${analytics.topArtistPlayCount} plays"
+            binding.tvTopArtist?.text = analytics.topArtist
+            binding.tvTopArtistPlays?.text = "${analytics.topArtistPlayCount} plays"
 
             if (analytics.topArtistCover != null) {
-                Glide.with(this)
-                    .load(analytics.topArtistCover)
-                    .placeholder(R.drawable.ic_music_note)
-                    .error(R.drawable.ic_music_note)
-                    .into(binding.ivTopArtistCover)
+                binding.ivTopArtistCover?.let {
+                    Glide.with(this)
+                        .load(analytics.topArtistCover)
+                        .placeholder(R.drawable.ic_music_note)
+                        .error(R.drawable.ic_music_note)
+                        .into(it)
+                }
             }
         } else {
-            binding.tvTopArtist.text = "No data"
-            binding.tvTopArtistPlays.text = ""
+            binding.tvTopArtist?.text = "No data"
+            binding.tvTopArtistPlays?.text = ""
         }
 
         // Top song
         if (analytics.topSong != null) {
-            binding.tvTopSong.text = analytics.topSong
-            binding.tvTopSongArtist.text = analytics.topSongArtist
-            binding.tvTopSongPlays.text = "${analytics.topSongPlayCount} plays"
+            binding.tvTopSong?.text = analytics.topSong
+            binding.tvTopSongArtist?.text = analytics.topSongArtist
+            binding.tvTopSongPlays?.text = "${analytics.topSongPlayCount} plays"
 
             if (analytics.topSongCover != null) {
-                Glide.with(this)
-                    .load(analytics.topSongCover)
-                    .placeholder(R.drawable.ic_music_note)
-                    .error(R.drawable.ic_music_note)
-                    .into(binding.ivTopSongCover)
+                binding.ivTopSongCover?.let {
+                    Glide.with(this)
+                        .load(analytics.topSongCover)
+                        .placeholder(R.drawable.ic_music_note)
+                        .error(R.drawable.ic_music_note)
+                        .into(it)
+                }
             }
         } else {
-            binding.tvTopSong.text = "No data"
-            binding.tvTopSongArtist.text = ""
-            binding.tvTopSongPlays.text = ""
+            binding.tvTopSong?.text = "No data"
+            binding.tvTopSongArtist?.text = ""
+            binding.tvTopSongPlays?.text = ""
         }
 
         // Stats
-        binding.tvTotalSongs.text = "${analytics.totalSongsPlayed} different songs"
-        binding.tvTotalArtists.text = "${analytics.totalArtistsListened} artists"
+        binding.tvTotalSongs?.text = "${analytics.totalSongsPlayed} different songs"
+        binding.tvTotalArtists?.text = "${analytics.totalArtistsListened} artists"
 
 
         // Day streaks
         if (analytics.dayStreaks.isNotEmpty()) {
             val topStreak = analytics.dayStreaks.first()
-            binding.tvStreakSong.text = topStreak.songTitle
-            binding.tvStreakArtist.text = topStreak.artist
-            binding.tvStreakDays.text = "${topStreak.streakDays}-day streak"
-            binding.tvStreakDates.text = "${topStreak.startDate} - ${topStreak.endDate}"
+            binding.tvStreakSong?.text = topStreak.songTitle
+            binding.tvStreakArtist?.text = topStreak.artist
+            binding.tvStreakDays?.text = "${topStreak.streakDays}-day streak"
+            binding.tvStreakDates?.text = "${topStreak.startDate} - ${topStreak.endDate}"
 
             if (topStreak.cover != null) {
-                Glide.with(this)
-                    .load(topStreak.cover)
-                    .placeholder(R.drawable.ic_music_note)
-                    .error(R.drawable.ic_music_note)
-                    .into(binding.ivStreakCover)
+                binding.ivStreakCover?.let {
+                    Glide.with(this)
+                        .load(topStreak.cover)
+                        .placeholder(R.drawable.ic_music_note)
+                        .error(R.drawable.ic_music_note)
+                        .into(it)
+                }
             }
 
-            binding.cardDayStreak.visibility = View.VISIBLE
+            binding.cardDayStreak?.visibility = View.VISIBLE
         } else {
-            binding.cardDayStreak.visibility = View.GONE
+            binding.cardDayStreak?.visibility = View.GONE
         }
     }
 

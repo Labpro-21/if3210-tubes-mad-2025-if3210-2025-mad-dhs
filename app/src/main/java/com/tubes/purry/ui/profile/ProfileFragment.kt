@@ -273,7 +273,7 @@ class ProfileFragment : Fragment() {
 
     private fun showNetworkError() {
         binding.networkErrorLayout.visibility = View.VISIBLE
-        binding.profileLayout.visibility = View.GONE
+        binding.profileLayout?.visibility = View.GONE
     }
 
     private fun navigateToLogin() {

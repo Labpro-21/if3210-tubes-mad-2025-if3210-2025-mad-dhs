@@ -172,18 +172,16 @@ class MusicNotificationService : Service() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        // Create dismiss action
-        val dismissIntent = Intent(this, MusicNotificationService::class.java).apply {
-            action = ACTION_DISMISS
+        val dismissIntent = Intent(this, MusicNotificationReceiver::class.java).apply {
+            action = MusicNotificationReceiver.ACTION_DISMISS
         }
-        val dismissPendingIntent = PendingIntent.getService(
+        val dismissPendingIntent = PendingIntent.getBroadcast(
             this,
             999,
             dismissIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        // Get current time info
         val currentPosition = PlayerController.getCurrentPosition()
         val duration = PlayerController.getDuration()
         val timeText = "${formatTime(currentPosition)} / ${formatTime(duration)}"

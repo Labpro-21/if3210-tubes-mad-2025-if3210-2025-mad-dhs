@@ -27,7 +27,7 @@
     <string name="album_cover_player" />
     <string name="play_pause_song" />
     <string name="next_song" />
-    <string name="previous_song" />
+    <string name="previous_song">Previous</string>
     <string name="edit_song">Edit Song</string>
     <string name="delete_song" />
     <string name="song_title">Song Title</string>
@@ -109,5 +109,6 @@
     <string name="export_success">Export successful! Check your Downloads folder.</string>
     <string name="export_failed">Export failed. Please try again.</string>
     <string name="chart_image_desc">Chart cover image</string>
-
+    <string name="edit_profile">Edit Profil</string>
+    <string name="next_song_play">next</string>
 </resources>
