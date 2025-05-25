@@ -18,6 +18,9 @@ class ChartAdapter(
         val imgCover: ImageView = view.findViewById(R.id.imgCover)
         val tvTitle: TextView = view.findViewById(R.id.tvTitle)
         val tvArtist: TextView = view.findViewById(R.id.tvArtist)
+//        val chartImage: ImageView = view.findViewById(R.id.chartImage)
+//        val chartTitle: TextView = view.findViewById(R.id.chartTitle)
+//        val chartDescription: TextView = view.findViewById(R.id.chartDescription)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChartViewHolder {
@@ -30,6 +33,9 @@ class ChartAdapter(
 
     override fun onBindViewHolder(holder: ChartViewHolder, position: Int) {
         val item = items[position]
+//        holder.chartImage.setImageResource(item.imageRes)
+//        holder.chartTitle.text = item.title
+//        holder.chartDescription.text = item.description
         holder.imgCover.setImageResource(item.imageRes)
         holder.tvTitle.text = item.title
         holder.tvArtist.text = item.description

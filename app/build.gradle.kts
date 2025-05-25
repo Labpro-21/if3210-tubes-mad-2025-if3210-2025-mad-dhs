@@ -94,7 +94,7 @@ dependencies {
 
     // Google Maps
     implementation("com.google.android.gms:play-services-maps:18.2.0")
-    implementation ("com.google.android.gms:play-services-location:21.0.1")
+    implementation("com.google.android.gms:play-services-location:21.0.1")
 
     // CardView untuk UI
     implementation("androidx.cardview:cardview:1.0.0")
@@ -103,6 +103,33 @@ dependencies {
 
     // ZXing untuk generate dan scan QR
     implementation("com.journeyapps:zxing-android-embedded:4.3.0")
+
+    // For charts (MPAndroidChart)
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+
+    // For CSV export
+    implementation("com.opencsv:opencsv:5.7.1")
+
+    // For coroutines (if not already added)
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+
+    // For lifecycle components (if not already added)
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.7.0")
+
+    // For RecyclerView and CardView (if not already added)
+    implementation("androidx.recyclerview:recyclerview:1.3.2")
+    implementation("androidx.cardview:cardview:1.0.0")
+
+    // Material Design Components (if not already added)
+    implementation("com.google.android.material:material:1.11.0")
+
+    // For image loading (Glide - if not already added)
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+
+    // Google Maps
+    implementation("com.google.android.gms:play-services-maps:18.2.0")
+    implementation("com.google.android.gms:play-services-location:21.0.1")
 
 
 

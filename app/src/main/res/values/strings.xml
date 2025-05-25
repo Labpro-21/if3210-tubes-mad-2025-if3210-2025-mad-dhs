@@ -99,4 +99,15 @@
     <string name="recommendation_cover">Recommendation playlist cover</string>
     <string name="play">Play</string>
     <string name="download_all">Download All</string>
+    <string name="sound_capsule">Sound Capsule</string>
+    <string name="time_listened">Time Listened</string>
+    <string name="top_artists">Top Artists</string>
+    <string name="top_songs">Top Songs</string>
+    <string name="export_data">Export Data</string>
+    <string name="no_data_available">No data available</string>
+    <string name="daily_chart">Daily Chart</string>
+    <string name="export_success">Export successful! Check your Downloads folder.</string>
+    <string name="export_failed">Export failed. Please try again.</string>
+    <string name="chart_image_desc">Chart cover image</string>
+
 </resources>

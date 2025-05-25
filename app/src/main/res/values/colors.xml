@@ -10,4 +10,9 @@
     <color name="blue">#3386FF</color>
     <color name="red">#FF3333</color>
     <color name="your_custom_color">#00C853</color>
+    <color name="background_dark">#121212</color>
+    <color name="card_background">#1E1E1E</color>
+    <color name="primary_green">#1DB954</color>
+    <color name="text_secondary">#B3B3B3</color>
+    <color name="divider">#2A2A2A</color>
 </resources>

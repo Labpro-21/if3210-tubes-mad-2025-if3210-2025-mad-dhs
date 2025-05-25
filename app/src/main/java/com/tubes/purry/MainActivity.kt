@@ -102,7 +102,10 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
         }
 
         // Fetch user profile
-        val profileViewModel = ViewModelProvider(this, ProfileViewModelFactory(this))[ProfileViewModel::class.java]
+        val profileViewModel = ViewModelProvider(
+            this,
+            ProfileViewModelFactory(application)
+        )[ProfileViewModel::class.java]
         profileViewModel.getProfileData()
         nowPlayingViewModel = ViewModelProvider(
             this,

@@ -1,5 +1,6 @@
 package com.tubes.purry.data.repository
 
+import android.util.Log
 import com.tubes.purry.data.model.OnlineSong
 import com.tubes.purry.data.remote.ApiClient
 
@@ -10,6 +11,7 @@ class ChartRepository {
         return if (isGlobal) {
             apiService.getTopSongsGlobal()
         } else {
+            Log.d("ChartRepository", "Country Code used: $countryCode")
             apiService.getTopSongsByCountry(countryCode ?: "ID")
         }
     }

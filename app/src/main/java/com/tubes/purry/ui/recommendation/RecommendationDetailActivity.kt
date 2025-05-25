@@ -58,7 +58,7 @@ class RecommendationDetailActivity : AppCompatActivity() {
         val songDao = db.songDao()
 
         // Create ProfileViewModel using its proper factory
-        val profileViewModelFactory = ProfileViewModelFactory(this)
+        val profileViewModelFactory = ProfileViewModelFactory(application)
         profileViewModel = ViewModelProvider(this, profileViewModelFactory)[ProfileViewModel::class.java]
 
         // Create NowPlayingViewModel with ProfileViewModel

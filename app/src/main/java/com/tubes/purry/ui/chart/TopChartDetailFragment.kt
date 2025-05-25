@@ -24,6 +24,7 @@ import com.tubes.purry.ui.profile.ProfileViewModel
 import com.tubes.purry.ui.profile.ProfileViewModelFactory
 import com.tubes.purry.utils.DownloadUtils
 import com.tubes.purry.utils.parseDuration
+import com.tubes.purry.utils.SessionManager
 import kotlinx.coroutines.launch
 import java.util.UUID
 
@@ -32,16 +33,24 @@ class TopChartDetailFragment : Fragment() {
     private var _binding: FragmentTopChartDetailBinding? = null
     private val binding get() = _binding!!
 
+    private lateinit var sessionManager: SessionManager
+
     private var currentSongList: List<OnlineSong> = emptyList()
 
     private lateinit var adapter: OnlineSongListAdapter
+
+    private val profileViewModel: ProfileViewModel by activityViewModels {
+        ProfileViewModelFactory(requireActivity().application)
+    }
+
 
     private val nowPlayingViewModel: NowPlayingViewModel by activityViewModels {
         NowPlayingViewModelFactory(
             requireActivity().application,
             AppDatabase.getDatabase(requireContext()).LikedSongDao(),
             AppDatabase.getDatabase(requireContext()).songDao(),
-            ViewModelProvider(requireActivity(), ProfileViewModelFactory(requireContext()))[ProfileViewModel::class.java]
+            ViewModelProvider(requireActivity(), ProfileViewModelFactory(requireActivity().application))[ProfileViewModel::class.java]
+            //            ViewModelProvider(requireActivity(), ProfileViewModelFactory(requireContext()))[ProfileViewModel::class.java]
         )
     }
 
@@ -59,11 +68,25 @@ class TopChartDetailFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val isGlobal = arguments?.getBoolean("isGlobal", true) ?: true
-        val chartTitle = if (isGlobal) "Top 50 GLOBAL" else "Top 50 INDONESIA"
-        val coverRes = if (isGlobal) R.drawable.cov_playlist_global else R.drawable.cov_playlist_around
+        profileViewModel.profileData.observe(viewLifecycleOwner) { profile ->
+            val countryCode = if (!isGlobal) profile?.location ?: "ID" else null
+            val countryName = if (!isGlobal) getCountryName(countryCode) else "GLOBAL"
+            val chartTitle = "Top 50 $countryName"
 
-        binding.tvChartTitle.text = chartTitle
-        binding.tvChartDescription.text = "Your daily update of the most played tracks right now - $chartTitle"
+            binding.tvChartTitle.text = chartTitle
+            binding.tvChartDescription.text = "Your daily update of the most played tracks right now - $chartTitle"
+
+            android.util.Log.d("TopChartDetail", "Country Code used: $countryCode")
+            chartViewModel.fetchSongs(isGlobal, countryCode)
+        }
+//        val chartTitle = if (isGlobal) "Top 50 GLOBAL" else "Top 50 INDONESIA"
+        val coverRes = if (isGlobal) R.drawable.top_50_global_cover else R.drawable.top_50_country_cover
+        sessionManager = SessionManager(requireContext())
+
+        binding.toolbar.setNavigationOnClickListener {
+            requireActivity().onBackPressedDispatcher.onBackPressed()
+        }
+
         Glide.with(this).load(coverRes).into(binding.ivChartCover)
 
         adapter = OnlineSongListAdapter(
@@ -152,8 +175,21 @@ class TopChartDetailFragment : Fragment() {
         }
 
 
-        val countryCode = if (!isGlobal) "ID" else null
-        chartViewModel.fetchSongs(isGlobal, countryCode)
+        profileViewModel.profileData.observe(viewLifecycleOwner) { profile ->
+            val countryCode = if (!isGlobal) profile?.location ?: "ID" else null
+            android.util.Log.d("TopChartDetail", "Country Code used: $countryCode")
+            chartViewModel.fetchSongs(isGlobal, countryCode)
+        }
+
+    }
+
+    private fun getCountryName(code: String?): String {
+        return try {
+            val locale = java.util.Locale("", code ?: "")
+            locale.displayCountry.ifBlank { "Your Country" }
+        } catch (e: Exception) {
+            "Your Country"
+        }
     }
 
     override fun onDestroyView() {
