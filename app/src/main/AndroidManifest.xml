@@ -10,6 +10,7 @@
     <!--    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />-->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:name=".PurrytifyApplication"
@@ -36,7 +37,13 @@
 
         <service android:name=".utils.TokenExpirationService" />
 
-<!--        <receiver-->
+        <receiver android:name="androidx.media.session.MediaButtonReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
+        </receiver>
+        <!--        <receiver-->
 <!--            android:name=".utils.NetworkStateReceiver"-->
 <!--            android:exported="false">-->
 <!--            <intent-filter>-->

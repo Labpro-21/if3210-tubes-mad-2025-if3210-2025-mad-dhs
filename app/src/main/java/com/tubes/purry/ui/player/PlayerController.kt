@@ -1,13 +1,14 @@
 package com.tubes.purry.ui.player
 
 import android.content.Context
-import android.content.res.AssetFileDescriptor
+import android.graphics.BitmapFactory
 import android.media.MediaPlayer
-import android.net.Uri
+import android.support.v4.media.session.MediaSessionCompat
 import com.tubes.purry.data.model.Song
 import android.util.Log
 import androidx.core.net.toUri
-import com.tubes.purry.ui.player.NowPlayingViewModel.RepeatMode
+import com.tubes.purry.R
+import com.tubes.purry.utils.MediaNotificationManager
 
 
 object PlayerController {
@@ -16,7 +17,26 @@ object PlayerController {
     private var currentlyPlaying: Song? = null
     var onCompletion: (() -> Unit)? = null
 
+    private lateinit var mediaSession: MediaSessionCompat
+    private lateinit var appContext: Context
+
+    fun initialize(context: Context) {
+        appContext = context.applicationContext
+        mediaSession = MediaSessionCompat(appContext, "PurryPlayer")
+        mediaSession.setCallback(object : MediaSessionCompat.Callback() {
+            override fun onPlay() = resume()
+            override fun onPause() = pause()
+            override fun onStop() = release()
+        })
+        mediaSession.isActive = true
+
+        MediaNotificationManager.createNotificationChannel(appContext)
+    }
+
+
     fun play(song: Song, context: Context): Boolean {
+        if (!::mediaSession.isInitialized) initialize(context)
+
         if (currentlyPlaying?.id == song.id && isPlaying()) {
             Log.d("PlayerController", "Same song already playing.")
             return true
@@ -33,12 +53,26 @@ object PlayerController {
         currentlyPlaying = song
 
         try {
-            val appContext = context.applicationContext
+            val coverBitmap = when {
+                song.coverResId != null -> BitmapFactory.decodeResource(context.resources, song.coverResId)
+                !song.coverPath.isNullOrBlank() -> BitmapFactory.decodeFile(song.coverPath)
+                else -> BitmapFactory.decodeResource(context.resources, R.drawable.album_default)
+            }
+
             mediaPlayer = MediaPlayer().apply {
                 setOnPreparedListener {
                     Log.d("PlayerController", "Prepared, starting playback: ${song.title}")
                     isPreparing = false
                     start()
+
+                    // Show media notification
+                    MediaNotificationManager.showNotification(
+                        context,
+                        mediaSession.sessionToken,
+                        song,
+                        coverBitmap,
+                        isPlaying = true
+                    )
                 }
 
                 setOnCompletionListener {
@@ -93,6 +127,16 @@ object PlayerController {
         if (isPlaying()) {
             mediaPlayer?.pause()
             Log.d("PlayerController", "Playback paused")
+
+            currentlyPlaying?.let { song ->
+                MediaNotificationManager.showNotification(
+                    appContext,
+                    mediaSession.sessionToken,
+                    song,
+                    getCurrentCoverBitmap(appContext, song),
+                    isPlaying = false
+                )
+            }
         }
     }
 
@@ -100,6 +144,16 @@ object PlayerController {
         if (!isPlaying()) {
             mediaPlayer?.start()
             Log.d("PlayerController", "Playback resumed")
+        }
+
+        currentlyPlaying?.let { song ->
+            MediaNotificationManager.showNotification(
+                appContext,
+                mediaSession.sessionToken,
+                song,
+                getCurrentCoverBitmap(appContext, song),
+                isPlaying = true
+            )
         }
     }
 
@@ -113,6 +167,11 @@ object PlayerController {
             mediaPlayer = null
             isPreparing = false
             currentlyPlaying = null
+
+            if (::mediaSession.isInitialized) mediaSession.isActive = false
+            if (::appContext.isInitialized) {
+                MediaNotificationManager.dismissNotification(appContext)
+            }
         }
     }
 
@@ -124,5 +183,11 @@ object PlayerController {
 
     fun seekTo(position: Int) {
         mediaPlayer?.seekTo(position)
+    }
+
+    private fun getCurrentCoverBitmap(context: Context, song: Song) = when {
+        song.coverResId != null -> BitmapFactory.decodeResource(context.resources, song.coverResId)
+        !song.coverPath.isNullOrBlank() -> BitmapFactory.decodeFile(song.coverPath)
+        else -> BitmapFactory.decodeResource(context.resources, R.drawable.album_default)
     }
 }
