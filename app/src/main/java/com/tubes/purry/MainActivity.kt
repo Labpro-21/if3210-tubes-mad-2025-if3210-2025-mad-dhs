@@ -38,16 +38,31 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
     private val networkStateReceiver = NetworkStateReceiver()
     private val permissionManager = PermissionManager()
     private lateinit var nowPlayingViewModel: NowPlayingViewModel
+    private var isReceiverRegistered = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        initializeViewModel()
+        setupMiniPlayer()
+        setupNavigation()
+        setupClickListeners()
+        requestPermissions()
+        setupNetworkMonitoring()
+        handleDeepLinks()
+        handleIntentNavigation(intent)
+    }
+
+    private fun initializeViewModel() {
         nowPlayingViewModel = (application as PurrytifyApplication).nowPlayingViewModel
         NowPlayingManager.setViewModel(nowPlayingViewModel)
+    }
 
+    private fun setupMiniPlayer() {
         binding.miniPlayerContainer.visibility = View.GONE
+
         nowPlayingViewModel.currSong.observe(this) { song ->
             Log.d("MainActivity", "currSong.observe: ${song?.title}")
             if (song != null) {
@@ -60,20 +75,13 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
         supportFragmentManager.beginTransaction()
             .replace(R.id.miniPlayerContainer, MiniPlayerFragment())
             .commit()
+    }
 
-        // Request necessary permissions
-        if (!permissionManager.checkBluetoothPermissions(this)) {
-            permissionManager.requestBluetoothPermissions(this)
-        }
-
-        if (!permissionManager.checkAudioPermissions(this)) {
-            permissionManager.requestAudioPermissions(this)
-        }
-
-        // Observe destination changes to hide/show mini player
+    private fun setupNavigation() {
         val navView = findViewById<BottomNavigationView?>(R.id.navView)
         val navController = supportFragmentManager.findFragmentById(R.id.nav_host_fragment)
             ?.findNavController() ?: throw IllegalStateException("NavController not found")
+
         navView?.setupWithNavController(navController)
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
@@ -97,17 +105,60 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
                 else -> resetMenuHighlight()
             }
         }
+    }
 
+    private fun setupClickListeners() {
+        binding.menuHome?.setOnClickListener {
+            val navController = findNavController(R.id.nav_host_fragment)
+            if (navController.currentDestination?.id != R.id.navigation_home) {
+                navController.navigate(R.id.navigation_home)
+            }
+        }
+
+        binding.menuLibrary?.setOnClickListener {
+            val navController = findNavController(R.id.nav_host_fragment)
+            if (navController.currentDestination?.id != R.id.navigation_library) {
+                navController.navigate(R.id.navigation_library)
+            }
+        }
+
+        binding.menuProfile?.setOnClickListener {
+            val navController = findNavController(R.id.nav_host_fragment)
+            if (navController.currentDestination?.id != R.id.navigation_profile) {
+                navController.navigate(R.id.navigation_profile)
+            }
+        }
+
+        binding.btnScanQr?.setOnClickListener {
+            val intent = Intent(this, ScanQRActivity::class.java)
+            startActivity(intent)
+        }
+    }
+
+    private fun requestPermissions() {
+        if (!permissionManager.checkBluetoothPermissions(this)) {
+            permissionManager.requestBluetoothPermissions(this)
+        }
+
+        if (!permissionManager.checkAudioPermissions(this)) {
+            permissionManager.requestAudioPermissions(this)
+        }
+    }
+
+    private fun setupNetworkMonitoring() {
         TokenExpirationService.startService(this)
         networkStateReceiver.addListener(this)
-        registerReceiver(networkStateReceiver, IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION))
 
         NetworkUtil.getNetworkStatus().observe(this) { isAvailable ->
             if (isAvailable) hideNetworkErrorBanner() else showNetworkErrorBanner()
         }
 
-        if (!NetworkUtil.isNetworkAvailable(this)) showNetworkErrorBanner()
+        if (!NetworkUtil.isNetworkAvailable(this)) {
+            showNetworkErrorBanner()
+        }
+    }
 
+    private fun handleDeepLinks() {
         Firebase.dynamicLinks
             .getDynamicLink(intent)
             .addOnSuccessListener { pendingDynamicLinkData ->
@@ -120,33 +171,9 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
                 // Optional: log error
             }
 
-        handleIntentNavigation(intent)
         binding.root.post { handleDeepLink(intent?.data) }
     }
 
-        binding.menuHome?.setOnClickListener {
-            val navController = findNavController(R.id.nav_host_fragment)
-            if (navController.currentDestination?.id != R.id.navigation_home) {
-                navController.navigate(R.id.navigation_home)
-            }
-        }
-        binding.menuLibrary?.setOnClickListener {
-            val navController = findNavController(R.id.nav_host_fragment)
-            if (navController.currentDestination?.id != R.id.navigation_library) {
-                navController.navigate(R.id.navigation_library)
-            }
-        }
-        binding.menuProfile?.setOnClickListener {
-            val navController = findNavController(R.id.nav_host_fragment)
-            if (navController.currentDestination?.id != R.id.navigation_profile) {
-                navController.navigate(R.id.navigation_profile)
-            }
-        }
-        binding.btnScanQr?.setOnClickListener {
-            val intent = Intent(this, ScanQRActivity::class.java)
-            startActivity(intent)
-        }
-    // FIXED: Moved this method outside of onCreate()
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
@@ -278,15 +305,26 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
 
     override fun onStart() {
         super.onStart()
-        registerReceiver(
-            networkStateReceiver,
-            IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
-        )
+        if (!isReceiverRegistered) {
+            registerReceiver(
+                networkStateReceiver,
+                IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
+            )
+            isReceiverRegistered = true
+        }
     }
 
     override fun onStop() {
         super.onStop()
-        unregisterReceiver(networkStateReceiver)
+        if (isReceiverRegistered) {
+            try {
+                unregisterReceiver(networkStateReceiver)
+                isReceiverRegistered = false
+            } catch (e: IllegalArgumentException) {
+                // Receiver was not registered
+                Log.w("MainActivity", "NetworkStateReceiver was not registered")
+            }
+        }
         networkStateReceiver.removeListener(this)
     }
 }
