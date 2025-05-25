@@ -9,7 +9,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import com.tubes.purry.ui.player.PlayerController
 
 class MusicNotificationReceiver : BroadcastReceiver() {
 
@@ -50,16 +49,19 @@ class MusicNotificationReceiver : BroadcastReceiver() {
 
             ACTION_DISMISS -> {
                 Log.d("NotificationReceiver", "Dismiss action received")
-                PlayerController.pause()
-                PlayerController.release()
-                viewModel.clearQueue()
 
+                // Gunakan fungsi dismissPlayer() yang sudah ada
+                // yang lebih lengkap dan konsisten
+                viewModel.dismissPlayer()
+
+                // Stop notification service
                 val serviceIntent = Intent(context, MusicNotificationService::class.java)
                 context.stopService(serviceIntent)
                 return
             }
         }
 
+        // Update notification untuk action selain dismiss
         CoroutineScope(Dispatchers.Main).launch {
             delay(100)
             val serviceIntent = Intent(context, MusicNotificationService::class.java)

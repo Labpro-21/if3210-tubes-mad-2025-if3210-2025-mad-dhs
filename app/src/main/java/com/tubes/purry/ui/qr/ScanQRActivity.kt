@@ -68,17 +68,20 @@ class ScanQRActivity : AppCompatActivity() {
                     val scannedUri = Uri.parse(result.contents)
 
                     if (scannedUri.scheme == "purrytify" && scannedUri.host == "song") {
-                        val songId = scannedUri.lastPathSegment?.toIntOrNull()
+                        val rawId = scannedUri.lastPathSegment
+                        val idInt = rawId?.toIntOrNull()
 
-                        if (songId != null && songId > 0) {
-                            val deepLinkIntent = Intent(this, MainActivity::class.java).apply {
-                                this.data = scannedUri
-                                flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                        if (idInt != null && idInt > 0) {
+                            val deepLinkIntent = Intent(Intent.ACTION_VIEW).apply {
+                                setClass(this@ScanQRActivity, MainActivity::class.java)
+                                setData(Uri.parse("purrytify://song/$idInt"))
+                                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
                             }
+
                             startActivity(deepLinkIntent)
                             finish()
                         } else {
-                            Toast.makeText(this, "ID lagu tidak valid", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this, "ID lagu tidak valid: $rawId", Toast.LENGTH_SHORT).show()
                             finish()
                         }
                     } else {
@@ -97,4 +100,5 @@ class ScanQRActivity : AppCompatActivity() {
             super.onActivityResult(requestCode, resultCode, data)
         }
     }
+
 }

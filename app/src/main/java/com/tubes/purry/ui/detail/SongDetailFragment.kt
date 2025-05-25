@@ -59,41 +59,36 @@ class SongDetailFragment : Fragment() {
         arguments?.let { bundle ->
             Log.d("SongDetailFragment", "Bundle contents: ${bundle.keySet().joinToString()}")
 
-            // Debug: Print semua values dalam bundle
+            // Debug log
             for (key in bundle.keySet()) {
                 val value = bundle.get(key)
                 Log.d("SongDetailFragment", "  $key = $value (${value?.javaClass?.simpleName})")
             }
 
-            // Get basic parameters
             val songId = bundle.getString("songId")
+            val songIdInt = bundle.getInt("songIdInt", -1)
             val isLocal = bundle.getBoolean("isLocal", false)
             val serverId = bundle.getInt("serverId", -1)
 
-            Log.d("SongDetailFragment", "Parsed: songId=$songId, isLocal=$isLocal, serverId=$serverId")
+            Log.d("SongDetailFragment", "Parsed: songId=$songId, songIdInt=$songIdInt, isLocal=$isLocal, serverId=$serverId")
 
             if (!songId.isNullOrEmpty()) {
                 if (isLocal) {
-                    // Local song
-                    Log.d("SongDetailFragment", "Loading local song: $songId")
                     loadLocalSong(songId)
                 } else {
-                    // Server song - extract serverId from songId or use provided serverId
-                    val serverIdToUse = if (serverId > 0) {
-                        serverId
-                    } else {
-                        extractServerIdFromSongId(songId)
-                    }
-
+                    val serverIdToUse = if (serverId > 0) serverId else extractServerIdFromSongId(songId)
                     if (serverIdToUse != null && serverIdToUse > 0) {
-                        Log.d("SongDetailFragment", "Loading server song with ID: $serverIdToUse")
                         loadServerSong(serverIdToUse)
                     } else {
                         showErrorAndReturn("ID lagu server tidak valid: $songId")
                     }
                 }
+            } else if (songIdInt > 0) {
+                // Perbaikan untuk deep link int
+                Log.d("SongDetailFragment", "Loading song from songIdInt: $songIdInt")
+                loadServerSong(songIdInt)
             } else {
-                // Fallback to legacy format
+                // Fallback ke legacy
                 handleLegacyFormat(bundle)
             }
         } ?: run {
@@ -104,13 +99,11 @@ class SongDetailFragment : Fragment() {
     private fun handleLegacyFormat(bundle: Bundle) {
         Log.d("SongDetailFragment", "Using legacy format")
 
-        // Cek format lama dengan "id"
         val legacyId = bundle.getString("id")
         if (!legacyId.isNullOrEmpty()) {
             Log.d("SongDetailFragment", "Legacy ID: $legacyId")
 
             if (legacyId.startsWith("srv-")) {
-                // Server song dengan format "srv-123"
                 val serverId = extractServerIdFromSongId(legacyId)
                 if (serverId != null) {
                     loadServerSong(serverId)
@@ -118,12 +111,10 @@ class SongDetailFragment : Fragment() {
                     showErrorAndReturn("Format ID server tidak valid: $legacyId")
                 }
             } else {
-                // Coba sebagai integer untuk server song lama
                 val serverIdInt = legacyId.toIntOrNull()
                 if (serverIdInt != null && serverIdInt > 0) {
                     loadServerSong(serverIdInt)
                 } else {
-                    // Assume it's local song UUID
                     loadLocalSong(legacyId)
                 }
             }
@@ -131,6 +122,7 @@ class SongDetailFragment : Fragment() {
             showErrorAndReturn("ID lagu tidak ditemukan")
         }
     }
+
 
     private fun loadLocalSong(songId: String) {
         val current = nowPlayingViewModel.currSong.value
@@ -281,27 +273,40 @@ class SongDetailFragment : Fragment() {
                     R.id.menu_share -> {
                         nowPlayingViewModel.currSong.value?.let { song ->
                             if (!song.isLocal) {
-                                val intent = Intent(Intent.ACTION_SEND).apply {
-                                    type = "text/plain"
-                                    putExtra(Intent.EXTRA_TEXT, "purrytify://song/${song.id}")
+                                val serverId = song.id.removePrefix("srv-").toIntOrNull()
+                                if (serverId != null) {
+                                    val intent = Intent(Intent.ACTION_SEND).apply {
+                                        type = "text/plain"
+                                        putExtra(Intent.EXTRA_TEXT, "purrytify://song/$serverId")
+                                    }
+                                    startActivity(Intent.createChooser(intent, "Share via"))
+                                } else {
+                                    Toast.makeText(requireContext(), "ID server tidak valid", Toast.LENGTH_SHORT).show()
                                 }
-                                startActivity(Intent.createChooser(intent, "Share via"))
                             } else {
                                 Toast.makeText(requireContext(), "Lagu lokal tidak dapat dibagikan", Toast.LENGTH_SHORT).show()
                             }
                         }
                         true
                     }
+
                     R.id.menu_share_qr -> {
                         nowPlayingViewModel.currSong.value?.let { song ->
                             if (!song.isLocal) {
-                                previewAndShareQrCode(requireContext(), song.id, song.title, song.artist)
+                                val serverId = song.id.removePrefix("srv-").toIntOrNull()
+                                if (serverId != null) {
+                                    previewAndShareQrCode(requireContext(), serverId, song.title, song.artist)
+                                } else {
+                                    Toast.makeText(requireContext(), "ID server tidak valid", Toast.LENGTH_SHORT).show()
+                                }
                             } else {
                                 Toast.makeText(requireContext(), "Lagu lokal tidak dapat dibagikan", Toast.LENGTH_SHORT).show()
                             }
                         }
                         true
                     }
+
+
                     else -> false
                 }
             }

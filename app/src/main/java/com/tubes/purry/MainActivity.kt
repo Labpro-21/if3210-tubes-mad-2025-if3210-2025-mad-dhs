@@ -224,7 +224,10 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
             if (songId != null) {
                 val navController = findNavController(R.id.nav_host_fragment)
                 val bundle = Bundle().apply {
-                    putInt("songId", songId)
+                    putInt("songIdInt", songId)
+                    // Atau tetap isi keduanya untuk compatibility:
+                    // putString("songId", rawId)
+                    // putInt("songIdInt", songId)
                 }
 
                 val navOptions = androidx.navigation.NavOptions.Builder()
@@ -240,17 +243,16 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
         }
     }
 
-
     private fun handleIntentNavigation(intent: Intent?) {
         intent?.getStringExtra("navigateTo")?.let { destination ->
             if (destination == "detail") {
-                val songId = intent.getIntExtra("songId", -1) // Get songId from intent
+                val songId = intent.getIntExtra("songId", -1)
                 if (songId != -1) {
                     val navController = supportFragmentManager.findFragmentById(R.id.nav_host_fragment)
                         ?.findNavController()
                     if (navController?.currentDestination?.id != R.id.songDetailFragment) {
                         val bundle = Bundle().apply {
-                            putInt("songId", songId)
+                            putString("songId", songId.toString()) // ✅ Convert to String
                         }
                         navController?.navigate(R.id.songDetailFragment, bundle)
                     }

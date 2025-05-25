@@ -61,6 +61,10 @@
             app:argType="string"
             app:nullable="true" />
         <argument
+            android:name="songIdInt"
+            app:argType="integer"
+            android:defaultValue="-1" />
+        <argument
             android:name="isLocal"
             app:argType="boolean"
             android:defaultValue="false" />
