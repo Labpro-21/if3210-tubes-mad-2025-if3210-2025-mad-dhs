@@ -10,18 +10,16 @@ import android.net.ConnectivityManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import android.view.Menu
-import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.fragment.findNavController
-import androidx.navigation.ui.setupWithNavController
 import androidx.activity.viewModels
+import androidx.navigation.NavController
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.NavigationUI
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.tubes.purry.data.local.AppDatabase
 import com.tubes.purry.databinding.ActivityMainBinding
@@ -34,12 +32,12 @@ import com.tubes.purry.utils.AudioOutputManager
 import com.tubes.purry.utils.NetworkStateReceiver
 import com.tubes.purry.utils.NetworkUtil
 import com.tubes.purry.utils.TokenExpirationService
-import com.tubes.purry.utils.seedAssets
 
 class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListener {
     private lateinit var binding: ActivityMainBinding
     private val networkStateReceiver = NetworkStateReceiver()
     private lateinit var audioDeviceReceiver: AudioDeviceBroadcastReceiver
+    private lateinit var navController: NavController
 
     // Lazily initialize NowPlayingViewModel
     private val nowPlayingViewModel: NowPlayingViewModel by viewModels {
@@ -88,9 +86,39 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
 
         // Setup bottom navigation
         val navView: BottomNavigationView = binding.navView
-        val navController = supportFragmentManager.findFragmentById(R.id.nav_host_fragment)
-            ?.findNavController() ?: throw IllegalStateException("NavController not found")
-        navView.setupWithNavController(navController)
+        val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        navController = navHostFragment.navController // Initialize navController
+
+        NavigationUI.setupWithNavController(navView, navController)
+
+        // Custom listener to handle the audio output item specifically
+        navView.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.navigation_audio_output -> {
+                    showAudioDeviceDialog()
+                    // Return false because we are not navigating to a new fragment for this item.
+                    // We want to stay on the current fragment.
+                    // However, the BottomNavigationView might still try to visually select it.
+                    // To prevent actual navigation and keep the current fragment selected:
+                    // You might need to manage the selected item state carefully or use onNavigationItemSelected.
+                    // For simplicity, let's see if returning true (consumed) but not navigating works.
+                    // A common pattern is to let it navigate to current item if reselected.
+                    // For a non-navigation action, this gets tricky with setupWithNavController.
+                    // An alternative is to NOT use setupWithNavController and handle all item selections manually.
+                    true // Indicate we've handled this item
+                }
+                // Let NavigationUI handle other items for fragment navigation
+                R.id.navigation_home, R.id.navigation_library, R.id.navigation_profile -> {
+                    NavigationUI.onNavDestinationSelected(item, navController)
+                    // true
+                }
+            }
+            if (item.itemId == R.id.navigation_audio_output) {
+                showAudioDeviceDialog()
+                return@setOnItemSelectedListener true // We handled it.
+            }
+            return@setOnItemSelectedListener NavigationUI.onNavDestinationSelected(item, navController)
+        }
 
         // Add mini player fragment
         if (savedInstanceState == null) {
@@ -142,6 +170,21 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
 
         // Trigger seeding
         // checkPermissionsAndSeed()
+    }
+
+    fun showAudioDeviceDialog() {
+        if (!checkAndRequestBluetoothPermissions()) {
+            Toast.makeText(this, "Bluetooth permissions are needed to list devices.", Toast.LENGTH_SHORT).show()
+            return
+        }
+        val devices = AudioOutputManager.getAvailableAudioDevices(this)
+        if (devices.isEmpty()) {
+            Toast.makeText(this, "No paired Bluetooth audio devices found. Please pair a device in settings.", Toast.LENGTH_LONG).show()
+            AudioOutputManager.openBluetoothSettings(this)
+            return
+        }
+        val dialog = com.tubes.purry.ui.outputdevice.SelectAudioDeviceDialog()
+        dialog.show(supportFragmentManager, "SelectAudioDeviceDialog")
     }
 
     private fun checkAndRequestBluetoothPermissions(): Boolean {
@@ -203,39 +246,6 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
 
     private fun showBottomNav() {
         binding.navView.visibility = View.VISIBLE
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.main_menu, menu)
-        return true
-    }
-
-    private fun showAudioDeviceDialog() {
-        if (!checkAndRequestBluetoothPermissions()) {
-            Toast.makeText(this, "Bluetooth permissions are needed to list devices.", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        // Permissions are granted or not needed for this specific call path if pre-S
-        val devices = AudioOutputManager.getAvailableAudioDevices(this)
-        if (devices.isEmpty()) {
-            Toast.makeText(this, "No paired Bluetooth audio devices found. Please pair a device in settings.", Toast.LENGTH_LONG).show()
-            AudioOutputManager.openBluetoothSettings(this) // Guide user to pair
-            return
-        }
-
-        val dialog = com.tubes.purry.ui.outputdevice.SelectAudioDeviceDialog()
-        dialog.show(supportFragmentManager, "SelectAudioDeviceDialog")
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.action_audio_output -> {
-                showAudioDeviceDialog()
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
-        }
     }
 
     override fun onStart() {
