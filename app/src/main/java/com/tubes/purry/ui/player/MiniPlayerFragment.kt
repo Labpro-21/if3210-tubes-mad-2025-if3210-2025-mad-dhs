@@ -11,22 +11,20 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.tubes.purry.R
 import com.tubes.purry.databinding.FragmentMiniPlayerBinding
 import androidx.core.net.toUri
-import androidx.lifecycle.lifecycleScope
 import com.tubes.purry.data.local.AppDatabase
-import com.tubes.purry.data.model.LikedSong
 import com.tubes.purry.ui.profile.ProfileViewModel
 import com.tubes.purry.ui.profile.ProfileViewModelFactory
-import kotlinx.coroutines.launch
 
 class MiniPlayerFragment : Fragment() {
     private lateinit var viewModel: NowPlayingViewModel
-    private lateinit var binding: FragmentMiniPlayerBinding
+    private var _binding: FragmentMiniPlayerBinding? = null // Nullable
+    private val binding get() = _binding!! // Non-null accessor
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = FragmentMiniPlayerBinding.inflate(inflater, container, false)
+        _binding = FragmentMiniPlayerBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -34,39 +32,34 @@ class MiniPlayerFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val appContext = requireContext().applicationContext
-        val likedSongDao = AppDatabase.getDatabase(appContext).LikedSongDao()
-        val songDao = AppDatabase.getDatabase(appContext).songDao()
+        val db = AppDatabase.getDatabase(appContext) // Get DB instance
+        val likedSongDao = db.LikedSongDao()
+        val songDao = db.songDao()
 
-        val profileViewModelFactory = ProfileViewModelFactory(requireContext())
-        val profileViewModel = ViewModelProvider(requireActivity(), profileViewModelFactory)[ProfileViewModel::class.java]
+        // Use ProfileViewModelFactory correctly
+        val profileFactory = ProfileViewModelFactory(appContext)
+        val profileViewModel = ViewModelProvider(requireActivity(), profileFactory)[ProfileViewModel::class.java]
 
-        val factory = NowPlayingViewModelFactory(likedSongDao, songDao, profileViewModel)
+        val factory = NowPlayingViewModelFactory(likedSongDao, songDao, profileViewModel, appContext) // Pass AppContext
         viewModel = ViewModelProvider(requireActivity(), factory)[NowPlayingViewModel::class.java]
+
+        // Make title scroll
+        binding.textTitle.isSelected = true
+
 
         viewModel.currSong.observe(viewLifecycleOwner) { song ->
             if (song != null) {
                 binding.textTitle.text = song.title
                 binding.textArtist.text = song.artist
+                binding.root.visibility = View.VISIBLE // Show mini player if there's a song
 
                 when {
-                    song.coverResId != null -> {
-                        Glide.with(binding.root)
-                            .load(song.coverResId)
-                            .diskCacheStrategy(DiskCacheStrategy.ALL)
-                            .into(binding.imageCover)
-                    }
-                    !song.coverPath.isNullOrEmpty() -> {
-                        Glide.with(binding.root)
-                            .load(song.coverPath.toUri())
-                            .diskCacheStrategy(DiskCacheStrategy.ALL)
-                            .into(binding.imageCover)
-                    }
-                    else -> {
-                        Glide.with(binding.root)
-                            .load(R.drawable.album_default) // 👈 fallback image
-                            .into(binding.imageCover)
-                    }
+                    song.coverResId != null -> Glide.with(this).load(song.coverResId).diskCacheStrategy(DiskCacheStrategy.ALL).error(R.drawable.album_default).into(binding.imageCover)
+                    !song.coverPath.isNullOrEmpty() -> Glide.with(this).load(song.coverPath.toUri()).diskCacheStrategy(DiskCacheStrategy.ALL).error(R.drawable.album_default).into(binding.imageCover)
+                    else -> Glide.with(this).load(R.drawable.album_default).into(binding.imageCover)
                 }
+            } else {
+                binding.root.visibility = View.GONE // Hide if no song
             }
         }
 
@@ -77,31 +70,47 @@ class MiniPlayerFragment : Fragment() {
         }
 
         viewModel.isLiked.observe(viewLifecycleOwner) { isLiked ->
-            if (isLiked) {
-                binding.btnFavorite.setImageResource(R.drawable.ic_heart_filled)
-            } else {
-                binding.btnFavorite.setImageResource(R.drawable.ic_heart_outline)
+            binding.btnFavorite.setImageResource(
+                if (isLiked) R.drawable.ic_heart_filled else R.drawable.ic_heart_outline
+            )
+        }
+
+        // Observe active audio output
+        viewModel.activeAudioOutputInfo.observe(viewLifecycleOwner) { outputInfo ->
+            outputInfo?.let {
+                binding.ivMiniAudioOutputIcon.setImageResource(it.iconResId)
+                // Optionally set content description for accessibility
+                binding.ivMiniAudioOutputIcon.contentDescription = getString(R.string.playing_on, it.name)
             }
         }
+
 
         binding.btnFavorite.setOnClickListener {
-            val currentSong = viewModel.currSong.value
-            currentSong?.let { song ->
-                viewModel.toggleLike(song)
-            }
+            viewModel.currSong.value?.let { song -> viewModel.toggleLike(song) }
         }
 
-        binding.btnPlayPause.setOnClickListener {
-            viewModel.togglePlayPause()
-        }
+        binding.btnPlayPause.setOnClickListener { viewModel.togglePlayPause() }
 
         binding.root.setOnClickListener {
-            val navHostFragment = requireActivity()
-                .supportFragmentManager
-                .findFragmentById(R.id.nav_host_fragment) as? androidx.navigation.fragment.NavHostFragment
-
-            val navController = navHostFragment?.navController
-            navController?.navigate(R.id.songDetailFragment)
+            val navHostFragment = requireActivity().supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as? androidx.navigation.fragment.NavHostFragment
+            navHostFragment?.navController?.navigate(R.id.songDetailFragment)
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Ensure mini-player visibility is correct based on current song
+        if (viewModel.currSong.value == null) {
+            binding.root.visibility = View.GONE
+        } else {
+            binding.root.visibility = View.VISIBLE
+        }
+        viewModel.updateActiveAudioOutput() // Refresh on resume
+    }
+
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null // Clear binding
     }
 }

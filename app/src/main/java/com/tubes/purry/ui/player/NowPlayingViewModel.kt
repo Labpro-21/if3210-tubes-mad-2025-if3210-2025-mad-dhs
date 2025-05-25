@@ -9,6 +9,9 @@ import com.tubes.purry.data.model.ProfileData
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import com.tubes.purry.data.model.Song
 import com.tubes.purry.ui.profile.ProfileViewModel
 import kotlinx.coroutines.Dispatchers
@@ -17,11 +20,13 @@ import kotlinx.coroutines.withContext
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import com.tubes.purry.data.model.SongInQueue
+import com.tubes.purry.utils.AudioOutputManager
 
 class NowPlayingViewModel(
     private val likedSongDao: LikedSongDao,
     private val songDao: SongDao,
-    private val profileViewModel: ProfileViewModel
+    private val profileViewModel: ProfileViewModel,
+    private val applicationContext: Context // Added application context
 ) : ViewModel() {
 
     private val _currSong = MutableLiveData<Song?>()
@@ -30,7 +35,6 @@ class NowPlayingViewModel(
     private val _isPlaying = MutableLiveData<Boolean>(false) // Default to false
     val isPlaying: LiveData<Boolean> = _isPlaying
 
-    // ... (other LiveData and properties) ...
     private val _isLiked = MutableLiveData<Boolean>()
     val isLiked: LiveData<Boolean> = _isLiked
 
@@ -46,13 +50,18 @@ class NowPlayingViewModel(
 
     private val _repeatMode = MutableLiveData<RepeatMode>(RepeatMode.NONE)
     val repeatMode: LiveData<RepeatMode> = _repeatMode
-    enum class RepeatMode { NONE, ONE, ALL }
 
+    // LiveData for active audio output
+    private val _activeAudioOutputInfo = MutableLiveData<AudioOutputManager.ActiveOutputInfo>()
+    val activeAudioOutputInfo: LiveData<AudioOutputManager.ActiveOutputInfo> = _activeAudioOutputInfo
+
+    enum class RepeatMode { NONE, ONE, ALL }
 
     init {
         // Set up PlayerController callbacks
         PlayerController.onCompletion = {
             Log.d("NowPlayingViewModel", "PlayerController.onCompletion triggered. RepeatMode: ${_repeatMode.value}")
+            updateActiveAudioOutput()
             // Ensure this runs on the main thread as it might update UI indirectly
             viewModelScope.launch(Dispatchers.Main) {
                 val currentContext = PlayerController.appContext // Get context from PlayerController
@@ -107,6 +116,18 @@ class NowPlayingViewModel(
         }
     }
 
+    fun updateActiveAudioOutput() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val info = AudioOutputManager.getActiveAudioOutputInfo(applicationContext)
+            _activeAudioOutputInfo.postValue(info)
+        }
+    }
+
+    private fun getCurrentSongInQueue(): SongInQueue? {
+        val currId = _currSong.value?.id ?: return null
+        return _manualQueue.value?.find { it.song.id == currId }
+    }
+
     fun playSong(song: Song, context: Context, isReplay: Boolean = false) {
         _isPlaying.value = true // Optimistically set to true
 
@@ -152,14 +173,14 @@ class NowPlayingViewModel(
     }
 
     private fun pauseSong() {
-        PlayerController.pause()
         _isPlaying.value = false
+        PlayerController.pause()
     }
 
     private fun resumeSong() {
-        if (PlayerController.currentlyPlaying != null) {
-            PlayerController.resume()
+        if (!PlayerController.isPlaying()) {
             _isPlaying.value = true
+            PlayerController.resume()
         } else {
             Log.w("NowPlayingViewModel", "Resume called but no current song in PlayerController.")
             // Optionally, try to play the first song in the queue if available
@@ -177,21 +198,6 @@ class NowPlayingViewModel(
             resumeSong()
         }
     }
-
-    fun nextSong(context: Context, fromUserAction: Boolean = true) {
-        Log.d("NowPlayingViewModel", "nextSong called. fromUserAction: $fromUserAction, RepeatMode: ${_repeatMode.value}")
-        if (fromUserAction && _repeatMode.value == RepeatMode.ONE) {
-            // If user explicitly hits next, disable repeat ONE for this action
-            // and behave as if repeat ALL or NONE.
-            playNextInQueue(context, forceAdvance = true)
-        } else {
-            playNextInQueue(context)
-        }
-    }
-
-
-    // ... (getUserIdBlocking, addToQueue, setQueueFromClickedSong, removeFromQueue as before)
-    // Make sure they use context.applicationContext when calling PlayerController methods
 
     fun toggleLike(song: Song) {
         viewModelScope.launch {
@@ -247,7 +253,6 @@ class NowPlayingViewModel(
                         profileViewModel.profileData.removeObserver(this) // Clean up observer
                         continuation.resume(value.id)
                     }
-                    // Optional: Add a timeout or handle case where it never becomes non-null
                 }
             }
             // Observe on the main thread
@@ -274,87 +279,51 @@ class NowPlayingViewModel(
         }
     }
 
-    fun setQueueFromClickedSong(clickedSong: Song, allSongsFromSource: List<Song>, context: Context) {
-        Log.d("NowPlayingViewModel", "Setting queue from clicked song: ${clickedSong.title}")
-        originalAllSongs = allSongsFromSource.distinctBy { it.id } // Ensure unique songs
+    fun setQueueFromClickedSong(clicked: Song, allSongs: List<Song>, context: Context) {
+        originalAllSongs = allSongs
 
         val newMainQueue = mutableListOf<SongInQueue>()
-        newMainQueue.add(SongInQueue(clickedSong, fromManualQueue = false)) // Clicked song first
+        newMainQueue.add(SongInQueue(clicked, fromManualQueue = false))
+        newMainQueue.addAll(allSongs.filter { it.id != clicked.id }.map { SongInQueue(it, false) })
 
-        // Add rest of the songs, ensuring clicked song isn't duplicated if it was part of originalAllSongs
-        newMainQueue.addAll(
-            originalAllSongs
-                .filter { it.id != clickedSong.id }
-                .map { SongInQueue(it, fromManualQueue = false) }
-        )
-
-        _mainQueue.postValue(newMainQueue)
-        _manualQueue.postValue(mutableListOf()) // Clear manual queue
-
-        currentQueueIndex = 0 // Clicked song is at index 0
-        playSong(clickedSong, context.applicationContext)
+        _manualQueue.value = mutableListOf()
+        _mainQueue.value = newMainQueue
+        currentQueueIndex = 0
+        playSong(clicked, context)
     }
 
-
     fun removeFromQueue(deletedSongId: String, context: Context) {
-        val wasCurrentPlaying = PlayerController.currentlyPlaying?.id == deletedSongId
+        val wasCurrent = _currSong.value?.id == deletedSongId
 
-        var foundAndRemoved = false
+        val manualQueueList = _manualQueue.value ?: mutableListOf()
+        val manualIndex = manualQueueList.indexOfFirst { it.song.id == deletedSongId }
 
-        // Try removing from manual queue first
-        _manualQueue.value?.let { currentManualQueue ->
-            val newManualQueue = currentManualQueue.filterNot { it.song.id == deletedSongId }.toMutableList()
-            if (newManualQueue.size < currentManualQueue.size) {
-                _manualQueue.postValue(newManualQueue)
-                foundAndRemoved = true
+        if (manualIndex != -1) {
+            manualQueueList.removeAt(manualIndex)
+            _manualQueue.value = manualQueueList
+        } else {
+            val mainQueueList = _mainQueue.value?.toMutableList() ?: mutableListOf()
+            val mainIndex = mainQueueList.indexOfFirst { it.song.id == deletedSongId }
+
+            if (mainIndex != -1) {
+                mainQueueList.removeAt(mainIndex)
+                _mainQueue.value = mainQueueList
+                if (mainIndex < currentQueueIndex) currentQueueIndex--
             }
         }
 
-        // If not in manual or still need to check main
-        if (!foundAndRemoved) {
-            _mainQueue.value?.let { currentMainQueue ->
-                val itemIndexInMain = currentMainQueue.indexOfFirst { it.song.id == deletedSongId }
-                if (itemIndexInMain != -1) {
-                    val newMainQueue = currentMainQueue.filterNot { it.song.id == deletedSongId }
-                    _mainQueue.postValue(newMainQueue)
-
-                    if (itemIndexInMain < currentQueueIndex) {
-                        currentQueueIndex--
-                    } else if (itemIndexInMain == currentQueueIndex && !wasCurrentPlaying) {
-                        // If it was the current index but NOT the currently playing song
-                        // (e.g. queue was modified externally), adjust index.
-                        // This case is less likely if PlayerController.currentlyPlaying is source of truth
-                        currentQueueIndex = if (newMainQueue.isEmpty()) -1 else currentQueueIndex.coerceAtMost(newMainQueue.size -1)
-
-                    }
-                    foundAndRemoved = true
-                }
-            }
-        }
-
-        originalAllSongs = originalAllSongs.filterNot { it.id == deletedSongId }
-
-
-        if (wasCurrentPlaying) {
-            Log.d("NowPlayingViewModel", "Removed currently playing song: $deletedSongId. Playing next.")
-            PlayerController.releaseMediaPlayer() // Stop current playback
-            playNextInQueue(context.applicationContext, playEvenIfEmpty = false) // playEvenIfEmpty might need adjustment
-        } else if (foundAndRemoved) {
-            Log.d("NowPlayingViewModel", "Removed song $deletedSongId from queue.")
+        if (wasCurrent) {
+            playNextInQueue(context)
         }
     }
 
 
     private fun removeCurrentFromQueue() {
-        val currentSongObject = PlayerController.currentlyPlaying ?: return
-        // This function is mainly for when a manually queued song finishes and shouldn't repeat with the main queue.
-        _manualQueue.value?.let { manual ->
-            val isManual = manual.any {it.song.id == currentSongObject.id && it.fromManualQueue }
-            if(isManual) {
-                val updatedManualQueue = manual.filterNot { it.song.id == currentSongObject.id }.toMutableList()
-                _manualQueue.postValue(updatedManualQueue)
-                Log.d("NowPlayingViewModel", "Removed ${currentSongObject.title} from manual queue after completion.")
-            }
+        val currentInQueue = getCurrentSongInQueue()
+        if (currentInQueue?.fromManualQueue == true) {
+            val updatedManual = _manualQueue.value?.toMutableList()
+            updatedManual?.removeIf { it.song.id == currentInQueue.song.id }
+            _manualQueue.value = updatedManual
         }
     }
 
@@ -422,75 +391,42 @@ class NowPlayingViewModel(
         }
     }
 
-
+    fun nextSong(context: Context, fromUserAction: Boolean = true) {
+        Log.d("NowPlayingViewModel", "nextSong called. fromUserAction: $fromUserAction, RepeatMode: ${_repeatMode.value}")
+        if (fromUserAction && _repeatMode.value == RepeatMode.ONE) {
+            // If user explicitly hits next, disable repeat ONE for this action
+            // and behave as if repeat ALL or NONE.
+            playNextInQueue(context, forceAdvance = true)
+        } else {
+            playNextInQueue(context)
+        }
+    }
 
     fun previousSong(context: Context) {
         val main = _mainQueue.value.orEmpty()
-        if (main.isEmpty()) {
-            Log.d("NowPlayingViewModel", "PreviousSong: Main queue empty.")
-            return
-        }
+        if (main.isEmpty()) return
 
-        // If shuffling, "previous" might mean a new random song or actual previous,
-        // For simplicity, let's make it play a new random if shuffling.
         if (_isShuffling.value == true) {
-            var prevIndex = (0 until main.size).random()
-            if (main.size > 1 && main[prevIndex].song.id == PlayerController.currentlyPlaying?.id) {
-                prevIndex = (prevIndex - 1 + main.size) % main.size // try one before
-            }
-            currentQueueIndex = prevIndex
-            Log.d("NowPlayingViewModel", "Shuffling: Playing previous (random) at index $currentQueueIndex: ${main[currentQueueIndex].song.title}")
+            val randomSong = main.random()
+            currentQueueIndex = main.indexOf(randomSong)
+            playSong(randomSong.song, context)
         } else {
-            currentQueueIndex--
-        }
-
-        if (currentQueueIndex < 0) {
-            if (_repeatMode.value == RepeatMode.ALL && main.isNotEmpty()) {
-                currentQueueIndex = main.size - 1 // Loop to end
-                Log.d("NowPlayingViewModel", "Start of queue, Repeat.ALL: Looping to end. Index: $currentQueueIndex")
-            } else {
-                Log.d("NowPlayingViewModel", "Start of queue, No Repeat: Resetting to first song or stopping if already there.")
-                // Behavior: if at start and press prev, either restart current or do nothing.
-                // For now, let's restart current song if possible, or just stay.
-                // Or, set index to 0 and let playSong handle it (might restart or continue if already playing)
-                currentQueueIndex = 0
-                if (PlayerController.currentlyPlaying != null && PlayerController.currentlyPlaying!!.id == main[currentQueueIndex].song.id) {
-                    PlayerController.seekTo(0) // Restart current song
-                    _isPlaying.value = true // Assuming seekTo doesn't change this, but play might
-                    return
-                }
-                // If not the same song, or nothing was playing, proceed to play main[0]
-            }
-        }
-
-        if (currentQueueIndex in main.indices) {
-            val prevSongToPlay = main[currentQueueIndex].song
-            Log.d("NowPlayingViewModel", "Playing previous from main queue (Index $currentQueueIndex): ${prevSongToPlay.title}")
-            playSong(prevSongToPlay, context)
-        } else {
-            Log.w("NowPlayingViewModel", "previousSong: currentQueueIndex $currentQueueIndex is out of bounds. current song: ${PlayerController.currentlyPlaying?.title}")
-            // If it became -1 and no repeat, effectively means "do nothing" or stop.
-            // Let's try to play the first song if queue is not empty
-            if(main.isNotEmpty()){
-                currentQueueIndex = 0
+            if (currentQueueIndex > 0) {
+                currentQueueIndex--
                 playSong(main[currentQueueIndex].song, context)
-            } else {
-                PlayerController.release()
-                _currSong.postValue(null)
-                _isPlaying.postValue(false)
+            } else if (_repeatMode.value == RepeatMode.ALL && main.isNotEmpty()) {
+                currentQueueIndex = main.size - 1
+                playSong(main[currentQueueIndex].song, context)
             }
         }
     }
 
     fun clearQueue() {
-        _mainQueue.postValue(emptyList())
-        _manualQueue.postValue(mutableListOf())
-        // _currSong.postValue(null) // Don't nullify current song if player is still active with it
-        // _isPlaying.postValue(false)
+        _mainQueue.value = emptyList()
+        _manualQueue.value = mutableListOf()
+        _currSong.value = null
+        _isPlaying.value = false
         currentQueueIndex = -1
-        originalAllSongs = emptyList()
-        Log.d("NowPlayingViewModel", "Queues cleared.")
-        // PlayerController.release() // This will stop music and notification
     }
 
     fun stopPlaybackAndClearNotification() {
@@ -501,53 +437,37 @@ class NowPlayingViewModel(
         Log.d("NowPlayingViewModel", "Playback stopped and notification cleared explicitly.")
     }
 
-
     fun toggleShuffle() {
         val isNowShuffling = !(_isShuffling.value ?: false)
-        _isShuffling.postValue(isNowShuffling)
-        Log.d("NowPlayingViewModel", "Shuffle toggled. IsShuffling: $isNowShuffling")
+        _isShuffling.value = isNowShuffling
 
-        PlayerController.currentlyPlaying?.let { currentActualSong ->
-            val currentSongInQueue = SongInQueue(currentActualSong, fromManualQueue = false) // Assume it's from main for reordering
-            val newMainQueue = mutableListOf<SongInQueue>()
+        val currentSong = _currSong.value ?: return
+        val newMainQueue = mutableListOf<SongInQueue>()
 
-            if (isNowShuffling) {
-                // Keep current song, shuffle the rest of originalAllSongs
-                newMainQueue.add(currentSongInQueue)
-                val shuffledRest = originalAllSongs.filter { it.id != currentActualSong.id }.shuffled()
-                newMainQueue.addAll(shuffledRest.map { SongInQueue(it, fromManualQueue = false) })
-            } else {
-                // Revert to original order, current song first
-                newMainQueue.add(currentSongInQueue)
-                val orderedRest = originalAllSongs.filter { it.id != currentActualSong.id }
-                newMainQueue.addAll(orderedRest.map { SongInQueue(it, fromManualQueue = false) })
-            }
-            _mainQueue.postValue(newMainQueue)
-            currentQueueIndex = 0 // Current song is now at the start of the reordered main queue
-            Log.d("NowPlayingViewModel", "Queue reordered. New main queue size: ${newMainQueue.size}. Current index: $currentQueueIndex")
-        } ?: Log.d("NowPlayingViewModel", "ToggleShuffle: No current song playing, queue not reordered.")
+        if (isNowShuffling) {
+            val shuffled = originalAllSongs.shuffled().filter { it.id != currentSong.id }
+            newMainQueue.add(SongInQueue(currentSong, fromManualQueue = false))
+            newMainQueue.addAll(shuffled.map { SongInQueue(it, false) })
+        } else {
+            val ordered = originalAllSongs.filter { it.id != currentSong.id }
+            newMainQueue.add(SongInQueue(currentSong, fromManualQueue = false))
+            newMainQueue.addAll(ordered.map { SongInQueue(it, false) })
+        }
+
+        _mainQueue.value = newMainQueue
+        currentQueueIndex = 0
     }
 
-
     fun toggleRepeat() {
-        val newMode = when (_repeatMode.value) {
+        _repeatMode.value = when (_repeatMode.value) {
             RepeatMode.NONE -> RepeatMode.ALL
             RepeatMode.ALL -> RepeatMode.ONE
             RepeatMode.ONE, null -> RepeatMode.NONE
         }
-        _repeatMode.postValue(newMode)
-        PlayerController.PlayerSessionCallback.currentRepeatMode = newMode // Update static ref
-        Log.d("NowPlayingViewModel", "Repeat mode toggled to: $newMode")
     }
-
 
     override fun onCleared() {
         super.onCleared()
-        // PlayerController.fullyReleaseSession() // Release session when ViewModel is cleared
-        // Or, if playback should continue beyond ViewModel scope (e.g. via a Service),
-        // then this release should happen elsewhere (e.g. when Service is destroyed).
-        // For now, if your app structure relies on this ViewModel for playback, releasing here is okay.
-        // However, for true background play independent of UI lifecycle, a Service is better.
-        Log.d("NowPlayingViewModel", "onCleared called.")
+        PlayerController.release()
     }
 }

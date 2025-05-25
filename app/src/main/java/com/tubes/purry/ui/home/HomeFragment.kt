@@ -65,7 +65,7 @@ class HomeFragment : Fragment() {
         val profileViewModel: ProfileViewModel = ViewModelProvider(requireActivity())[ProfileViewModel::class.java]
 
         // Use custom factory
-        val factory = NowPlayingViewModelFactory(likedSongDao, songDao, profileViewModel)
+        val factory = NowPlayingViewModelFactory(likedSongDao, songDao, profileViewModel, context)
         nowPlayingViewModel = ViewModelProvider(requireActivity(), factory)[NowPlayingViewModel::class.java]
 
         setupAdapters()

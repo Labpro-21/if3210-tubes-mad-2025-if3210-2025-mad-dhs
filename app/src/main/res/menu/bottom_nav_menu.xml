@@ -12,6 +12,11 @@
         android:title="@string/title_library" />
 
     <item
+        android:id="@+id/navigation_audio_output"
+        android:icon="@drawable/ic_bluetooth_audio"
+        android:title="@string/pilih_output_audio" />
+
+    <item
         android:id="@+id/navigation_profile"
         android:icon="@drawable/ic_profile"
         android:title="@string/title_profile" />
