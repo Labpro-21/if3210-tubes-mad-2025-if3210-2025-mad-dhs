@@ -156,13 +156,21 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
                 val bundle = Bundle().apply {
                     putInt("songId", songId)
                 }
-                navController.navigate(R.id.songDetailFragment, bundle)
+
+                // ✅ Gunakan NavOptions agar tidak menumpuk fragment
+                val navOptions = androidx.navigation.NavOptions.Builder()
+                    .setLaunchSingleTop(true)
+                    .setPopUpTo(navController.graph.startDestinationId, false)
+                    .build()
+
+                navController.navigate(R.id.songDetailFragment, bundle, navOptions)
             } else {
                 Log.e("DeepLink", "Invalid songId in deep link: $rawId")
                 Toast.makeText(this, "Link tidak valid", Toast.LENGTH_SHORT).show()
             }
         }
     }
+
 
     private fun handleIntentNavigation(intent: Intent?) {
         intent?.getStringExtra("navigateTo")?.let { destination ->

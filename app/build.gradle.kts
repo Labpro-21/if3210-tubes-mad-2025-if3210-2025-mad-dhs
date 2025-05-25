@@ -101,6 +101,9 @@ dependencies {
 
     implementation("com.google.firebase:firebase-dynamic-links-ktx:21.0.1")
 
+    // ZXing untuk generate dan scan QR
+    implementation("com.journeyapps:zxing-android-embedded:4.3.0")
+
 
 
 //        implementation(libs.androidx.core.ktx)

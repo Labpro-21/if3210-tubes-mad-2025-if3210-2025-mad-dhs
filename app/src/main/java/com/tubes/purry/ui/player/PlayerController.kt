@@ -24,10 +24,15 @@ object PlayerController {
     fun play(song: Song, context: Context): Boolean {
         Log.d("PlayerController", "Masuk play(), judul: ${song.title}, url: ${song.filePath}")
 
-        if (currentlyPlaying?.id == song.id && isPlaying()) {
-            Log.d("PlayerController", "Lagu sudah diputar")
-            return true
+        if (currentlyPlaying?.id == song.id) {
+            if (isPlaying()) {
+                Log.d("PlayerController", "Lagu sudah diputar")
+                return true
+            } else {
+                Log.d("PlayerController", "Lagu sama tapi belum play, lanjut prepare")
+            }
         }
+
 
         if (isPreparing) {
             Log.d("PlayerController", "Masih mempersiapkan lagu sebelumnya")

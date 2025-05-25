@@ -67,38 +67,20 @@ class NowPlayingViewModel(
 
     fun playSong(song: Song, context: Context) {
         _isPlaying.value = true
-        Log.d("NowPlayingViewModel", "Calling PlayerController.play() with ${song.filePath}")
-
         viewModelScope.launch {
             val songWithLike = song.copy(isLiked = false)
             _currSong.postValue(songWithLike)
-
-            Log.d(
-                "NowPlayingViewModel",
-                "Song data: filePath=${song.filePath}, resId=${song.resId}"
-            )
             withContext(Dispatchers.Main) {
                 val success = PlayerController.play(songWithLike, context)
                 if (success) {
                     PlayerController.onPrepared = {
-                        val duration = PlayerController.getDuration()
-                        _currSong.postValue(_currSong.value?.copy(duration = duration))
+                        val realDuration = PlayerController.getDuration()
+                        _currSong.postValue(_currSong.value?.copy(duration = realDuration))
                         _isPlaying.postValue(PlayerController.isPlaying())
                     }
-
-                    Handler(Looper.getMainLooper()).postDelayed({
-                        _isPlaying.value = PlayerController.isPlaying()
-                    }, 300)
-
-
-                    val realDuration = PlayerController.getDuration()
-                    _currSong.value = _currSong.value?.copy(duration = realDuration)
-
                     PlayerController.onCompletion = {
                         when (_repeatMode.value) {
-                            RepeatMode.ONE -> {
-                                _currSong.value?.let { playSong(it, context) }
-                            }
+                            RepeatMode.ONE -> playSong(_currSong.value!!, context)
                             else -> {
                                 removeCurrentFromQueue()
                                 playNextInQueue(context)
@@ -106,7 +88,6 @@ class NowPlayingViewModel(
                         }
                     }
                     markSongAsRecentlyPlayed(songWithLike)
-
                     val userId = getUserIdBlocking()
                     if (userId != null) {
                         val isLiked = likedSongDao.isSongLiked(userId, songWithLike.id)
@@ -118,7 +99,8 @@ class NowPlayingViewModel(
                 }
             }
         }
-}
+    }
+
 
     private fun pauseSong() {
         PlayerController.pause()
@@ -199,24 +181,19 @@ class NowPlayingViewModel(
         val updatedManualQueue = _manualQueue.value ?: mutableListOf()
         updatedManualQueue.add(SongInQueue(song, true))
         _manualQueue.value = updatedManualQueue
-
         if (_currSong.value == null) {
+            _mainQueue.value = listOf(SongInQueue(song, true))
+            currentQueueIndex = 0
             playSong(song, context)
         }
     }
 
     fun setQueueFromClickedSong(clicked: Song, allSongs: List<Song>, context: Context) {
         originalAllSongs = allSongs
-
-//        val newMainQueue = mutableListOf<SongInQueue>()
         val newMainQueue = allSongs.map { SongInQueue(it, fromManualQueue = false) }
-//        newMainQueue.add(SongInQueue(clicked, fromManualQueue = false))
-//        newMainQueue.addAll(allSongs.filter { it.id != clicked.id }.map { SongInQueue(it, false) })
-
         _manualQueue.value = mutableListOf()
         _mainQueue.value = newMainQueue
         currentQueueIndex = newMainQueue.indexOfFirst { it.song.id == clicked.id }
-//        currentQueueIndex = 0
         playSong(clicked, context)
     }
 
@@ -241,16 +218,17 @@ class NowPlayingViewModel(
     }
 
     private fun removeCurrentFromQueue() {
-        val currentInQueue = getCurrentSongInQueue() ?: return
+        val currentInQueue = _currSong.value ?: return
         val updatedManual = _manualQueue.value?.toMutableList() ?: return
-        updatedManual.removeIf { it.song.id == currentInQueue.song.id }
+        updatedManual.removeIf { it.song.id == currentInQueue.id }
         _manualQueue.value = updatedManual
     }
 
     private fun playNextInQueue(context: Context) {
-        val queue = if (_isShuffling.value == true) shuffledQueue else _mainQueue.value.orEmpty()
+        val manualQueue = _manualQueue.value.orEmpty()
+        val mainQueue = _mainQueue.value.orEmpty()
+        val queue = if (_isShuffling.value == true) shuffledQueue else manualQueue + mainQueue
         if (queue.isEmpty()) return
-
         if (currentQueueIndex < queue.size - 1) {
             currentQueueIndex++
             playSong(queue[currentQueueIndex].song, context)
@@ -269,9 +247,10 @@ class NowPlayingViewModel(
     }
 
     fun previousSong(context: Context) {
-        val queue = if (_isShuffling.value == true) shuffledQueue else _mainQueue.value.orEmpty()
+        val manualQueue = _manualQueue.value.orEmpty()
+        val mainQueue = _mainQueue.value.orEmpty()
+        val queue = if (_isShuffling.value == true) shuffledQueue else manualQueue + mainQueue
         if (queue.isEmpty()) return
-
         if (currentQueueIndex > 0) {
             currentQueueIndex--
             playSong(queue[currentQueueIndex].song, context)
@@ -293,20 +272,15 @@ class NowPlayingViewModel(
     fun toggleShuffle() {
         val isNowShuffling = !(_isShuffling.value ?: false)
         _isShuffling.value = isNowShuffling
-
         val currentSong = _currSong.value ?: return
-//        val newMainQueue = mutableListOf<SongInQueue>()
-
         if (isNowShuffling) {
             val shuffled = originalAllSongs.shuffled()
             shuffledQueue = shuffled.map { SongInQueue(it, fromManualQueue = false) }
-
             currentQueueIndex = shuffledQueue.indexOfFirst { it.song.id == currentSong.id }
             _mainQueue.value = shuffledQueue
         } else {
             val ordered = originalAllSongs.map { SongInQueue(it, fromManualQueue = false) }
             _mainQueue.value = ordered
-
             currentQueueIndex = ordered.indexOfFirst { it.song.id == currentSong.id }
             shuffledQueue = emptyList()
         }

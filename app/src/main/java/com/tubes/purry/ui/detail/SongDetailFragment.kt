@@ -21,10 +21,9 @@ import com.tubes.purry.ui.player.NowPlayingViewModelFactory
 import com.tubes.purry.ui.player.PlayerController
 import com.tubes.purry.ui.profile.ProfileViewModel
 import com.tubes.purry.utils.formatDuration
-import android.util.Log
-import androidx.lifecycle.viewModelScope
 import androidx.navigation.fragment.findNavController
-import com.tubes.purry.utils.parseDuration
+import com.tubes.purry.utils.previewAndShareQrCode
+
 
 class SongDetailFragment : Fragment() {
     private lateinit var binding: FragmentSongDetailBinding
@@ -66,11 +65,18 @@ class SongDetailFragment : Fragment() {
 
         val songId = args.songId
         if (songId <= 0) {
-            // Handle invalid songId - maybe navigate back or show error
             Toast.makeText(requireContext(), "Invalid song ID", Toast.LENGTH_SHORT).show()
             findNavController().popBackStack()
             return
         }
+
+        val current = nowPlayingViewModel.currSong.value
+        val currentId = current?.serverId ?: -1
+
+        if (currentId != songId) {
+            nowPlayingViewModel.fetchSongById(songId, requireContext())
+        }
+
         nowPlayingViewModel.fetchSongById(songId, requireContext())
 
         nowPlayingViewModel.currSong.observe(viewLifecycleOwner) { song ->
@@ -127,7 +133,7 @@ class SongDetailFragment : Fragment() {
 //        }
 
         binding.btnPlayPause.setOnClickListener { nowPlayingViewModel.togglePlayPause() }
-        binding.btnBack.setOnClickListener { requireActivity().onBackPressedDispatcher.onBackPressed() }
+        binding.btnBack.setOnClickListener { findNavController().popBackStack() }
         binding.btnNext.setOnClickListener { nowPlayingViewModel.nextSong(requireContext()) }
         binding.btnPrev.setOnClickListener { nowPlayingViewModel.previousSong(requireContext()) }
 
@@ -194,10 +200,17 @@ class SongDetailFragment : Fragment() {
                         }
                         true
                     }
-//                    R.id.menu_add_playlist -> {
-//                        Toast.makeText(requireContext(), "Coming Soon: Add to Playlist", Toast.LENGTH_SHORT).show()
-//                        true
-//                    }
+                    R.id.menu_share_qr -> {
+                        nowPlayingViewModel.currSong.value?.let { song ->
+                            if (!song.isLocal) {
+                                previewAndShareQrCode(requireContext(), song.id, song.title, song.artist)
+                            } else {
+                                Toast.makeText(requireContext(), "Lagu lokal tidak dapat dibagikan", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                        true
+                    }
+
                     else -> false
                 }
             }
