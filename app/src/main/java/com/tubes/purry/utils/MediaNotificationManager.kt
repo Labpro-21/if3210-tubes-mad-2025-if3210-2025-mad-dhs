@@ -26,6 +26,7 @@ object MediaNotificationManager {
     private const val NOTIFICATION_ID = 1
 
     fun createNotificationChannel(context: Context) {
+        Log.w("MediaNotificationManager", "createNotificationChannel called")
         val channel = NotificationChannel(
             CHANNEL_ID,
             "Purry Music Playback",
@@ -44,6 +45,7 @@ object MediaNotificationManager {
         coverBitmap: Bitmap?,
         isPlaying: Boolean
     ) {
+        Log.w("MediaNotificationManager", "showNotification called")
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
             ContextCompat.checkSelfPermission(
                 context,

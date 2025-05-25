@@ -21,6 +21,7 @@ object PlayerController {
     private lateinit var appContext: Context
 
     fun initialize(context: Context) {
+        Log.d("PlayerController", "MediaSession initialized")
         appContext = context.applicationContext
         mediaSession = MediaSessionCompat(appContext, "PurryPlayer")
         mediaSession.setCallback(object : MediaSessionCompat.Callback() {
@@ -29,13 +30,14 @@ object PlayerController {
             override fun onStop() = release()
         })
         mediaSession.isActive = true
+        Log.w("PlayerController", "Initialize media session success")
 
         MediaNotificationManager.createNotificationChannel(appContext)
     }
 
 
     fun play(song: Song, context: Context): Boolean {
-        if (!::mediaSession.isInitialized) initialize(context)
+        initialize(context)
 
         if (currentlyPlaying?.id == song.id && isPlaying()) {
             Log.d("PlayerController", "Same song already playing.")
