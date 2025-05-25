@@ -9,6 +9,9 @@ import com.tubes.purry.data.model.ProfileData
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import com.tubes.purry.data.model.Song
 import com.tubes.purry.ui.profile.ProfileViewModel
 import kotlinx.coroutines.Dispatchers
@@ -17,11 +20,13 @@ import kotlinx.coroutines.withContext
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import com.tubes.purry.data.model.SongInQueue
+import com.tubes.purry.utils.AudioOutputManager
 
 class NowPlayingViewModel(
     private val likedSongDao: LikedSongDao,
     private val songDao: SongDao,
-    private val profileViewModel: ProfileViewModel
+    private val profileViewModel: ProfileViewModel,
+    private val applicationContext: Context // Added application context
 ) : ViewModel() {
 
     private val _currSong = MutableLiveData<Song?>()
@@ -30,7 +35,6 @@ class NowPlayingViewModel(
     private val _isPlaying = MutableLiveData<Boolean>(false) // Default to false
     val isPlaying: LiveData<Boolean> = _isPlaying
 
-    // ... (other LiveData and properties) ...
     private val _isLiked = MutableLiveData<Boolean>()
     val isLiked: LiveData<Boolean> = _isLiked
 
@@ -46,16 +50,24 @@ class NowPlayingViewModel(
 
     private val _repeatMode = MutableLiveData<RepeatMode>(RepeatMode.NONE)
     val repeatMode: LiveData<RepeatMode> = _repeatMode
-    enum class RepeatMode { NONE, ONE, ALL }
 
+    // LiveData for active audio output
+    private val _activeAudioOutputInfo = MutableLiveData<AudioOutputManager.ActiveOutputInfo>()
+    val activeAudioOutputInfo: LiveData<AudioOutputManager.ActiveOutputInfo> = _activeAudioOutputInfo
+
+    enum class RepeatMode { NONE, ONE, ALL }
 
     init {
         // Set up PlayerController callbacks
         PlayerController.onCompletion = {
-            Log.d("NowPlayingViewModel", "PlayerController.onCompletion triggered. RepeatMode: ${_repeatMode.value}")
+            Log.d(
+                "NowPlayingViewModel",
+                "PlayerController.onCompletion triggered. RepeatMode: ${_repeatMode.value}"
+            )
             // Ensure this runs on the main thread as it might update UI indirectly
             viewModelScope.launch(Dispatchers.Main) {
-                val currentContext = PlayerController.appContext // Get context from PlayerController
+                val currentContext =
+                    PlayerController.appContext // Get context from PlayerController
                 if (currentContext == null) {
                     Log.e("NowPlayingViewModel", "Context is null in onCompletion, cannot proceed.")
                     return@launch
@@ -63,12 +75,16 @@ class NowPlayingViewModel(
                 when (_repeatMode.value) {
                     RepeatMode.ONE -> {
                         _currSong.value?.let { currentSong ->
-                            Log.d("NowPlayingViewModel", "Repeat.ONE: Replaying ${currentSong.title}")
+                            Log.d(
+                                "NowPlayingViewModel",
+                                "Repeat.ONE: Replaying ${currentSong.title}"
+                            )
                             // We need context here. Consider how to get it reliably.
                             // For now, assuming PlayerController holds an application context.
                             playSong(currentSong, currentContext, isReplay = true)
                         }
                     }
+
                     else -> {
                         Log.d("NowPlayingViewModel", "Repeat.NONE or Repeat.ALL: Playing next.")
                         removeCurrentFromQueue() // Only if it was manually added and should be one-shot
@@ -101,10 +117,25 @@ class NowPlayingViewModel(
                 }
             }
         }
+
         // Update PlayerController's static repeat mode reference
         _repeatMode.observeForever { mode ->
             PlayerController.PlayerSessionCallback.currentRepeatMode = mode ?: RepeatMode.NONE
         }
+
+        updateActiveAudioOutput() // Initial check
+    }
+
+    fun updateActiveAudioOutput() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val info = AudioOutputManager.getActiveAudioOutputInfo(applicationContext)
+            _activeAudioOutputInfo.postValue(info)
+        }
+    }
+
+    private fun getCurrentSongInQueue(): SongInQueue? {
+        val currId = _currSong.value?.id ?: return null
+        return _manualQueue.value?.find { it.song.id == currId }
     }
 
     fun playSong(song: Song, context: Context, isReplay: Boolean = false) {
@@ -152,8 +183,8 @@ class NowPlayingViewModel(
     }
 
     private fun pauseSong() {
-        PlayerController.pause()
         _isPlaying.value = false
+        PlayerController.pause()
     }
 
     private fun resumeSong() {
@@ -188,7 +219,6 @@ class NowPlayingViewModel(
             playNextInQueue(context)
         }
     }
-
 
     // ... (getUserIdBlocking, addToQueue, setQueueFromClickedSong, removeFromQueue as before)
     // Make sure they use context.applicationContext when calling PlayerController methods
@@ -294,7 +324,6 @@ class NowPlayingViewModel(
         currentQueueIndex = 0 // Clicked song is at index 0
         playSong(clickedSong, context.applicationContext)
     }
-
 
     fun removeFromQueue(deletedSongId: String, context: Context) {
         val wasCurrentPlaying = PlayerController.currentlyPlaying?.id == deletedSongId
@@ -422,8 +451,6 @@ class NowPlayingViewModel(
         }
     }
 
-
-
     fun previousSong(context: Context) {
         val main = _mainQueue.value.orEmpty()
         if (main.isEmpty()) {
@@ -431,8 +458,6 @@ class NowPlayingViewModel(
             return
         }
 
-        // If shuffling, "previous" might mean a new random song or actual previous,
-        // For simplicity, let's make it play a new random if shuffling.
         if (_isShuffling.value == true) {
             var prevIndex = (0 until main.size).random()
             if (main.size > 1 && main[prevIndex].song.id == PlayerController.currentlyPlaying?.id) {
@@ -482,6 +507,7 @@ class NowPlayingViewModel(
         }
     }
 
+
     fun clearQueue() {
         _mainQueue.postValue(emptyList())
         _manualQueue.postValue(mutableListOf())
@@ -528,7 +554,6 @@ class NowPlayingViewModel(
         } ?: Log.d("NowPlayingViewModel", "ToggleShuffle: No current song playing, queue not reordered.")
     }
 
-
     fun toggleRepeat() {
         val newMode = when (_repeatMode.value) {
             RepeatMode.NONE -> RepeatMode.ALL
@@ -539,7 +564,6 @@ class NowPlayingViewModel(
         PlayerController.PlayerSessionCallback.currentRepeatMode = newMode // Update static ref
         Log.d("NowPlayingViewModel", "Repeat mode toggled to: $newMode")
     }
-
 
     override fun onCleared() {
         super.onCleared()

@@ -1,19 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/songDetailRootLayout"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:background="@android:color/black">
 
-    <!-- Top Bar: Back & Options -->
     <ImageButton
         android:id="@+id/btnBack"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_margin="16dp"
         android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="@null"
+        android:contentDescription="@string/content_desc_back_button"
         android:src="@drawable/ic_arrow_down"
+        app:tint="@android:color/white"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -23,21 +24,19 @@
         android:layout_height="48dp"
         android:layout_margin="16dp"
         android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="@null"
+        android:contentDescription="@string/content_desc_options_button"
         android:src="@drawable/ic_more_vert"
+        app:tint="@android:color/white"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- Album Art -->
-
-    <!-- Title and Favorite -->
     <ImageView
         android:id="@+id/ivCover"
         android:layout_width="308dp"
         android:layout_height="306dp"
         android:layout_margin="32dp"
         android:layout_marginTop="60dp"
-        android:contentDescription="@null"
+        android:contentDescription="@string/content_desc_album_art"
         android:scaleType="centerCrop"
         android:src="@drawable/album_default"
         app:layout_constraintDimensionRatio="1:1"
@@ -64,20 +63,18 @@
         app:layout_constraintStart_toStartOf="@+id/ivCover"
         app:layout_constraintEnd_toStartOf="@id/btnFavorite" />
 
-    <!-- Artist -->
-
     <ImageButton
         android:id="@+id/btnFavorite"
         android:layout_width="27dp"
         android:layout_height="38dp"
         android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="@null"
+        android:contentDescription="@string/content_desc_toggle_favorite"
         android:src="@drawable/ic_heart_outline"
+        app:tint="@color/white_gray"
         app:layout_constraintEnd_toEndOf="@+id/ivCover"
-        app:layout_constraintTop_toTopOf="@id/tvTitle" />
+        app:layout_constraintTop_toTopOf="@id/tvTitle"
+        app:layout_constraintBottom_toBottomOf="@id/tvTitle"/>
 
-
-    <!-- SeekBar -->
     <TextView
         android:id="@+id/tvArtist"
         android:layout_width="0dp"
@@ -86,25 +83,51 @@
         android:text="@string/artist"
         android:textColor="@android:color/white"
         android:textSize="20sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintEnd_toEndOf="@id/btnFavorite"
         app:layout_constraintStart_toStartOf="@+id/ivCover"
         app:layout_constraintTop_toBottomOf="@id/tvTitle" />
 
+    <LinearLayout
+        android:id="@+id/audioOutputIndicatorLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginTop="8dp"
+        app:layout_constraintStart_toStartOf="@id/tvArtist"
+        app:layout_constraintTop_toBottomOf="@id/tvArtist">
+
+        <ImageView
+            android:id="@+id/ivAudioOutputIcon"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:src="@drawable/ic_speaker"
+            app:tint="@color/white"
+            android:layout_marginEnd="4dp"
+            android:contentDescription="@string/content_desc_audio_output_icon"/>
+
+        <TextView
+            android:id="@+id/tvAudioOutputName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/audio_output_internal_speaker"
+            android:textColor="@color/white"
+            android:textSize="12sp"/>
+    </LinearLayout>
+
     <SeekBar
         android:id="@+id/seekBar"
-        android:layout_width="323dp"
+        android:layout_width="0dp"
         android:layout_height="30dp"
-        android:layout_marginTop="36dp"
+        android:layout_marginTop="16dp"
         android:progress="30"
         android:progressBackgroundTint="#777777"
         android:progressTint="@android:color/white"
         android:thumbTint="@android:color/white"
-        app:layout_constraintEnd_toEndOf="@+id/btnFavorite"
+        app:layout_constraintEnd_toEndOf="@+id/ivCover"
         app:layout_constraintStart_toStartOf="@+id/ivCover"
-        app:layout_constraintTop_toBottomOf="@id/tvArtist" />
+        app:layout_constraintTop_toBottomOf="@id/audioOutputIndicatorLayout" />
 
-    <!-- Time -->
     <TextView
         android:id="@+id/tvCurrentTime"
         android:layout_width="wrap_content"
@@ -125,46 +148,54 @@
         app:layout_constraintEnd_toEndOf="@id/seekBar"
         app:layout_constraintTop_toBottomOf="@id/seekBar" />
 
-    <!-- Playback Controls -->
     <LinearLayout
         android:id="@+id/playerControls"
-        android:layout_width="323dp"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_margin="24dp"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="24dp"
         android:layout_marginBottom="32dp"
-        android:gravity="center"
+        android:gravity="center_vertical"
         android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/ivCover"
+        app:layout_constraintStart_toStartOf="@+id/tvCurrentTime"
         app:layout_constraintTop_toBottomOf="@id/tvCurrentTime"
         app:layout_constraintVertical_bias="0.4">
 
         <ImageButton
             android:id="@+id/btnShuffle"
-            android:layout_width="77dp"
+            android:layout_width="48dp"
             android:layout_height="48dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@null"
-            android:src="@drawable/ic_shuffle" />
+            android:contentDescription="@string/content_desc_shuffle_button"
+            android:padding="8dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_shuffle"
+            app:tint="@android:color/white" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
 
         <ImageButton
             android:id="@+id/btnPrev"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@null"
-            android:src="@drawable/ic_skip_previous" />
+            android:contentDescription="@string/content_desc_previous_button"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_skip_previous"
+            app:tint="@android:color/white" />
 
         <ImageButton
             android:id="@+id/btnPlayPause"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
             android:background="@android:color/transparent"
-            android:contentDescription="@null"
+            android:contentDescription="@string/content_desc_play_pause_button"
             android:scaleType="centerInside"
             android:src="@drawable/ic_pause_btn" />
 
@@ -173,16 +204,26 @@
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@null"
-            android:src="@drawable/ic_skip_next" />
+            android:contentDescription="@string/content_desc_next_button"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_skip_next"
+            app:tint="@android:color/white" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
 
         <ImageButton
             android:id="@+id/btnRepeat"
-            android:layout_width="68dp"
+            android:layout_width="48dp"
             android:layout_height="48dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@null"
-            android:src="@drawable/ic_repeat" />
+            android:contentDescription="@string/content_desc_repeat_button"
+            android:padding="8dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_repeat"
+            app:tint="@android:color/white" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
