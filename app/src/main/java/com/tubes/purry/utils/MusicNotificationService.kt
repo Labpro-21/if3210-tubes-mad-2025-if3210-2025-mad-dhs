@@ -290,10 +290,10 @@ class MusicNotificationService : Service() {
         updateRunnable = object : Runnable {
             override fun run() {
                 if (PlayerController.isPlaying()) {
-                    Log.d("PeriodicUpdate", "Updating playback state - Playing")
+//                    Log.d("PeriodicUpdate", "Updating playback state - Playing")
                     updatePlaybackState()
                 } else {
-                    Log.d("PeriodicUpdate", "Player paused, updating state once")
+//                    Log.d("PeriodicUpdate", "Player paused, updating state once")
                     updatePlaybackState()
                 }
 

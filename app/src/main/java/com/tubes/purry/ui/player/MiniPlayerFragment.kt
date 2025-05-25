@@ -6,16 +6,13 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.fragment.NavHostFragment
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.tubes.purry.PurrytifyApplication
 import com.tubes.purry.R
-import com.tubes.purry.data.local.AppDatabase
 import com.tubes.purry.databinding.FragmentMiniPlayerBinding
-import com.tubes.purry.ui.profile.ProfileViewModel
-import com.tubes.purry.ui.profile.ProfileViewModelFactory
 import android.util.Log
+import androidx.navigation.fragment.NavHostFragment
 
 class MiniPlayerFragment : Fragment() {
     private lateinit var viewModel: NowPlayingViewModel
@@ -32,17 +29,12 @@ class MiniPlayerFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val appContext = requireContext().applicationContext
-        val likedSongDao = AppDatabase.getDatabase(appContext).LikedSongDao()
-        val songDao = AppDatabase.getDatabase(appContext).songDao()
-        val profileViewModelFactory = ProfileViewModelFactory(requireActivity().application)
-        val profileViewModel = ViewModelProvider(requireActivity(), profileViewModelFactory)[ProfileViewModel::class.java]
-
-        val factory = NowPlayingViewModelFactory(requireActivity().application, likedSongDao, songDao, profileViewModel)
-        viewModel = ViewModelProvider(requireActivity(), factory)[NowPlayingViewModel::class.java]
+        viewModel = (requireActivity().application as PurrytifyApplication).nowPlayingViewModel
 
         viewModel.currSong.observe(viewLifecycleOwner) { song ->
+            Log.d("MiniPlayerFragment", "currSong updated: ${song?.title}")
             if (song != null) {
+                binding.root.visibility = View.VISIBLE
                 binding.textTitle.text = song.title
                 binding.textArtist.text = song.artist
 
@@ -56,6 +48,8 @@ class MiniPlayerFragment : Fragment() {
                     .load(image)
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
                     .into(binding.imageCover)
+            } else {
+                binding.root.visibility = View.GONE
             }
         }
 
@@ -104,21 +98,18 @@ class MiniPlayerFragment : Fragment() {
                     return@setOnClickListener
                 }
 
-                // FIX: Always pass songId as String and use other parameters for type distinction
                 val bundle = Bundle().apply {
                     if (currentSong.isLocal) {
-                        // Untuk lagu lokal
                         putString("songId", currentSong.id)
                         putBoolean("isLocal", true)
-                        putString("id", currentSong.id) // backward compatibility
+                        putString("id", currentSong.id)
                     } else {
-                        // Untuk lagu server - KIRIM SEBAGAI STRING, bukan Int
-                        putString("songId", currentSong.id) // "srv-194"
+                        putString("songId", currentSong.id)
                         putBoolean("isLocal", false)
                         currentSong.serverId?.let { serverId ->
-                            putInt("serverId", serverId) // Keep serverId as Int for processing
+                            putInt("serverId", serverId)
                         }
-                        putString("id", currentSong.id) // backward compatibility
+                        putString("id", currentSong.id)
                     }
 
                     Log.d("MiniPlayerFragment", "Navigating to song detail:")

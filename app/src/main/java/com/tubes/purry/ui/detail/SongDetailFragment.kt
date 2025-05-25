@@ -19,20 +19,14 @@ import com.tubes.purry.ui.player.NowPlayingViewModelFactory
 import com.tubes.purry.ui.profile.ProfileViewModel
 import com.tubes.purry.utils.previewAndShareQrCode
 import android.util.Log
+import com.tubes.purry.PurrytifyApplication
 
 class SongDetailFragment : Fragment() {
     private lateinit var binding: FragmentSongDetailBinding
     private var isDragging = false
 
     private val profileViewModel: ProfileViewModel by activityViewModels()
-    private val nowPlayingViewModel: NowPlayingViewModel by activityViewModels {
-        NowPlayingViewModelFactory(
-            requireActivity().application,
-            AppDatabase.getDatabase(requireContext()).LikedSongDao(),
-            AppDatabase.getDatabase(requireContext()).songDao(),
-            profileViewModel
-        )
-    }
+    private lateinit var nowPlayingViewModel: NowPlayingViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -44,14 +38,9 @@ class SongDetailFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        // Handle arguments dengan cara yang diperbaiki
+        nowPlayingViewModel = (requireActivity().application as PurrytifyApplication).nowPlayingViewModel
         handleArguments()
-
-        // Setup observers
         setupObservers()
-
-        // Setup click listeners
         setupClickListeners()
     }
 

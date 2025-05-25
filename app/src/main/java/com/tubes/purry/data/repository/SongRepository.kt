@@ -1,5 +1,6 @@
 package com.tubes.purry.data.repository
 
+import androidx.lifecycle.LiveData
 import com.tubes.purry.data.local.LikedSongDao
 import com.tubes.purry.data.local.SongDao
 import com.tubes.purry.data.model.Song
@@ -13,7 +14,7 @@ class SongRepository(private val songDao: SongDao, private val likedSongDao: Lik
     fun getRecentlyPlayed(): Flow<List<Song>> = songDao.getRecentlyPlayed()
     fun getTotalSongCount(): Flow<Int> = songDao.getTotalSongCount()
     fun getListenedSongsCount(): Flow<Int> = songDao.getListenedSongsCount()
-    fun getLikedSongsByUser(userId: Int): Flow<List<Song>> {
+    fun getLikedSongsByUser(userId: Int): LiveData<List<Song>> {
         return likedSongDao.getLikedSongsByUser(userId)
     }
     fun getLikedCountByUser(userId: Int): Flow<Int> {

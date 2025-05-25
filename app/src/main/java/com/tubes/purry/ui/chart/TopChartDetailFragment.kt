@@ -8,7 +8,6 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
@@ -19,12 +18,12 @@ import com.tubes.purry.data.model.Song
 import com.tubes.purry.data.model.toTemporarySong
 import com.tubes.purry.databinding.FragmentTopChartDetailBinding
 import com.tubes.purry.ui.player.NowPlayingViewModel
-import com.tubes.purry.ui.player.NowPlayingViewModelFactory
 import com.tubes.purry.ui.profile.ProfileViewModel
 import com.tubes.purry.ui.profile.ProfileViewModelFactory
 import com.tubes.purry.utils.DownloadUtils
 import com.tubes.purry.utils.parseDuration
 import com.tubes.purry.utils.SessionManager
+import com.tubes.purry.PurrytifyApplication
 import kotlinx.coroutines.launch
 import java.util.UUID
 
@@ -43,16 +42,7 @@ class TopChartDetailFragment : Fragment() {
         ProfileViewModelFactory(requireActivity().application)
     }
 
-
-    private val nowPlayingViewModel: NowPlayingViewModel by activityViewModels {
-        NowPlayingViewModelFactory(
-            requireActivity().application,
-            AppDatabase.getDatabase(requireContext()).LikedSongDao(),
-            AppDatabase.getDatabase(requireContext()).songDao(),
-            ViewModelProvider(requireActivity(), ProfileViewModelFactory(requireActivity().application))[ProfileViewModel::class.java]
-            //            ViewModelProvider(requireActivity(), ProfileViewModelFactory(requireContext()))[ProfileViewModel::class.java]
-        )
-    }
+    private lateinit var nowPlayingViewModel: NowPlayingViewModel
 
     private val chartViewModel: ChartViewModel by viewModels {
         ChartViewModelFactory()
@@ -67,6 +57,10 @@ class TopChartDetailFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        nowPlayingViewModel = (requireActivity().application as PurrytifyApplication).nowPlayingViewModel
+
         val isGlobal = arguments?.getBoolean("isGlobal", true) ?: true
         profileViewModel.profileData.observe(viewLifecycleOwner) { profile ->
             val countryCode = if (!isGlobal) profile?.location ?: "ID" else null
@@ -79,7 +73,7 @@ class TopChartDetailFragment : Fragment() {
             android.util.Log.d("TopChartDetail", "Country Code used: $countryCode")
             chartViewModel.fetchSongs(isGlobal, countryCode)
         }
-//        val chartTitle = if (isGlobal) "Top 50 GLOBAL" else "Top 50 INDONESIA"
+
         val coverRes = if (isGlobal) R.drawable.cov_playlist_global else R.drawable.cov_playlist_around
         sessionManager = SessionManager(requireContext())
 
@@ -132,9 +126,7 @@ class TopChartDetailFragment : Fragment() {
 
         binding.btnShuffle.setOnClickListener {
             isShuffleMode = !isShuffleMode
-//            val icon = if (isShuffleMode) R.drawable.ic_shuffle_on else R.drawable.ic_shuffle
             val color = if (isShuffleMode) R.color.green else android.R.color.white
-//            binding.btnShuffle.setImageResource(icon)
             binding.btnShuffle.setColorFilter(resources.getColor(color, null))
         }
 
@@ -161,26 +153,18 @@ class TopChartDetailFragment : Fragment() {
             Toast.makeText(context, "Mengunduh semua lagu...", Toast.LENGTH_SHORT).show()
         }
 
-
         binding.rvChartSongs.layoutManager = LinearLayoutManager(requireContext())
         binding.rvChartSongs.adapter = adapter
 
         chartViewModel.songs.observe(viewLifecycleOwner) { songs ->
             currentSongList = songs
             adapter.updateSongs(songs)
-            adapter.checkDownloadedStatus(requireContext()) // ✅ DETEKSI ulang lagu yang sudah terunduh
+            adapter.checkDownloadedStatus(requireContext())
         }
+
         binding.toolbar.setNavigationOnClickListener {
             requireActivity().onBackPressedDispatcher.onBackPressed()
         }
-
-
-        profileViewModel.profileData.observe(viewLifecycleOwner) { profile ->
-            val countryCode = if (!isGlobal) profile?.location ?: "ID" else null
-            android.util.Log.d("TopChartDetail", "Country Code used: $countryCode")
-            chartViewModel.fetchSongs(isGlobal, countryCode)
-        }
-
     }
 
     private fun getCountryName(code: String?): String {

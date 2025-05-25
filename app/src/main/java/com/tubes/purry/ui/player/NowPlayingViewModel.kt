@@ -286,7 +286,6 @@ class NowPlayingViewModel(
         }
     }
 
-    // ===== PERBAIKAN DURASI - SEEK METHOD =====
     fun seekTo(positionMs: Int) {
         PlayerController.seekTo(positionMs)
         _currentPosition.value = positionMs
@@ -294,7 +293,7 @@ class NowPlayingViewModel(
 
     fun toggleLike(song: Song) {
         viewModelScope.launch {
-            val userId = profileViewModel.profileData.value?.id
+            val userId = getUserIdBlocking()
             if (userId == null) {
                 Log.e("NowPlayingViewModel", "User not logged in.")
                 return@launch
@@ -302,12 +301,13 @@ class NowPlayingViewModel(
 
             val db = AppDatabase.getDatabase(getApplication())
             val songExists = db.songDao().getById(song.id) != null
-
             if (!songExists) {
                 db.songDao().insert(song)
             }
 
             val isLiked = db.LikedSongDao().isSongLiked(userId, song.id)
+            val updatedSong = song.copy(isLiked = !isLiked)
+
             if (!isLiked) {
                 db.LikedSongDao().likeSong(LikedSong(userId = userId, songId = song.id))
                 _isLiked.postValue(true)
@@ -315,8 +315,12 @@ class NowPlayingViewModel(
                 db.LikedSongDao().unlikeSong(userId, song.id)
                 _isLiked.postValue(false)
             }
+
+            _currSong.postValue(updatedSong)
         }
     }
+
+
 
     private suspend fun getUserIdBlocking(): Int? {
         return profileViewModel.profileData.value?.id ?: suspendCoroutine { cont ->
@@ -576,6 +580,7 @@ class NowPlayingViewModel(
         pauseSong()
         clearQueue()
         PlayerController.stop()
+        PlayerController.release()
 
         Log.d("NowPlayingViewModel", "Player dismissed and cleared")
     }

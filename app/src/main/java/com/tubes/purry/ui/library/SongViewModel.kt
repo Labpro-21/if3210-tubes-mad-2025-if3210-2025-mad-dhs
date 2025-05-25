@@ -34,6 +34,6 @@ class SongViewModel(private val repository: SongRepository) : ViewModel() {
     }
 
     fun getLikedSongsByUser(userId: Int): LiveData<List<Song>> {
-        return repository.getLikedSongsByUser(userId).asLiveData()
+        return repository.getLikedSongsByUser(userId)
     }
 }

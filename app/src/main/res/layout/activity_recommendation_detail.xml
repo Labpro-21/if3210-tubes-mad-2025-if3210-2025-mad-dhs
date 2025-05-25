@@ -70,13 +70,4 @@
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
-
-    <FrameLayout
-        android:id="@+id/miniPlayerContainer"
-        android:layout_width="match_parent"
-        android:layout_height="64dp"
-        android:layout_alignParentBottom="true"
-        android:visibility="gone"
-        android:background="#222" />
-
 </RelativeLayout>

@@ -49,12 +49,7 @@ class MusicNotificationReceiver : BroadcastReceiver() {
 
             ACTION_DISMISS -> {
                 Log.d("NotificationReceiver", "Dismiss action received")
-
-                // Gunakan fungsi dismissPlayer() yang sudah ada
-                // yang lebih lengkap dan konsisten
                 viewModel.dismissPlayer()
-
-                // Stop notification service
                 val serviceIntent = Intent(context, MusicNotificationService::class.java)
                 context.stopService(serviceIntent)
                 return

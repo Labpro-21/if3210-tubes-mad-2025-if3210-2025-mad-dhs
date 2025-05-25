@@ -6,21 +6,51 @@ import android.net.ConnectivityManager
 import com.tubes.purry.data.remote.ApiClient
 import com.tubes.purry.utils.NetworkStateReceiver
 import com.tubes.purry.utils.NetworkUtil
+import com.tubes.purry.utils.SessionManager
 
 class PurrytifyApplication : Application() {
-
-    private val networkStateReceiver = NetworkStateReceiver()
+    lateinit var nowPlayingViewModel: com.tubes.purry.ui.player.NowPlayingViewModel
+    private val networkStateReceiver = com.tubes.purry.utils.NetworkStateReceiver()
 
     override fun onCreate() {
         super.onCreate()
-        ApiClient.init(this)
+        com.tubes.purry.data.remote.ApiClient.init(this)
 
-        // Start network callback for LiveData approach
-        NetworkUtil.startNetworkCallback(this)
+        val db = com.tubes.purry.data.local.AppDatabase.getDatabase(this)
+        val songDao = db.songDao()
+        val likedSongDao = db.LikedSongDao()
 
-        // Register broadcast receiver approach
-        val filter = IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
-        registerReceiver(networkStateReceiver, filter)
+        val sessionManager = com.tubes.purry.utils.SessionManager(this)
+
+        val authRepository = com.tubes.purry.data.repository.AuthRepository(
+            com.tubes.purry.data.remote.ApiClient.apiService,
+            sessionManager
+        )
+
+        val songRepository = com.tubes.purry.data.repository.SongRepository(
+            songDao,
+            likedSongDao
+        )
+
+        val profileViewModel = com.tubes.purry.ui.profile.ProfileViewModel(
+            this,
+            songRepository,
+            authRepository
+        )
+
+        nowPlayingViewModel = com.tubes.purry.ui.player.NowPlayingViewModel(
+            this,
+            likedSongDao,
+            songDao,
+            profileViewModel
+        )
+
+        // Warning CONNECTIVITY_ACTION boleh diabaikan atau diganti ke API level 24+
+        com.tubes.purry.utils.NetworkUtil.startNetworkCallback(this)
+        registerReceiver(
+            networkStateReceiver,
+            IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
+        )
     }
 
     override fun onTerminate() {

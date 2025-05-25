@@ -25,7 +25,6 @@ import com.tubes.purry.ui.library.SongViewModelFactory
 import com.tubes.purry.ui.library.SongCardAdapter
 import com.tubes.purry.ui.library.SongListAdapter
 import com.tubes.purry.ui.player.NowPlayingViewModel
-import com.tubes.purry.ui.player.NowPlayingViewModelFactory
 import com.tubes.purry.databinding.FragmentHomeBinding
 import com.tubes.purry.data.model.Song
 import com.tubes.purry.ui.profile.ProfileViewModel
@@ -33,11 +32,9 @@ import com.tubes.purry.ui.library.EditSongBottomSheetFragment
 import com.tubes.purry.ui.player.MiniPlayerFragment
 import androidx.core.graphics.toColorInt
 import androidx.core.os.bundleOf
-import androidx.navigation.fragment.findNavController
-import androidx.core.os.bundleOf
 import com.tubes.purry.data.model.ChartItem
 import com.tubes.purry.ui.chart.ChartAdapter
-
+import com.tubes.purry.PurrytifyApplication
 import com.tubes.purry.data.model.RecommendationItem
 import com.tubes.purry.data.model.RecommendationType
 import com.tubes.purry.ui.recommendation.RecommendationDetailActivity
@@ -66,19 +63,9 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val context = requireContext().applicationContext
-        val db = AppDatabase.getDatabase(context)
-        val likedSongDao = db.LikedSongDao()
-        val songDao = db.songDao()
-
         sessionManager = SessionManager(requireContext())
 
-        // Get ProfileViewModel using default factory
-        val profileViewModel: ProfileViewModel = ViewModelProvider(requireActivity())[ProfileViewModel::class.java]
-
-        // Use custom factory
-        val factory = NowPlayingViewModelFactory(requireActivity().application, likedSongDao, songDao, profileViewModel)
-        nowPlayingViewModel = ViewModelProvider(requireActivity(), factory)[NowPlayingViewModel::class.java]
+        nowPlayingViewModel = (requireActivity().application as PurrytifyApplication).nowPlayingViewModel
 
         setupAdapters()
         setupChartSection()
@@ -94,7 +81,7 @@ class HomeFragment : Fragment() {
 
         recentSongsAdapter = SongListAdapter(
             onClick = { song -> onSongClicked(song) },
-            onEdit = {song -> showEditBottomSheet(song)},
+            onEdit = { song -> showEditBottomSheet(song) },
             onDelete = { song -> confirmDelete(song) }
         )
 
@@ -142,26 +129,6 @@ class HomeFragment : Fragment() {
         nowPlayingViewModel.setQueueFromClickedSong(song, allSongs, requireContext())
         nowPlayingViewModel.playSong(song, requireContext())
         viewModel.markAsPlayed(song)
-
-        val fragmentManager = requireActivity().supportFragmentManager
-
-        // Check if MiniPlayerFragment is already attached
-        val existingFragment = fragmentManager.findFragmentById(R.id.miniPlayerContainer)
-        if (existingFragment == null) {
-            fragmentManager.beginTransaction()
-                .replace(R.id.miniPlayerContainer, MiniPlayerFragment())
-                .commit()
-        }
-
-        // Make the container visible with fade-in if it's not already
-        val container = requireActivity().findViewById<FrameLayout>(R.id.miniPlayerContainer)
-        if (container.visibility != View.VISIBLE) {
-            container.alpha = 0f
-            container.visibility = View.VISIBLE
-            container.animate().alpha(1f).setDuration(250).start()
-        }
-
-//        (requireActivity() as MainActivity).showMiniPlayer()
     }
 
     private fun enableSwipeToAddToQueue(
@@ -211,7 +178,6 @@ class HomeFragment : Fragment() {
         itemTouchHelper.attachToRecyclerView(recyclerView)
     }
 
-
     private fun setupChartSection() {
         val chartItems = listOf(
             ChartItem(
@@ -238,7 +204,6 @@ class HomeFragment : Fragment() {
                 R.id.topChartDetailFragment,
                 bundleOf("isGlobal" to item.isGlobal)
             )
-
         }
 
         binding.rvCharts.apply {
@@ -249,7 +214,7 @@ class HomeFragment : Fragment() {
 
     private fun setupRecommendationSection() {
         val userId = sessionManager.getUserId()
-        val userName = "User" // You can get this from your user profile
+        val userName = "User"
 
         val recommendationItems = listOf(
             RecommendationItem(
