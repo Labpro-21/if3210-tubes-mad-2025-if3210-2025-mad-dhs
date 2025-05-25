@@ -29,6 +29,7 @@ import com.tubes.purry.utils.NetworkStateReceiver
 import com.tubes.purry.utils.NetworkUtil
 import com.tubes.purry.utils.TokenExpirationService
 import com.tubes.purry.ui.player.NowPlayingManager
+import com.tubes.purry.ui.qr.ScanQRActivity
 
 class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListener {
 
@@ -163,7 +164,18 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
             }
         }
 
+        binding.btnScanQr?.setOnClickListener {
+            val intent = Intent(this, ScanQRActivity::class.java)
+            startActivity(intent)
+        }
+
+
         navController.addOnDestinationChangedListener { _, destination, _ ->
+            when (destination.id) {
+                R.id.songDetailFragment -> binding.btnScanQr?.hide()
+                else -> binding.btnScanQr?.show()
+            }
+
             when (destination.id) {
                 R.id.navigation_home -> highlightMenu("home")
                 R.id.navigation_library -> highlightMenu("library")
@@ -171,6 +183,7 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
                 else -> resetMenuHighlight()
             }
         }
+
     }
 
     override fun onNewIntent(intent: Intent?) {

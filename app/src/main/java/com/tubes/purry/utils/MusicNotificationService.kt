@@ -239,7 +239,7 @@ class MusicNotificationService : Service() {
         val duration = PlayerController.getDuration().toLong()
         val isPlaying = PlayerController.isPlaying()
 
-        Log.d("PlaybackState", "Position: $currentPosition, Duration: $duration, Playing: $isPlaying")
+//        Log.d("PlaybackState", "Position: $currentPosition, Duration: $duration, Playing: $isPlaying")
 
         val playbackState = PlaybackStateCompat.Builder()
             .setActions(
@@ -307,7 +307,7 @@ class MusicNotificationService : Service() {
     private fun stopPeriodicUpdates() {
         updateRunnable?.let {
             updateHandler.removeCallbacks(it)
-            Log.d("PeriodicUpdate", "Stopped periodic updates")
+//            Log.d("PeriodicUpdate", "Stopped periodic updates")
         }
         updateRunnable = null
     }

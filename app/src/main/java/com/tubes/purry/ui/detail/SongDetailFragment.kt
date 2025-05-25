@@ -10,21 +10,19 @@ import android.widget.PopupMenu
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.navigation.fragment.navArgs
+import androidx.navigation.fragment.findNavController
 import com.tubes.purry.R
 import com.tubes.purry.data.local.AppDatabase
 import com.tubes.purry.databinding.FragmentSongDetailBinding
 import com.tubes.purry.ui.player.NowPlayingViewModel
 import com.tubes.purry.ui.player.NowPlayingViewModelFactory
 import com.tubes.purry.ui.profile.ProfileViewModel
-import androidx.navigation.fragment.findNavController
 import com.tubes.purry.utils.previewAndShareQrCode
-
+import android.util.Log
 
 class SongDetailFragment : Fragment() {
     private lateinit var binding: FragmentSongDetailBinding
     private var isDragging = false
-    private val args: SongDetailFragmentArgs by navArgs()
 
     private val profileViewModel: ProfileViewModel by activityViewModels()
     private val nowPlayingViewModel: NowPlayingViewModel by activityViewModels {
@@ -47,29 +45,144 @@ class SongDetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val songId = args.songId
-        if (songId <= 0) {
-            Toast.makeText(requireContext(), "Invalid song ID", Toast.LENGTH_SHORT).show()
-            findNavController().popBackStack()
-            return
-        }
+        // Handle arguments dengan cara yang diperbaiki
+        handleArguments()
 
+        // Setup observers
+        setupObservers()
+
+        // Setup click listeners
+        setupClickListeners()
+    }
+
+    private fun handleArguments() {
+        arguments?.let { bundle ->
+            Log.d("SongDetailFragment", "Bundle contents: ${bundle.keySet().joinToString()}")
+
+            // Debug: Print semua values dalam bundle
+            for (key in bundle.keySet()) {
+                val value = bundle.get(key)
+                Log.d("SongDetailFragment", "  $key = $value (${value?.javaClass?.simpleName})")
+            }
+
+            // Get basic parameters
+            val songId = bundle.getString("songId")
+            val isLocal = bundle.getBoolean("isLocal", false)
+            val serverId = bundle.getInt("serverId", -1)
+
+            Log.d("SongDetailFragment", "Parsed: songId=$songId, isLocal=$isLocal, serverId=$serverId")
+
+            if (!songId.isNullOrEmpty()) {
+                if (isLocal) {
+                    // Local song
+                    Log.d("SongDetailFragment", "Loading local song: $songId")
+                    loadLocalSong(songId)
+                } else {
+                    // Server song - extract serverId from songId or use provided serverId
+                    val serverIdToUse = if (serverId > 0) {
+                        serverId
+                    } else {
+                        extractServerIdFromSongId(songId)
+                    }
+
+                    if (serverIdToUse != null && serverIdToUse > 0) {
+                        Log.d("SongDetailFragment", "Loading server song with ID: $serverIdToUse")
+                        loadServerSong(serverIdToUse)
+                    } else {
+                        showErrorAndReturn("ID lagu server tidak valid: $songId")
+                    }
+                }
+            } else {
+                // Fallback to legacy format
+                handleLegacyFormat(bundle)
+            }
+        } ?: run {
+            showErrorAndReturn("Tidak ada data lagu")
+        }
+    }
+
+    private fun handleLegacyFormat(bundle: Bundle) {
+        Log.d("SongDetailFragment", "Using legacy format")
+
+        // Cek format lama dengan "id"
+        val legacyId = bundle.getString("id")
+        if (!legacyId.isNullOrEmpty()) {
+            Log.d("SongDetailFragment", "Legacy ID: $legacyId")
+
+            if (legacyId.startsWith("srv-")) {
+                // Server song dengan format "srv-123"
+                val serverId = extractServerIdFromSongId(legacyId)
+                if (serverId != null) {
+                    loadServerSong(serverId)
+                } else {
+                    showErrorAndReturn("Format ID server tidak valid: $legacyId")
+                }
+            } else {
+                // Coba sebagai integer untuk server song lama
+                val serverIdInt = legacyId.toIntOrNull()
+                if (serverIdInt != null && serverIdInt > 0) {
+                    loadServerSong(serverIdInt)
+                } else {
+                    // Assume it's local song UUID
+                    loadLocalSong(legacyId)
+                }
+            }
+        } else {
+            showErrorAndReturn("ID lagu tidak ditemukan")
+        }
+    }
+
+    private fun loadLocalSong(songId: String) {
         val current = nowPlayingViewModel.currSong.value
-        val currentId = current?.serverId ?: -1
-        if (currentId != songId) {
-            nowPlayingViewModel.fetchSongById(songId, requireContext())
+        if (current?.id != songId) {
+            Log.d("SongDetailFragment", "Fetching local song: $songId")
+            nowPlayingViewModel.fetchSongByUUID(songId, requireContext())
+        } else {
+            Log.d("SongDetailFragment", "Local song already loaded: $songId")
         }
+    }
 
-        nowPlayingViewModel.fetchSongById(songId, requireContext())
+    private fun loadServerSong(serverId: Int) {
+        val current = nowPlayingViewModel.currSong.value
+        val expectedId = "srv-$serverId"
 
+        if (current?.id != expectedId) {
+            Log.d("SongDetailFragment", "Fetching server song: $serverId")
+            nowPlayingViewModel.fetchSongById(serverId, requireContext())
+        } else {
+            Log.d("SongDetailFragment", "Server song already loaded: $serverId")
+        }
+    }
+
+    private fun extractServerIdFromSongId(songId: String): Int? {
+        return if (songId.startsWith("srv-")) {
+            try {
+                songId.removePrefix("srv-").toInt()
+            } catch (e: NumberFormatException) {
+                Log.e("SongDetailFragment", "Cannot extract serverId from: $songId", e)
+                null
+            }
+        } else {
+            null
+        }
+    }
+
+    private fun showErrorAndReturn(message: String) {
+        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+        findNavController().popBackStack()
+    }
+
+    private fun setupObservers() {
         nowPlayingViewModel.currSong.observe(viewLifecycleOwner) { song ->
             song?.let {
                 binding.tvTitle.text = it.title
                 binding.tvTitle.isSelected = true
                 binding.tvArtist.text = it.artist
                 Glide.with(this)
-                    .load(song.coverPath ?: song.coverResId ?: R.drawable.album_default)
+                    .load(it.coverPath ?: it.coverResId ?: R.drawable.album_default)
                     .into(binding.ivCover)
+
+                Log.d("SongDetailFragment", "Song loaded: ${it.title} (${it.id})")
             }
         }
 
@@ -77,6 +190,7 @@ class SongDetailFragment : Fragment() {
             if (duration > 0) {
                 binding.seekBar.max = duration
                 binding.tvDuration.text = nowPlayingViewModel.formatDurationMs(duration)
+                Log.d("SongDetailFragment", "Duration set: $duration ms")
             }
         }
 
@@ -111,6 +225,14 @@ class SongDetailFragment : Fragment() {
             ))
         }
 
+        nowPlayingViewModel.isLiked.observe(viewLifecycleOwner) { isLiked ->
+            binding.btnFavorite.setImageResource(
+                if (isLiked) R.drawable.ic_heart_filled else R.drawable.ic_heart_outline
+            )
+        }
+    }
+
+    private fun setupClickListeners() {
         binding.btnPlayPause.setOnClickListener { nowPlayingViewModel.togglePlayPause() }
         binding.btnBack.setOnClickListener { findNavController().popBackStack() }
         binding.btnNext.setOnClickListener { nowPlayingViewModel.nextSong(requireContext()) }
@@ -134,12 +256,6 @@ class SongDetailFragment : Fragment() {
                 }
             }
         })
-
-        nowPlayingViewModel.isLiked.observe(viewLifecycleOwner) { isLiked ->
-            binding.btnFavorite.setImageResource(
-                if (isLiked) R.drawable.ic_heart_filled else R.drawable.ic_heart_outline
-            )
-        }
 
         binding.btnFavorite.setOnClickListener {
             nowPlayingViewModel.currSong.value?.let {
@@ -191,8 +307,5 @@ class SongDetailFragment : Fragment() {
             }
             popup.show()
         }
-
-
     }
-
 }

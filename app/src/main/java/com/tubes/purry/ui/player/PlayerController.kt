@@ -182,7 +182,7 @@ object PlayerController {
         return try {
             if (isPrepared && mediaPlayer != null) {
                 val position = mediaPlayer?.currentPosition ?: 0
-                Log.d("PlayerController", "getCurrentPosition: $position ms")
+//                Log.d("PlayerController", "getCurrentPosition: $position ms")
                 position
             } else {
                 0
@@ -197,7 +197,7 @@ object PlayerController {
         return try {
             if (isPrepared && mediaPlayer != null) {
                 val duration = mediaPlayer?.duration ?: 0
-                Log.d("PlayerController", "getDuration: $duration ms")
+//                Log.d("PlayerController", "getDuration: $duration ms")
                 duration
             } else {
                 Log.d("PlayerController", "getDuration: not prepared or null player")
@@ -213,7 +213,7 @@ object PlayerController {
         try {
             if (isPrepared && mediaPlayer != null) {
                 mediaPlayer?.seekTo(position)
-                Log.d("PlayerController", "Seeked to: $position ms")
+//                Log.d("PlayerController", "Seeked to: $position ms")
                 onSeeked?.invoke(position)
             } else {
                 Log.w("PlayerController", "Cannot seek: not prepared or null player")

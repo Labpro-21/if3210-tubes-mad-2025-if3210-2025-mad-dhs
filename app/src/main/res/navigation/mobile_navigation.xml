@@ -28,9 +28,9 @@
         tools:layout="@layout/fragment_add_song_bottom_sheet">
 
         <argument
-            android:name="song_id"
-            app:argType="integer"
-            app:nullable="false" />
+            android:name="id"
+            app:argType="string"
+            app:nullable="true" />
     </fragment>
 
     <fragment
@@ -55,12 +55,23 @@
     <fragment
         android:id="@+id/songDetailFragment"
         android:name="com.tubes.purry.ui.detail.SongDetailFragment"
-        android:label="Now Playing"
-        tools:layout="@layout/fragment_song_detail">
-
+        android:label="Song Detail">
         <argument
             android:name="songId"
-            app:argType="integer" />
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="isLocal"
+            app:argType="boolean"
+            android:defaultValue="false" />
+        <argument
+            android:name="serverId"
+            app:argType="integer"
+            android:defaultValue="-1" />
+        <argument
+            android:name="id"
+            app:argType="string"
+            app:nullable="true" />
     </fragment>
 
     <fragment

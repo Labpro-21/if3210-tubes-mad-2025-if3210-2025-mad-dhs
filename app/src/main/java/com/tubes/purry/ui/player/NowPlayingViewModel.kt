@@ -455,14 +455,49 @@ class NowPlayingViewModel(
         }
     }
 
-    fun fetchSongById(id: Int, context: Context) {
+    // Tambahkan method ini ke NowPlayingViewModel Anda, gantikan method yang ada
+
+    // ===== FIXED SONG FETCHING METHODS =====
+
+    /**
+     * Fetch song by UUID/String ID (untuk lagu lokal)
+     */
+    fun fetchSongByUUID(uuid: String, context: Context) {
+        Log.d("NowPlayingVM", "fetchSongByUUID called with: $uuid")
         viewModelScope.launch {
             try {
-                val response = apiService.getSongById(id)
+                val song = songDao.getById(uuid)
+                if (song != null) {
+                    Log.d("NowPlayingVM", "Local song found: ${song.title}")
+                    _currSong.postValue(song)
+                    playSong(song, context)
+
+                    val userId = getUserIdBlocking()
+                    if (userId != null) {
+                        val isLiked = likedSongDao.isSongLiked(userId, uuid)
+                        _isLiked.postValue(isLiked)
+                    }
+                } else {
+                    _errorMessage.postValue("Lagu lokal tidak ditemukan.")
+                    Log.e("NowPlayingVM", "Lagu lokal tidak ditemukan: $uuid")
+                }
+            } catch (e: Exception) {
+                _errorMessage.postValue("Gagal memuat lagu lokal: ${e.message}")
+                Log.e("NowPlayingVM", "Error fetchSongByUUID: ${e.message}", e)
+            }
+        }
+    }
+
+    fun fetchSongById(serverId: Int, context: Context) {
+        Log.d("NowPlayingVM", "fetchSongById called with serverId: $serverId")
+        viewModelScope.launch {
+            try {
+                val response = apiService.getSongById(serverId)
                 if (response.isSuccessful) {
                     response.body()?.let { raw ->
                         val converted = Song(
                             id = "srv-${raw.id}",
+                            serverId = raw.id,
                             title = raw.title,
                             artist = raw.artist,
                             filePath = raw.url,
@@ -471,14 +506,24 @@ class NowPlayingViewModel(
                             isLocal = false,
                             isLiked = false
                         )
+                        Log.d("NowPlayingVM", "Server song converted: ${converted.title} (ID: ${converted.id})")
                         _currSong.postValue(converted)
                         playSong(converted, context)
+
+                        // Check if liked
+                        val userId = getUserIdBlocking()
+                        if (userId != null) {
+                            val isLiked = likedSongDao.isSongLiked(userId, converted.id)
+                            _isLiked.postValue(isLiked)
+                        }
                     }
                 } else {
-                    Log.e("NowPlayingVM", "Gagal load lagu: ${response.code()}")
+                    _errorMessage.postValue("Gagal memuat lagu dari server: ${response.code()}")
+                    Log.e("NowPlayingVM", "Server error: ${response.code()} - ${response.message()}")
                 }
             } catch (e: Exception) {
-                Log.e("NowPlayingVM", "Error saat fetch lagu: ${e.message}")
+                _errorMessage.postValue("Error saat mengambil lagu: ${e.message}")
+                Log.e("NowPlayingVM", "Error saat fetch lagu dari server: ${e.message}", e)
             }
         }
     }
@@ -489,6 +534,41 @@ class NowPlayingViewModel(
             songDao.update(updatedSong)
         } else {
             songDao.insert(updatedSong)
+        }
+    }
+
+    fun fetchSong(songId: String, isLocal: Boolean, serverId: Int? = null, context: Context) {
+        Log.d("NowPlayingVM", "fetchSong called - songId: $songId, isLocal: $isLocal, serverId: $serverId")
+
+        if (isLocal) {
+            fetchSongByUUID(songId, context)
+        } else {
+            // Untuk lagu server, coba extract serverId dari songId jika tidak disediakan
+            val serverIdToUse = serverId ?: run {
+                if (songId.startsWith("srv-")) {
+                    try {
+                        songId.removePrefix("srv-").toInt()
+                    } catch (e: NumberFormatException) {
+                        Log.e("NowPlayingVM", "Cannot extract serverId from songId: $songId", e)
+                        null
+                    }
+                } else {
+                    // Mungkin ID langsung berupa angka
+                    try {
+                        songId.toInt()
+                    } catch (e: NumberFormatException) {
+                        Log.e("NowPlayingVM", "Cannot parse songId as serverId: $songId", e)
+                        null
+                    }
+                }
+            }
+
+            if (serverIdToUse != null) {
+                fetchSongById(serverIdToUse, context)
+            } else {
+                _errorMessage.postValue("Invalid server song ID format: $songId")
+                Log.e("NowPlayingVM", "Invalid serverId for song: $songId")
+            }
         }
     }
 

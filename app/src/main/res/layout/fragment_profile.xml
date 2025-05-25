@@ -280,7 +280,7 @@
                         android:layout_height="48dp"
                         android:layout_gravity="center_vertical"
                         android:src="@android:drawable/ic_media_play"
-                        android:tint="#1DB954" />
+                        app:tint="#1DB954" />
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -324,7 +324,7 @@
                         android:layout_height="24dp"
                         android:layout_gravity="center_vertical"
                         android:src="@android:drawable/ic_media_next"
-                        android:tint="@color/gray" />
+                        app:tint="@color/gray" />
 
                 </LinearLayout>
 
