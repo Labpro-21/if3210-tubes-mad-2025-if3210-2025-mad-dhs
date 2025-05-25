@@ -225,30 +225,41 @@ object PlayerController {
     }
 
 
-    // Renamed from 'release' to be more specific
     internal fun releaseMediaPlayer() {
-        Log.d("PlayerController", "Releasing MediaPlayer instance.")
-        mediaPlayer?.release()
-        mediaPlayer = null
-        isPreparing = false
-        // Don't nullify currentlyPlaying here, session might still need it for metadata
-        // Only nullify currentlyPlaying when the session itself is being stopped/released.
+        Log.d("PlayerController", "Attempting to release MediaPlayer instance.")
+        try {
+            mediaPlayer?.apply {
+                if (isPlaying) {
+                    stop() // Stop playback first
+                    Log.d("PlayerController", "MediaPlayer.stop() called.")
+                }
+                reset() // Reset to idle state
+                Log.d("PlayerController", "MediaPlayer.reset() called.")
+                release() // Release resources
+                Log.d("PlayerController", "MediaPlayer.release() called.")
+            }
+        } catch (e: Exception) {
+            Log.e("PlayerController", "Exception during MediaPlayer stop/reset/release: ${e.message}", e)
+        } finally {
+            mediaPlayer = null
+            isPreparing = false
+            Log.d("PlayerController", "MediaPlayer instance nulled and isPreparing set to false.")
+        }
     }
 
     // This is the main stop point that also clears the notification
-    fun release() { // This is effectively the 'stop' action
-        Log.d("PlayerController", "PlayerController.release() (stop) called.")
-        releaseMediaPlayer()
-        updateMediaSessionState(isPlaying = false, isStopped = true)
-        if (::appContext.isInitialized) {
-            MediaNotificationManager.dismissNotification(appContext)
-        }
-        currentlyPlaying = null // Now it's safe to clear the current song
-        // Consider if MediaSession should be released here or kept for app lifecycle
-        // For now, just make it inactive if we are stopping.
-        // if (::mediaSession.isInitialized) mediaSession.isActive = false;
-    }
+    fun release() {
+        Log.i("PlayerController", "PlayerController.release() (ACTION_STOP) called.")
+        releaseMediaPlayer() // Ensures MediaPlayer is stopped and released
+        updateMediaSessionState(isPlaying = false, isStopped = true) // Set session state to STOPPED
 
+        if (::appContext.isInitialized) {
+            MediaNotificationManager.dismissNotification(appContext) // Explicitly remove our notification
+            Log.d("PlayerController", "Notification explicitly dismissed by PlayerController.release().")
+        }
+        currentlyPlaying = null // Clear the current song reference
+        Log.d("PlayerController", "currentlyPlaying set to null.")
+    }
 
     fun isPlaying(): Boolean = mediaPlayer?.isPlaying == true
 
