@@ -243,9 +243,4 @@ object PlayerController {
             0
         }
     }
-
-
-    fun getCurrentSong(): Song? {
-        return currentlyPlaying
-    }
 }
