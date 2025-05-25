@@ -492,10 +492,12 @@ class NowPlayingViewModel(
         }
     }
 
-    fun formatDuration(seconds: Int): String {
-        val minutes = seconds / 60
-        val secs = seconds % 60
-        return "%d:%02d".format(minutes, secs)
+    fun dismissPlayer() {
+        pauseSong()
+        clearQueue()
+        PlayerController.stop()
+
+        Log.d("NowPlayingViewModel", "Player dismissed and cleared")
     }
 
     fun formatDurationMs(durationMs: Int): String {
@@ -505,7 +507,6 @@ class NowPlayingViewModel(
         return "%d:%02d".format(minutes, seconds)
     }
 
-    // ===== PERBAIKAN DURASI - ONCLEARED DENGAN TRACKING =====
     override fun onCleared() {
         super.onCleared()
         stopPositionTracking()

@@ -144,6 +144,23 @@ object PlayerController {
         }
     }
 
+    fun stop() {
+        try {
+            mediaPlayer?.apply {
+                if (isPlaying) {
+                    stop()
+                }
+                reset()
+                release()
+            }
+            mediaPlayer = null
+            currentlyPlaying = null
+            Log.d("PlayerController", "MediaPlayer stopped and released")
+        } catch (e: Exception) {
+            Log.e("PlayerController", "Error stopping MediaPlayer: ${e.message}")
+        }
+    }
+
     fun release() {
         try {
             mediaPlayer?.release()

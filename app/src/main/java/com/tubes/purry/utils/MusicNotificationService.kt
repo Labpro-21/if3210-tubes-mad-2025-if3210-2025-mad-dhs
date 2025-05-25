@@ -17,6 +17,7 @@ import com.tubes.purry.R
 import com.tubes.purry.MainActivity
 import com.tubes.purry.ui.player.PlayerController
 import android.support.v4.media.MediaMetadataCompat
+import com.tubes.purry.ui.player.NowPlayingManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -30,12 +31,14 @@ class MusicNotificationService : Service() {
     companion object {
         const val CHANNEL_ID = "purrytify_channel"
         const val NOTIFICATION_ID = 1
+        const val ACTION_DISMISS = "ACTION_DISMISS"
     }
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private var mediaSession: MediaSessionCompat? = null
     private val updateHandler = Handler(Looper.getMainLooper())
     private var updateRunnable: Runnable? = null
+    private var isUpdating = false
 
     // Media Session Callback
     private val mediaSessionCallback = object : MediaSessionCompat.Callback() {
@@ -74,13 +77,30 @@ class MusicNotificationService : Service() {
         override fun onSeekTo(pos: Long) {
             Log.d("MediaSession", "onSeekTo called: $pos")
             PlayerController.seekTo(pos.toInt())
+            // Immediate update after seek
             updatePlaybackState()
+        }
+
+        override fun onStop() {
+            Log.d("MediaSession", "onStop called - dismissing notification")
+            PlayerController.pause()
+            stopForeground(true)
+            stopSelf()
         }
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        // Handle dismiss action
+        if (intent?.action == ACTION_DISMISS) {
+            Log.d("MusicNotification", "Dismiss action received")
+            PlayerController.pause()
+            stopForeground(true)
+            stopSelf()
+            return START_NOT_STICKY
+        }
+
         Log.d("MusicNotification", "Service dimulai")
         createNotificationChannel()
 
@@ -90,24 +110,14 @@ class MusicNotificationService : Service() {
             return START_NOT_STICKY
         }
 
-        mediaSession = MediaSessionCompat(this, "PurrytifySession").apply {
-            setCallback(mediaSessionCallback)
-            setFlags(
-                MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS or
-                        MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS
-            )
-            isActive = true
-        }
+        setupMediaSession()
 
         PlayerController.onSeeked = { position ->
             Log.d("MusicNotification", "Seeked callback ke posisi: $position")
             updatePlaybackState()
         }
 
-        // Update playback state dan mulai update berkala
-        updatePlaybackState()
-        startPeriodicUpdates()
-
+        // Setup initial metadata and notification
         serviceScope.launch {
             val artworkBitmap: Bitmap = withContext(Dispatchers.IO) {
                 try {
@@ -121,17 +131,32 @@ class MusicNotificationService : Service() {
                     BitmapFactory.decodeResource(resources, R.drawable.logo)
                 }
             }
-            delay(300)
+
+            // Setup metadata first
+            setupMediaMetadata(currentSong, artworkBitmap)
+
+            // Then create notification
             createAndShowNotification(currentSong, artworkBitmap)
+
+            // Start periodic updates after initial setup
+            startPeriodicUpdates()
         }
 
         return START_STICKY
     }
 
-    private fun createAndShowNotification(song: com.tubes.purry.data.model.Song, artworkBitmap: Bitmap) {
-        // Setup metadata dulu sebelum notification
-        setupMediaMetadata(song, artworkBitmap)
+    private fun setupMediaSession() {
+        mediaSession = MediaSessionCompat(this, "PurrytifySession").apply {
+            setCallback(mediaSessionCallback)
+            setFlags(
+                MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS or
+                        MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS
+            )
+            isActive = true
+        }
+    }
 
+    private fun createAndShowNotification(song: com.tubes.purry.data.model.Song, artworkBitmap: Bitmap) {
         val isPlaying = PlayerController.isPlaying()
         val playPauseIcon = if (isPlaying) R.drawable.ic_pause else R.drawable.ic_play
         val playPauseAction = if (isPlaying) MusicNotificationReceiver.ACTION_PAUSE else MusicNotificationReceiver.ACTION_PLAY
@@ -147,9 +172,26 @@ class MusicNotificationService : Service() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
+        // Create dismiss action
+        val dismissIntent = Intent(this, MusicNotificationService::class.java).apply {
+            action = ACTION_DISMISS
+        }
+        val dismissPendingIntent = PendingIntent.getService(
+            this,
+            999,
+            dismissIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        // Get current time info
+        val currentPosition = PlayerController.getCurrentPosition()
+        val duration = PlayerController.getDuration()
+        val timeText = "${formatTime(currentPosition)} / ${formatTime(duration)}"
+
         val notification = NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle(song.title)
             .setContentText(song.artist)
+            .setSubText(timeText) // Show current time / duration
             .setSmallIcon(R.drawable.logo)
             .setLargeIcon(artworkBitmap)
             .setContentIntent(pendingIntent)
@@ -157,14 +199,17 @@ class MusicNotificationService : Service() {
             .setCategory(NotificationCompat.CATEGORY_TRANSPORT)
             .setOngoing(true)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            .addAction(R.drawable.ic_skip_previous, "Prev", getPendingIntent(MusicNotificationReceiver.ACTION_PREV))
+            .addAction(R.drawable.ic_skip_previous, "Previous", getPendingIntent(MusicNotificationReceiver.ACTION_PREV))
             .addAction(playPauseIcon, "Play/Pause", getPendingIntent(playPauseAction))
             .addAction(R.drawable.ic_skip_next, "Next", getPendingIntent(MusicNotificationReceiver.ACTION_NEXT))
+            .addAction(R.drawable.ic_close, "Dismiss", dismissPendingIntent)
+            .setDeleteIntent(dismissPendingIntent)
             .setStyle(
                 androidx.media.app.NotificationCompat.MediaStyle()
                     .setMediaSession(mediaSession?.sessionToken)
                     .setShowActionsInCompactView(0, 1, 2)
                     .setShowCancelButton(true)
+                    .setCancelButtonIntent(dismissPendingIntent)
             )
             .build()
 
@@ -184,10 +229,14 @@ class MusicNotificationService : Service() {
             .build()
 
         mediaSession?.setMetadata(metadata)
+        mediaSession?.isActive = true
+
         Log.d("MediaMetadata", "Set metadata - Duration: $duration ms")
     }
 
     private fun updatePlaybackState() {
+        if (isUpdating) return // Prevent recursive updates
+
         val currentPosition = PlayerController.getCurrentPosition().toLong()
         val duration = PlayerController.getDuration().toLong()
         val isPlaying = PlayerController.isPlaying()
@@ -207,27 +256,61 @@ class MusicNotificationService : Service() {
             .setState(
                 if (isPlaying) PlaybackStateCompat.STATE_PLAYING else PlaybackStateCompat.STATE_PAUSED,
                 currentPosition,
-                if (isPlaying) 1.0f else 0.0f, // playback speed
-                System.currentTimeMillis() // last position update time
+                if (isPlaying) 1.0f else 0.0f,
+                System.currentTimeMillis()
             )
             .build()
 
         mediaSession?.setPlaybackState(playbackState)
+
+        // Update notification with current song info
+        val currentSong = PlayerController.getCurrentSong()
+        if (currentSong != null) {
+            isUpdating = true
+            serviceScope.launch {
+                val artworkBitmap: Bitmap = withContext(Dispatchers.IO) {
+                    try {
+                        Glide.with(this@MusicNotificationService)
+                            .asBitmap()
+                            .load(currentSong.coverPath)
+                            .submit()
+                            .get()
+                    } catch (e: Exception) {
+                        BitmapFactory.decodeResource(resources, R.drawable.logo)
+                    }
+                }
+                createAndShowNotification(currentSong, artworkBitmap)
+                isUpdating = false
+            }
+        }
     }
 
     private fun startPeriodicUpdates() {
+        // Clear any existing updates first
+        stopPeriodicUpdates()
+
         updateRunnable = object : Runnable {
             override fun run() {
-                updatePlaybackState()
-                // Update setiap 500ms untuk seekbar yang lebih smooth
-                updateHandler.postDelayed(this, 500)
+                if (PlayerController.isPlaying()) {
+                    Log.d("PeriodicUpdate", "Updating playback state - Playing")
+                    updatePlaybackState()
+                } else {
+                    Log.d("PeriodicUpdate", "Player paused, updating state once")
+                    updatePlaybackState()
+                }
+
+                // Continue updates every second
+                updateHandler.postDelayed(this, 1000)
             }
         }
         updateHandler.post(updateRunnable!!)
     }
 
     private fun stopPeriodicUpdates() {
-        updateRunnable?.let { updateHandler.removeCallbacks(it) }
+        updateRunnable?.let {
+            updateHandler.removeCallbacks(it)
+            Log.d("PeriodicUpdate", "Stopped periodic updates")
+        }
         updateRunnable = null
     }
 
@@ -251,10 +334,31 @@ class MusicNotificationService : Service() {
         ).apply {
             description = "Menampilkan kontrol pemutar musik"
             setShowBadge(false)
+            lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+            setSound(null, null)
         }
 
         val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         manager.createNotificationChannel(channel)
+    }
+
+    private fun formatTime(milliseconds: Int): String {
+        val totalSeconds = milliseconds / 1000
+        val minutes = totalSeconds / 60
+        val seconds = totalSeconds % 60
+        return String.format("%d:%02d", minutes, seconds)
+    }
+
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        super.onTaskRemoved(rootIntent)
+        Log.d("MusicNotification", "Task removed - keeping service alive")
+
+        PlayerController.pause()
+        PlayerController.release()
+        NowPlayingManager.viewModel?.clearQueue()
+
+        stopForeground(true)
+        stopSelf()
     }
 
     override fun onDestroy() {
