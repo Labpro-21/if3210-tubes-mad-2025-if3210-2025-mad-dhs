@@ -137,15 +137,17 @@
             android:exported="false"
             android:foregroundServiceType="mediaPlayback" />
 
-
-
-        <!--        <receiver-->
-<!--            android:name=".utils.NetworkStateReceiver"-->
-<!--            android:exported="false">-->
-<!--            <intent-filter>-->
-<!--                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />-->
-<!--            </intent-filter>-->
-<!--        </receiver>-->
+        <receiver
+            android:name=".utils.MusicNotificationReceiver"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.tubes.purry.ACTION_PLAY" />
+                <action android:name="com.tubes.purry.ACTION_PAUSE" />
+                <action android:name="com.tubes.purry.ACTION_NEXT" />
+                <action android:name="com.tubes.purry.ACTION_PREV" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

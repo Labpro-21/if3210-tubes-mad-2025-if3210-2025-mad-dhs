@@ -14,7 +14,6 @@ import android.os.Looper
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import com.tubes.purry.data.model.Song
 import com.tubes.purry.ui.profile.ProfileViewModel
 import com.tubes.purry.utils.SessionManager
@@ -24,9 +23,7 @@ import kotlinx.coroutines.withContext
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import com.tubes.purry.data.model.SongInQueue
-import com.tubes.purry.data.model.toTemporarySong
 import com.tubes.purry.data.remote.ApiClient.apiService
-import com.tubes.purry.utils.formatDuration
 import com.tubes.purry.utils.parseDuration
 
 class NowPlayingViewModel(
@@ -37,8 +34,8 @@ class NowPlayingViewModel(
 ) : AndroidViewModel(application) {
 
     val profileData: LiveData<ProfileData> get() = profileViewModel.profileData
-    private val _currSong = MutableLiveData<Song?>() // mutable untuk bisa diubah2
-    val currSong: LiveData<Song?> = _currSong // untuk read
+    private val _currSong = MutableLiveData<Song?>()
+    val currSong: LiveData<Song?> = _currSong
 
     private val _isPlaying = MutableLiveData<Boolean>()
     val isPlaying: LiveData<Boolean> = _isPlaying
@@ -46,22 +43,49 @@ class NowPlayingViewModel(
     private val _isLiked = MutableLiveData<Boolean>()
     val isLiked: LiveData<Boolean> = _isLiked
 
-    private val _errorMessage = MutableLiveData<String>()
-    private var originalAllSongs: List<Song> = emptyList()
-    private var shuffledQueue: List<SongInQueue> = emptyList()
-
-    private val _mainQueue = MutableLiveData<List<SongInQueue>>(emptyList())
-    private val _manualQueue = MutableLiveData<MutableList<SongInQueue>?>(mutableListOf())
-
-    private var currentQueueIndex = -1
-
     private val _isShuffling = MutableLiveData<Boolean>(false)
     val isShuffling: LiveData<Boolean> = _isShuffling
 
     private val _repeatMode = MutableLiveData<RepeatMode>(RepeatMode.NONE)
     val repeatMode: LiveData<RepeatMode> = _repeatMode
 
+    // ===== PERBAIKAN DURASI - TAMBAHAN LIVE DATA =====
+    private val _currentPosition = MutableLiveData<Int>(0)
+    val currentPosition: LiveData<Int> = _currentPosition
+
+    private val _songDuration = MutableLiveData<Int>(0)
+    val songDuration: LiveData<Int> = _songDuration
+
     enum class RepeatMode { NONE, ONE, ALL }
+
+    private val _errorMessage = MutableLiveData<String>()
+
+    private var originalAllSongs: List<Song> = emptyList()
+    private var shuffledQueue: List<SongInQueue> = emptyList()
+    private var currentQueueIndex = -1
+    private val _mainQueue = MutableLiveData<List<SongInQueue>>(emptyList())
+    private val _manualQueue = MutableLiveData<MutableList<SongInQueue>?>(mutableListOf())
+
+    // ===== PERBAIKAN DURASI - HANDLER UNTUK UPDATE POSISI =====
+    private val positionHandler = Handler(Looper.getMainLooper())
+    private val positionRunnable = object : Runnable {
+        override fun run() {
+            if (PlayerController.isPlaying()) {
+                val position = PlayerController.getCurrentPosition()
+                val duration = PlayerController.getDuration()
+
+                _currentPosition.value = position
+                if (duration > 0 && _songDuration.value != duration) {
+                    _songDuration.value = duration
+                    // Update song object dengan durasi yang benar
+                    _currSong.value?.let { song ->
+                        _currSong.value = song.copy(duration = duration)
+                    }
+                }
+            }
+            positionHandler.postDelayed(this, 1000) // Update setiap detik
+        }
+    }
 
     // ===== ANALYTICS TRACKING VARIABLES =====
     private val analyticsRepository by lazy {
@@ -75,12 +99,22 @@ class NowPlayingViewModel(
     private var pauseStartTime: Long = 0
     private var totalPauseTime: Long = 0
 
-
-    private fun getCurrentSongInQueue(): SongInQueue? {
-        val currId = _currSong.value?.id ?: return null
-        return _manualQueue.value?.find { it.song.id == currId }
+    // ===== PERBAIKAN DURASI - METHODS UNTUK TRACKING =====
+    private fun startPositionTracking() {
+        positionHandler.removeCallbacks(positionRunnable)
+        positionHandler.post(positionRunnable)
     }
 
+    private fun stopPositionTracking() {
+        positionHandler.removeCallbacks(positionRunnable)
+    }
+
+//    private fun getCurrentSongInQueue(): SongInQueue? {
+//        val currId = _currSong.value?.id ?: return null
+//        return _manualQueue.value?.find { it.song.id == currId }
+//    }
+
+    // ===== PERBAIKAN DURASI - PLAYSONG METHOD YANG DIPERBAIKI =====
     fun playSong(song: Song, context: Context) {
         // ===== END PREVIOUS ANALYTICS SESSION =====
         endCurrentAnalyticsSession()
@@ -89,23 +123,49 @@ class NowPlayingViewModel(
         viewModelScope.launch {
             val songWithLike = song.copy(isLiked = false)
             _currSong.postValue(songWithLike)
+
             withContext(Dispatchers.Main) {
                 val success = PlayerController.play(songWithLike, context)
                 if (success) {
-                    PlayerController.onPrepared = {
-                        val duration = PlayerController.getDuration()
-                        _currSong.postValue(_currSong.value?.copy(duration = duration))
-                        _isPlaying.postValue(PlayerController.isPlaying())
+                    // Set callback untuk durasi siap
+                    PlayerController.onDurationReady = { duration ->
+                        Log.d("NowPlayingViewModel", "Duration ready: $duration ms")
+                        _songDuration.postValue(duration)
+                        _currSong.value?.let { currentSong ->
+                            _currSong.postValue(currentSong.copy(duration = duration))
+                        }
                     }
 
-                    Handler(Looper.getMainLooper()).postDelayed({
-                        _isPlaying.value = PlayerController.isPlaying()
-                    }, 300)
+                    PlayerController.onPrepared = {
+                        val duration = PlayerController.getDuration()
+                        Log.d("NowPlayingViewModel", "OnPrepared - Duration: $duration ms")
 
-                    val realDuration = PlayerController.getDuration()
-                    _currSong.value = _currSong.value?.copy(duration = realDuration)
+                        if (duration > 0) {
+                            _songDuration.postValue(duration)
+                            _currSong.value?.let { currentSong ->
+                                _currSong.postValue(currentSong.copy(duration = duration))
+                            }
+                        }
+
+                        _isPlaying.postValue(PlayerController.isPlaying())
+
+                        // Mulai tracking posisi setelah prepared
+                        startPositionTracking()
+
+                        // Coba dapatkan durasi lagi setelah delay singkat
+                        Handler(Looper.getMainLooper()).postDelayed({
+                            val finalDuration = PlayerController.ensureDurationAvailable()
+                            if (finalDuration > 0 && finalDuration != _songDuration.value) {
+                                _songDuration.postValue(finalDuration)
+                                _currSong.value?.let { currentSong ->
+                                    _currSong.postValue(currentSong.copy(duration = finalDuration))
+                                }
+                            }
+                        }, 500)
+                    }
 
                     PlayerController.onCompletion = {
+                        stopPositionTracking()
                         when (_repeatMode.value) {
                             RepeatMode.ONE -> {
                                 _currSong.value?.let { playSong(it, context) }
@@ -189,9 +249,11 @@ class NowPlayingViewModel(
         }
     }
 
+    // ===== PERBAIKAN DURASI - PAUSE/RESUME METHODS =====
     private fun pauseSong() {
         PlayerController.pause()
         _isPlaying.value = false
+        stopPositionTracking()
 
         // ===== ANALYTICS: Track pause =====
         if (!isPaused && currentSessionId != null) {
@@ -204,6 +266,7 @@ class NowPlayingViewModel(
         if (!PlayerController.isPlaying()) {
             PlayerController.resume()
             _isPlaying.value = true
+            startPositionTracking()
 
             // ===== ANALYTICS: Track resume =====
             if (isPaused && currentSessionId != null) {
@@ -221,6 +284,12 @@ class NowPlayingViewModel(
         } else {
             resumeSong()
         }
+    }
+
+    // ===== PERBAIKAN DURASI - SEEK METHOD =====
+    fun seekTo(positionMs: Int) {
+        PlayerController.seekTo(positionMs)
+        _currentPosition.value = positionMs
     }
 
     fun toggleLike(song: Song) {
@@ -346,14 +415,18 @@ class NowPlayingViewModel(
         }
     }
 
+    // ===== PERBAIKAN DURASI - CLEAR QUEUE DENGAN TRACKING =====
     fun clearQueue() {
         // ===== END ANALYTICS SESSION BEFORE CLEARING =====
         endCurrentAnalyticsSession()
 
+        stopPositionTracking()
         _mainQueue.value = emptyList()
         _manualQueue.value = mutableListOf()
         _currSong.value = null
         _isPlaying.value = false
+        _currentPosition.value = 0
+        _songDuration.value = 0
         currentQueueIndex = -1
     }
 
@@ -425,8 +498,17 @@ class NowPlayingViewModel(
         return "%d:%02d".format(minutes, secs)
     }
 
+    fun formatDurationMs(durationMs: Int): String {
+        val totalSeconds = durationMs / 1000
+        val minutes = totalSeconds / 60
+        val seconds = totalSeconds % 60
+        return "%d:%02d".format(minutes, seconds)
+    }
+
+    // ===== PERBAIKAN DURASI - ONCLEARED DENGAN TRACKING =====
     override fun onCleared() {
         super.onCleared()
+        stopPositionTracking()
         // ===== END ANALYTICS SESSION WHEN VIEWMODEL IS CLEARED =====
         endCurrentAnalyticsSession()
     }

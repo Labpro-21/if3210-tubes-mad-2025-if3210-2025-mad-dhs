@@ -13,6 +13,7 @@ class MusicNotificationReceiver : BroadcastReceiver() {
         const val ACTION_PAUSE = "com.tubes.purry.ACTION_PAUSE"
         const val ACTION_NEXT = "com.tubes.purry.ACTION_NEXT"
         const val ACTION_PREV = "com.tubes.purry.ACTION_PREV"
+        const val ACTION_STOP = "com.tubes.purry.ACTION_STOP"
     }
 
     override fun onReceive(context: Context, intent: Intent) {
@@ -40,6 +41,11 @@ class MusicNotificationReceiver : BroadcastReceiver() {
             ACTION_PREV -> {
                 viewModel.previousSong(context)
                 Log.d("MusicNotifReceiver", "Prev dipanggil")
+            }
+
+            ACTION_STOP -> {
+                context.stopService(Intent(context, MusicNotificationService::class.java))
+                Log.d("MusicNotifReceiver", "Stop service dipanggil")
             }
         }
 

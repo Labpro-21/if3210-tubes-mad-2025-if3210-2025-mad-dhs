@@ -3,8 +3,6 @@ package com.tubes.purry.ui.detail
 import android.os.Bundle
 import com.bumptech.glide.Glide
 import android.content.Intent
-import android.os.Handler
-import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,16 +16,13 @@ import com.tubes.purry.data.local.AppDatabase
 import com.tubes.purry.databinding.FragmentSongDetailBinding
 import com.tubes.purry.ui.player.NowPlayingViewModel
 import com.tubes.purry.ui.player.NowPlayingViewModelFactory
-import com.tubes.purry.ui.player.PlayerController
 import com.tubes.purry.ui.profile.ProfileViewModel
-import com.tubes.purry.utils.formatDuration
 import androidx.navigation.fragment.findNavController
 import com.tubes.purry.utils.previewAndShareQrCode
 
 
 class SongDetailFragment : Fragment() {
     private lateinit var binding: FragmentSongDetailBinding
-    private val handler = Handler(Looper.getMainLooper())
     private var isDragging = false
     private val args: SongDetailFragmentArgs by navArgs()
 
@@ -39,17 +34,6 @@ class SongDetailFragment : Fragment() {
             AppDatabase.getDatabase(requireContext()).songDao(),
             profileViewModel
         )
-    }
-
-    private val updateSeekRunnable = object : Runnable {
-        override fun run() {
-            if (!isDragging && PlayerController.isPlaying()) {
-                val currentPosition = PlayerController.getCurrentPosition()
-                binding.seekBar.progress = currentPosition
-                binding.tvCurrentTime.text = formatDuration(currentPosition)
-            }
-            handler.postDelayed(this, 500)
-        }
     }
 
     override fun onCreateView(
@@ -72,7 +56,6 @@ class SongDetailFragment : Fragment() {
 
         val current = nowPlayingViewModel.currSong.value
         val currentId = current?.serverId ?: -1
-
         if (currentId != songId) {
             nowPlayingViewModel.fetchSongById(songId, requireContext())
         }
@@ -87,20 +70,30 @@ class SongDetailFragment : Fragment() {
                 Glide.with(this)
                     .load(song.coverPath ?: song.coverResId ?: R.drawable.album_default)
                     .into(binding.ivCover)
-                val durationInSeconds = it.duration
-                binding.seekBar.max = durationInSeconds
-                binding.tvDuration.text = formatDuration(durationInSeconds)
             }
         }
 
-        nowPlayingViewModel.isPlaying.observe(viewLifecycleOwner) { //isPlaying ->
+        nowPlayingViewModel.songDuration.observe(viewLifecycleOwner) { duration ->
+            if (duration > 0) {
+                binding.seekBar.max = duration
+                binding.tvDuration.text = nowPlayingViewModel.formatDurationMs(duration)
+            }
+        }
+
+        nowPlayingViewModel.currentPosition.observe(viewLifecycleOwner) { position ->
+            if (!isDragging) {
+                binding.seekBar.progress = position
+                binding.tvCurrentTime.text = nowPlayingViewModel.formatDurationMs(position)
+            }
+        }
+
+        nowPlayingViewModel.isPlaying.observe(viewLifecycleOwner) {
             binding.btnPlayPause.setImageResource(
-                if (it) R.drawable.ic_pause_btn
-                else R.drawable.ic_play_btn
+                if (it) R.drawable.ic_pause_btn else R.drawable.ic_play_btn
             )
         }
 
-        nowPlayingViewModel.isShuffling.observe(viewLifecycleOwner) { //isShuffling ->
+        nowPlayingViewModel.isShuffling.observe(viewLifecycleOwner) {
             val color = if (it) R.color.green else android.R.color.white
             binding.btnShuffle.setColorFilter(resources.getColor(color, null))
         }
@@ -118,20 +111,6 @@ class SongDetailFragment : Fragment() {
             ))
         }
 
-//        nowPlayingViewModel.repeatMode.observe(viewLifecycleOwner) { mode ->
-//            val resId = when (mode) {
-//                NowPlayingViewModel.RepeatMode.ONE -> R.drawable.ic_repeat_one
-//                else -> R.drawable.ic_repeat
-//            }
-//            val color = when (mode) {
-//                NowPlayingViewModel.RepeatMode.NONE, null -> android.R.color.white
-//                else -> R.color.green
-//            }
-//
-//            binding.btnRepeat.setImageResource(resId)
-//            binding.btnRepeat.setColorFilter(resources.getColor(color, null))
-//        }
-
         binding.btnPlayPause.setOnClickListener { nowPlayingViewModel.togglePlayPause() }
         binding.btnBack.setOnClickListener { findNavController().popBackStack() }
         binding.btnNext.setOnClickListener { nowPlayingViewModel.nextSong(requireContext()) }
@@ -140,7 +119,7 @@ class SongDetailFragment : Fragment() {
         binding.seekBar.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: android.widget.SeekBar?, progress: Int, fromUser: Boolean) {
                 if (fromUser) {
-                    binding.tvCurrentTime.text = formatDuration(progress)
+                    binding.tvCurrentTime.text = nowPlayingViewModel.formatDurationMs(progress)
                 }
             }
 
@@ -151,18 +130,15 @@ class SongDetailFragment : Fragment() {
             override fun onStopTrackingTouch(seekBar: android.widget.SeekBar?) {
                 isDragging = false
                 seekBar?.progress?.let {
-                    PlayerController.seekTo(it)
+                    nowPlayingViewModel.seekTo(it)
                 }
             }
         })
 
-        // Observe the liked state
         nowPlayingViewModel.isLiked.observe(viewLifecycleOwner) { isLiked ->
-            if (isLiked) {
-                binding.btnFavorite.setImageResource(R.drawable.ic_heart_filled)
-            } else {
-                binding.btnFavorite.setImageResource(R.drawable.ic_heart_outline)
-            }
+            binding.btnFavorite.setImageResource(
+                if (isLiked) R.drawable.ic_heart_filled else R.drawable.ic_heart_outline
+            )
         }
 
         binding.btnFavorite.setOnClickListener {
@@ -210,7 +186,6 @@ class SongDetailFragment : Fragment() {
                         }
                         true
                     }
-
                     else -> false
                 }
             }
@@ -220,13 +195,4 @@ class SongDetailFragment : Fragment() {
 
     }
 
-    override fun onResume() {
-        super.onResume()
-        handler.post(updateSeekRunnable)
-    }
-
-    override fun onPause() {
-        super.onPause()
-        handler.removeCallbacks(updateSeekRunnable)
-    }
 }

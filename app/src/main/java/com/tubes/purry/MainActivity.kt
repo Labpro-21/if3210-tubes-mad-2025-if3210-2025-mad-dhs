@@ -115,7 +115,7 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
                 profileViewModel)
         )[NowPlayingViewModel::class.java]
 
-        NowPlayingManager.viewModel = nowPlayingViewModel
+        NowPlayingManager.setViewModel(nowPlayingViewModel)
 
         Firebase.dynamicLinks
             .getDynamicLink(intent)
