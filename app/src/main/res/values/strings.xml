@@ -87,5 +87,24 @@
     <string name="artist_song_card">Artist</string>
     <string name="song_title_card">Song Title</string>
     <string name="pilih_output_audio">Pilih Output Audio</string>
-    <string name="bluetooth_icon_desc">Bluetooth icon</string>
+    <string name="audio_output_internal_speaker">Internal Speaker</string>
+    <string name="audio_output_headphones">Headphones</string>
+    <string name="audio_output_bluetooth">Bluetooth Device</string>
+    <string name="playing_on">Playing on: %s</string>
+    <string name="audio_output_disconnected_message">Bluetooth device disconnected. Audio output switched to %s.</string>
+    <string name="action_select_audio_output">Select Audio Output</string>
+    <string name="content_desc_back_button">Back</string>
+    <string name="content_desc_options_button">More options</string>
+    <string name="content_desc_album_art">Album art</string>
+    <string name="content_desc_toggle_favorite">Toggle favorite</string>
+    <string name="content_desc_play_pause_button">Play or pause current song</string>
+    <string name="content_desc_previous_button">Play previous song</string>
+    <string name="content_desc_next_button">Play next song</string>
+    <string name="content_desc_shuffle_button">Toggle shuffle mode</string>
+    <string name="content_desc_repeat_button">Toggle repeat mode</string>
+    <string name="content_desc_audio_output_icon">Current audio output device</string>
+    <string name="bluetooth_icon_desc">Bluetooth audio output</string>
+    <string name="speaker_icon_desc">Speaker audio output</string>
+    <string name="headset_icon_desc">Wired headset audio output</string>
+    <string name="current_audio_output_device_icon">Current audio output device icon</string>
 </resources>

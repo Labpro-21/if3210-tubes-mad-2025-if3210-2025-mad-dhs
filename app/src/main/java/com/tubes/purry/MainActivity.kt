@@ -1,11 +1,15 @@
 package com.tubes.purry
 
 import android.Manifest
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothDevice
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.media.AudioManager
 import android.net.ConnectivityManager
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -17,10 +21,15 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
+import androidx.activity.viewModels
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.tubes.purry.data.local.AppDatabase
 import com.tubes.purry.databinding.ActivityMainBinding
+import com.tubes.purry.ui.player.NowPlayingViewModel
+import com.tubes.purry.ui.player.NowPlayingViewModelFactory
 import com.tubes.purry.ui.profile.ProfileViewModel
 import com.tubes.purry.ui.profile.ProfileViewModelFactory
+import com.tubes.purry.utils.AudioDeviceBroadcastReceiver
 import com.tubes.purry.utils.AudioOutputManager
 import com.tubes.purry.utils.NetworkStateReceiver
 import com.tubes.purry.utils.NetworkUtil
@@ -28,18 +37,32 @@ import com.tubes.purry.utils.TokenExpirationService
 import com.tubes.purry.utils.seedAssets
 
 class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListener {
-
     private lateinit var binding: ActivityMainBinding
     private val networkStateReceiver = NetworkStateReceiver()
+    private lateinit var audioDeviceReceiver: AudioDeviceBroadcastReceiver
 
-    private val permissionLauncher = registerForActivityResult(
+    // Lazily initialize NowPlayingViewModel
+    private val nowPlayingViewModel: NowPlayingViewModel by viewModels {
+        val appContext = applicationContext
+        val db = AppDatabase.getDatabase(appContext)
+        val profileFactory = ProfileViewModelFactory(appContext)
+        val profileViewModel = ViewModelProvider(this, profileFactory)[ProfileViewModel::class.java]
+        NowPlayingViewModelFactory(db.LikedSongDao(), db.songDao(), profileViewModel, appContext)
+    }
+
+    private val requestBluetoothPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
-        val granted = permissions.values.all { it }
-        if (granted) {
-            seedAssets(this)
+        val allGranted = permissions.entries.all { it.value }
+        if (allGranted) {
+            Log.d("MainActivity", "All required Bluetooth permissions granted.")
+            showAudioDeviceDialog() // Proceed to show dialog if permissions are now granted
         } else {
-            Toast.makeText(this, "Permissions required to access media files.", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Bluetooth permissions are required to select audio output.", Toast.LENGTH_LONG).show()
+            Log.d("MainActivity", "Not all Bluetooth permissions were granted.")
+            permissions.entries.forEach {
+                Log.d("MainActivity", "Permission: ${it.key}, Granted: ${it.value}")
+            }
         }
     }
 
@@ -47,6 +70,21 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        // Initialize and register AudioDeviceBroadcastReceiver
+        audioDeviceReceiver = AudioDeviceBroadcastReceiver()
+        val audioIntentFilter = IntentFilter().apply {
+            addAction(BluetoothDevice.ACTION_ACL_CONNECTED)
+            addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED)
+            addAction(AudioManager.ACTION_HEADSET_PLUG)
+            addAction(BluetoothAdapter.ACTION_STATE_CHANGED) // For BT on/off
+            addAction(AudioManager.ACTION_SCO_AUDIO_STATE_UPDATED)
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(audioDeviceReceiver, audioIntentFilter, RECEIVER_NOT_EXPORTED)
+        } else {
+            registerReceiver(audioDeviceReceiver, audioIntentFilter)
+        }
 
         // Setup bottom navigation
         val navView: BottomNavigationView = binding.navView
@@ -100,23 +138,38 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
         val profileViewModel = ViewModelProvider(this, ProfileViewModelFactory(this))[ProfileViewModel::class.java]
         profileViewModel.getProfileData()
 
+        nowPlayingViewModel.updateActiveAudioOutput()
+
         // Trigger seeding
         // checkPermissionsAndSeed()
     }
 
-    private fun checkPermissionsAndSeed() {
-        val permissionsToRequest = mutableListOf<String>().apply {
-            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2) {
-                add(Manifest.permission.READ_EXTERNAL_STORAGE)
+    private fun checkAndRequestBluetoothPermissions(): Boolean {
+        val requiredPermissions = mutableListOf<String>()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) { // Android 12+
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+                requiredPermissions.add(Manifest.permission.BLUETOOTH_CONNECT)
+            }
+            // BLUETOOTH_SCAN might be needed for more active discovery, but for bondedDevices, CONNECT is key.
+            // If you were to scan for *new* devices:
+            // if (ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
+            // requiredPermissions.add(Manifest.permission.BLUETOOTH_SCAN)
+            // }
+        } else { // Pre-Android 12
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH) != PackageManager.PERMISSION_GRANTED) {
+                requiredPermissions.add(Manifest.permission.BLUETOOTH)
+            }
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_ADMIN) != PackageManager.PERMISSION_GRANTED) {
+                requiredPermissions.add(Manifest.permission.BLUETOOTH_ADMIN)
             }
         }
 
-        if (permissionsToRequest.isEmpty() ||
-            permissionsToRequest.all { ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED }) {
-            seedAssets(this)
-        } else {
-            permissionLauncher.launch(permissionsToRequest.toTypedArray())
+        if (requiredPermissions.isNotEmpty()) {
+            Log.d("MainActivity", "Requesting Bluetooth permissions: $requiredPermissions")
+            requestBluetoothPermissionLauncher.launch(requiredPermissions.toTypedArray())
+            return false
         }
+        return true
     }
 
     override fun onNetworkAvailable() = runOnUiThread { hideNetworkErrorBanner() }
@@ -158,22 +211,16 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
     }
 
     private fun showAudioDeviceDialog() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT)
-            != PackageManager.PERMISSION_GRANTED
-        ) {
-            Toast.makeText(this, "Izin Bluetooth belum diberikan.", Toast.LENGTH_SHORT).show()
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(Manifest.permission.BLUETOOTH_CONNECT),
-                1001
-            )
+        if (!checkAndRequestBluetoothPermissions()) {
+            Toast.makeText(this, "Bluetooth permissions are needed to list devices.", Toast.LENGTH_SHORT).show()
             return
         }
 
+        // Permissions are granted or not needed for this specific call path if pre-S
         val devices = AudioOutputManager.getAvailableAudioDevices(this)
         if (devices.isEmpty()) {
-            Toast.makeText(this, "Tidak ada perangkat audio Bluetooth yang tersedia.", Toast.LENGTH_LONG).show()
-            AudioOutputManager.openBluetoothSettings(this)
+            Toast.makeText(this, "No paired Bluetooth audio devices found. Please pair a device in settings.", Toast.LENGTH_LONG).show()
+            AudioOutputManager.openBluetoothSettings(this) // Guide user to pair
             return
         }
 
@@ -191,7 +238,6 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
         }
     }
 
-
     override fun onStart() {
         super.onStart()
         registerReceiver(networkStateReceiver,
@@ -202,5 +248,21 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
         super.onStop()
         unregisterReceiver(networkStateReceiver)
         networkStateReceiver.removeListener(this)
+    }
+
+    // Companion object to allow BroadcastReceiver to access MainActivity instance
+    companion object {
+        var activityInstance: MainActivity? = null
+    }
+
+    override fun onResume() {
+        super.onResume()
+        activityInstance = this
+        nowPlayingViewModel.updateActiveAudioOutput() // Refresh audio output on resume
+    }
+
+    override fun onPause() {
+        super.onPause()
+        activityInstance = null
     }
 }

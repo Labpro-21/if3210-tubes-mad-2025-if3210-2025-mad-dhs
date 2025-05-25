@@ -20,11 +20,13 @@ import kotlinx.coroutines.withContext
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import com.tubes.purry.data.model.SongInQueue
+import com.tubes.purry.utils.AudioOutputManager
 
 class NowPlayingViewModel(
     private val likedSongDao: LikedSongDao,
     private val songDao: SongDao,
-    private val profileViewModel: ProfileViewModel
+    private val profileViewModel: ProfileViewModel,
+    private val applicationContext: Context // Added application context
 ) : ViewModel() {
 
     private val _currSong = MutableLiveData<Song?>() // mutable untuk bisa diubah2
@@ -49,7 +51,22 @@ class NowPlayingViewModel(
     private val _repeatMode = MutableLiveData<RepeatMode>(RepeatMode.NONE)
     val repeatMode: LiveData<RepeatMode> = _repeatMode
 
+    // LiveData for active audio output
+    private val _activeAudioOutputInfo = MutableLiveData<AudioOutputManager.ActiveOutputInfo>()
+    val activeAudioOutputInfo: LiveData<AudioOutputManager.ActiveOutputInfo> = _activeAudioOutputInfo
+
     enum class RepeatMode { NONE, ONE, ALL }
+
+    init {
+        updateActiveAudioOutput() // Initial check
+    }
+
+    fun updateActiveAudioOutput() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val info = AudioOutputManager.getActiveAudioOutputInfo(applicationContext)
+            _activeAudioOutputInfo.postValue(info)
+        }
+    }
 
     private fun getCurrentSongInQueue(): SongInQueue? {
         val currId = _currSong.value?.id ?: return null
@@ -59,15 +76,15 @@ class NowPlayingViewModel(
     fun playSong(song: Song, context: Context) {
         _isPlaying.value = true
 
-
         viewModelScope.launch {
             val userId = getUserIdBlocking() ?: return@launch
             val isLiked = likedSongDao.isLiked(userId, song.id)
             val songWithLike = song.copy(isLiked = isLiked)
 
-            if (_currSong.value?.id == song.id) {
-                _currSong.postValue(songWithLike)
-            }
+            // This logic ensures that if the same song is "played" again (e.g., after queue manipulation
+            // or repeat), its liked status is re-evaluated and the LiveData is updated.
+            _currSong.postValue(songWithLike) // Post value before PlayerController.play
+            _isLiked.postValue(isLiked)
 
             Log.d(
                 "NowPlayingViewModel",
@@ -78,9 +95,6 @@ class NowPlayingViewModel(
             withContext(Dispatchers.Main) {
                 val success = PlayerController.play(songWithLike, context)
                 if (success) {
-                    _currSong.value = songWithLike
-                    _isLiked.value = isLiked
-
                     Handler(Looper.getMainLooper()).postDelayed({
                         _isPlaying.value = PlayerController.isPlaying()
                     }, 300)
@@ -102,31 +116,6 @@ class NowPlayingViewModel(
                 }
             }
         }
-//        val success = PlayerController.play(song, context)
-//        if (success) {
-//            _currSong.value = song
-////            _isPlaying.value = true
-//            Handler(Looper.getMainLooper()).postDelayed({
-//                _isPlaying.value = PlayerController.isPlaying()
-//            }, 300)
-//
-//
-//
-//            PlayerController.onCompletion = {
-//                when (_repeatMode.value) {
-//                    RepeatMode.ONE -> {
-//                        _currSong.value?.let { playSong(it, context) }
-//                    }
-//                    else -> {
-//                        removeCurrentFromQueue()
-//                        playNextInQueue(context)
-//                    }
-//                }
-//            }
-//        } else {
-//            _isPlaying.value = false
-//            _errorMessage.value = "Gagal memutar lagu. Cek file atau perizinan."
-//        }
     }
 
     private fun pauseSong() {

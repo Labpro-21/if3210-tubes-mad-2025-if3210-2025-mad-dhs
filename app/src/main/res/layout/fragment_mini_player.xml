@@ -1,4 +1,5 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/miniPlayerContainer"
     android:layout_width="match_parent"
     android:layout_height="64dp"
@@ -20,7 +21,8 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:orientation="vertical"
-        android:layout_marginStart="8dp">
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="4dp">
 
         <TextView
             android:id="@+id/textTitle"
@@ -28,8 +30,13 @@
             android:textColor="@android:color/white"
             android:textSize="14sp"
             android:maxLines="1"
+            android:ellipsize="marquee"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:marqueeRepeatLimit="marquee_forever"
+            android:scrollHorizontally="true"
             android:layout_height="wrap_content"
-            android:layout_width="wrap_content"/>
+            android:layout_width="match_parent"/>
 
         <TextView
             android:id="@+id/textArtist"
@@ -37,14 +44,26 @@
             android:textColor="@android:color/darker_gray"
             android:textSize="12sp"
             android:maxLines="1"
+            android:ellipsize="end"
             android:layout_height="wrap_content"
-            android:layout_width="wrap_content"/>
+            android:layout_width="match_parent"/>
     </LinearLayout>
+
+    <ImageView
+        android:id="@+id/ivMiniAudioOutputIcon"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:src="@drawable/ic_speaker"
+        app:tint="@color/white"
+        android:layout_marginEnd="8dp"
+        android:contentDescription="@string/current_audio_output_device_icon"/>
 
     <ImageButton
         android:id="@+id/btnFavorite"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:padding="8dp"
+        android:scaleType="fitCenter"
         android:layout_marginEnd="8dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="@string/like_song"
@@ -52,10 +71,11 @@
 
     <ImageButton
         android:id="@+id/btnPlayPause"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:padding="8dp"
+        android:scaleType="fitCenter"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="@string/play_song"
         android:src="@drawable/ic_play"/>
-<!--        android:tint="@android:color/white" />-->
 </LinearLayout>
