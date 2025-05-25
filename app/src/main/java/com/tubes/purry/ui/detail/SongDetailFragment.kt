@@ -12,10 +12,8 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.tubes.purry.R
-import com.tubes.purry.data.local.AppDatabase
 import com.tubes.purry.databinding.FragmentSongDetailBinding
 import com.tubes.purry.ui.player.NowPlayingViewModel
-import com.tubes.purry.ui.player.NowPlayingViewModelFactory
 import com.tubes.purry.ui.profile.ProfileViewModel
 import com.tubes.purry.utils.previewAndShareQrCode
 import android.util.Log
@@ -46,20 +44,10 @@ class SongDetailFragment : Fragment() {
 
     private fun handleArguments() {
         arguments?.let { bundle ->
-            Log.d("SongDetailFragment", "Bundle contents: ${bundle.keySet().joinToString()}")
-
-            // Debug log
-            for (key in bundle.keySet()) {
-                val value = bundle.get(key)
-                Log.d("SongDetailFragment", "  $key = $value (${value?.javaClass?.simpleName})")
-            }
-
             val songId = bundle.getString("songId")
             val songIdInt = bundle.getInt("songIdInt", -1)
             val isLocal = bundle.getBoolean("isLocal", false)
             val serverId = bundle.getInt("serverId", -1)
-
-            Log.d("SongDetailFragment", "Parsed: songId=$songId, songIdInt=$songIdInt, isLocal=$isLocal, serverId=$serverId")
 
             if (!songId.isNullOrEmpty()) {
                 if (isLocal) {
@@ -73,11 +61,8 @@ class SongDetailFragment : Fragment() {
                     }
                 }
             } else if (songIdInt > 0) {
-                // Perbaikan untuk deep link int
-                Log.d("SongDetailFragment", "Loading song from songIdInt: $songIdInt")
                 loadServerSong(songIdInt)
             } else {
-                // Fallback ke legacy
                 handleLegacyFormat(bundle)
             }
         } ?: run {
@@ -86,12 +71,8 @@ class SongDetailFragment : Fragment() {
     }
 
     private fun handleLegacyFormat(bundle: Bundle) {
-        Log.d("SongDetailFragment", "Using legacy format")
-
         val legacyId = bundle.getString("id")
         if (!legacyId.isNullOrEmpty()) {
-            Log.d("SongDetailFragment", "Legacy ID: $legacyId")
-
             if (legacyId.startsWith("srv-")) {
                 val serverId = extractServerIdFromSongId(legacyId)
                 if (serverId != null) {
@@ -112,37 +93,24 @@ class SongDetailFragment : Fragment() {
         }
     }
 
-
     private fun loadLocalSong(songId: String) {
         val current = nowPlayingViewModel.currSong.value
         if (current?.id != songId) {
-            Log.d("SongDetailFragment", "Fetching local song: $songId")
             nowPlayingViewModel.fetchSongByUUID(songId, requireContext())
-        } else {
-            Log.d("SongDetailFragment", "Local song already loaded: $songId")
         }
     }
 
     private fun loadServerSong(serverId: Int) {
         val current = nowPlayingViewModel.currSong.value
         val expectedId = "srv-$serverId"
-
         if (current?.id != expectedId) {
-            Log.d("SongDetailFragment", "Fetching server song: $serverId")
             nowPlayingViewModel.fetchSongById(serverId, requireContext())
-        } else {
-            Log.d("SongDetailFragment", "Server song already loaded: $serverId")
         }
     }
 
     private fun extractServerIdFromSongId(songId: String): Int? {
         return if (songId.startsWith("srv-")) {
-            try {
-                songId.removePrefix("srv-").toInt()
-            } catch (e: NumberFormatException) {
-                Log.e("SongDetailFragment", "Cannot extract serverId from: $songId", e)
-                null
-            }
+            songId.removePrefix("srv-").toIntOrNull()
         } else {
             null
         }
@@ -162,8 +130,10 @@ class SongDetailFragment : Fragment() {
                 Glide.with(this)
                     .load(it.coverPath ?: it.coverResId ?: R.drawable.album_default)
                     .into(binding.ivCover)
-
-                Log.d("SongDetailFragment", "Song loaded: ${it.title} (${it.id})")
+                // Set icon like berdasarkan properti lagu
+                binding.btnFavorite.setImageResource(
+                    if (it.isLiked) R.drawable.ic_heart_filled else R.drawable.ic_heart_outline
+                )
             }
         }
 
@@ -171,7 +141,6 @@ class SongDetailFragment : Fragment() {
             if (duration > 0) {
                 binding.seekBar.max = duration
                 binding.tvDuration.text = nowPlayingViewModel.formatDurationMs(duration)
-                Log.d("SongDetailFragment", "Duration set: $duration ms")
             }
         }
 
@@ -294,7 +263,6 @@ class SongDetailFragment : Fragment() {
                         }
                         true
                     }
-
 
                     else -> false
                 }

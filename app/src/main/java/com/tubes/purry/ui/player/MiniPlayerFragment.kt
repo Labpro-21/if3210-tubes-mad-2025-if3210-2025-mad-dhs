@@ -48,6 +48,11 @@ class MiniPlayerFragment : Fragment() {
                     .load(image)
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
                     .into(binding.imageCover)
+
+                // ✅ Update icon like sesuai properti di currSong juga
+                binding.btnFavorite.setImageResource(
+                    if (song.isLiked) R.drawable.ic_heart_filled else R.drawable.ic_heart_outline
+                )
             } else {
                 binding.root.visibility = View.GONE
             }
@@ -99,27 +104,13 @@ class MiniPlayerFragment : Fragment() {
                 }
 
                 val bundle = Bundle().apply {
-                    if (currentSong.isLocal) {
-                        putString("songId", currentSong.id)
-                        putBoolean("isLocal", true)
-                        putString("id", currentSong.id)
-                    } else {
-                        putString("songId", currentSong.id)
-                        putBoolean("isLocal", false)
-                        currentSong.serverId?.let { serverId ->
-                            putInt("serverId", serverId)
-                        }
-                        putString("id", currentSong.id)
-                    }
-
-                    Log.d("MiniPlayerFragment", "Navigating to song detail:")
-                    Log.d("MiniPlayerFragment", "  Original songId: ${currentSong.id}")
-                    Log.d("MiniPlayerFragment", "  isLocal: ${currentSong.isLocal}")
-                    Log.d("MiniPlayerFragment", "  serverId: ${currentSong.serverId}")
-                    Log.d("MiniPlayerFragment", "  title: ${currentSong.title}")
-                    Log.d("MiniPlayerFragment", "  Bundle songId: ${getString("songId")}")
+                    putString("songId", currentSong.id)
+                    putBoolean("isLocal", currentSong.isLocal)
+                    putString("id", currentSong.id)
+                    currentSong.serverId?.let { putInt("serverId", it) }
                 }
 
+                Log.d("MiniPlayerFragment", "Navigating to song detail for: ${currentSong.title}")
                 navController.navigate(R.id.songDetailFragment, bundle)
 
             } catch (e: Exception) {
@@ -127,4 +118,5 @@ class MiniPlayerFragment : Fragment() {
             }
         }
     }
+
 }
