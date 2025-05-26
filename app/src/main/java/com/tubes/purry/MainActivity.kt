@@ -28,6 +28,7 @@ import com.tubes.purry.ui.profile.ProfileViewModelFactory
 import com.tubes.purry.utils.NetworkStateReceiver
 import com.tubes.purry.utils.NetworkUtil
 import com.tubes.purry.utils.TokenExpirationService
+import com.tubes.purry.utils.PermissionManager
 import com.tubes.purry.ui.player.NowPlayingManager
 import com.tubes.purry.ui.qr.ScanQRActivity
 
@@ -35,6 +36,7 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
 
     private lateinit var binding: ActivityMainBinding
     private val networkStateReceiver = NetworkStateReceiver()
+    private val permissionManager = PermissionManager()
     private lateinit var nowPlayingViewModel: NowPlayingViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,11 +56,29 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
                 hideMiniPlayer()
             }
         }
+        // Setup bottom navigation
+//        val navView: BottomNavigationView = binding.navView
+//        val navController = supportFragmentManager.findFragmentById(R.id.nav_host_fragment)
+//            ?.findNavController() ?: throw IllegalStateException("NavController not found")
+//        navView.setupWithNavController(navController)
 
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.miniPlayerContainer, MiniPlayerFragment())
-            .commit()
+        // Add mini player fragment (di before ga pake cek if saved)
+        if (savedInstanceState == null) {
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.miniPlayerContainer, MiniPlayerFragment())
+                .commit()
+        }
 
+        // Request necessary permissions
+        if (!permissionManager.checkBluetoothPermissions(this)) {
+            permissionManager.requestBluetoothPermissions(this)
+        }
+
+        if (!permissionManager.checkAudioPermissions(this)) {
+            permissionManager.requestAudioPermissions(this)
+        }
+
+        // Observe destination changes to hide/show mini player
         val navView = findViewById<BottomNavigationView?>(R.id.navView)
         val navController = supportFragmentManager.findFragmentById(R.id.nav_host_fragment)
             ?.findNavController() ?: throw IllegalStateException("NavController not found")
@@ -71,6 +91,7 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
                     hideBottomNav()
                     binding.btnScanQr?.hide()
                 }
+
                 else -> {
                     showMiniPlayer()
                     showBottomNav()
@@ -88,13 +109,31 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
 
         TokenExpirationService.startService(this)
         networkStateReceiver.addListener(this)
-        registerReceiver(networkStateReceiver, IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION))
+        registerReceiver(
+            networkStateReceiver,
+            IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
+        )
 
+        // Observe network status changes
         NetworkUtil.getNetworkStatus().observe(this) { isAvailable ->
-            if (isAvailable) hideNetworkErrorBanner() else showNetworkErrorBanner()
+            if (isAvailable) {
+                hideNetworkErrorBanner()
+            } else {
+                showNetworkErrorBanner()
+            }
         }
 
-        if (!NetworkUtil.isNetworkAvailable(this)) showNetworkErrorBanner()
+        // Initial network check
+        if (!NetworkUtil.isNetworkAvailable(this)) {
+            showNetworkErrorBanner()
+        }
+
+        // Fetch user profile
+        val profileViewModel = ViewModelProvider(
+            this,
+            ProfileViewModelFactory(application)
+        )[ProfileViewModel::class.java]
+        profileViewModel.getProfileData()
 
         Firebase.dynamicLinks
             .getDynamicLink(intent)
@@ -103,6 +142,9 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
                 if (deepLink != null) {
                     binding.root.post { handleDeepLink(deepLink) }
                 }
+            }
+            .addOnFailureListener {
+                // Optional: log error
             }
 
         handleIntentNavigation(intent)
@@ -130,6 +172,33 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
             val intent = Intent(this, ScanQRActivity::class.java)
             startActivity(intent)
         }
+
+    }
+
+    // FIXED: Moved this method outside of onCreate()
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        permissionManager.handlePermissionResult(
+            requestCode,
+            grantResults,
+            onBluetoothGranted = {
+                Toast.makeText(this, "Bluetooth permissions granted", Toast.LENGTH_SHORT).show()
+            },
+            onBluetoothDenied = {
+                Toast.makeText(this, "Bluetooth permissions required for external audio devices", Toast.LENGTH_LONG).show()
+            },
+            onAudioGranted = {
+                Toast.makeText(this, "Audio permissions granted", Toast.LENGTH_SHORT).show()
+            },
+            onAudioDenied = {
+                Toast.makeText(this, "Audio permissions required for output control", Toast.LENGTH_LONG).show()
+            }
+        )
     }
 
     override fun onNewIntent(intent: Intent?) {
@@ -185,6 +254,7 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
         }
     }
 
+
     private fun handleIntentNavigation(intent: Intent?) {
         intent?.getStringExtra("navigateTo")?.let { destination ->
             if (destination == "detail") {
@@ -229,11 +299,11 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
     }
 
     private fun hideBottomNav() {
-        binding.navView?.visibility = View.GONE
+        binding.navView!!.visibility = View.GONE
     }
 
     private fun showBottomNav() {
-        binding.navView?.visibility = View.VISIBLE
+        binding.navView!!.visibility = View.VISIBLE
     }
 
     override fun onStart() {

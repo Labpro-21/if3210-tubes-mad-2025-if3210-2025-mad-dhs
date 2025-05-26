@@ -2,9 +2,12 @@ package com.tubes.purry.ui.recommendation
 
 import android.os.Bundle
 import android.util.Log
+import android.view.View
+import android.widget.FrameLayout
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -16,16 +19,23 @@ import com.tubes.purry.data.model.Song
 import com.tubes.purry.data.model.toTemporarySong
 import com.tubes.purry.data.remote.ApiClient
 import com.tubes.purry.databinding.ActivityRecommendationDetailBinding
+import com.tubes.purry.ui.library.SongListAdapter
 import com.tubes.purry.ui.library.SongViewModel
 import com.tubes.purry.ui.library.SongViewModelFactory
+import com.tubes.purry.ui.player.MiniPlayerFragment
 import com.tubes.purry.ui.player.NowPlayingViewModel
+import com.tubes.purry.ui.player.NowPlayingViewModelFactory
+import com.tubes.purry.ui.profile.ProfileViewModel
 import com.tubes.purry.utils.SessionManager
+import com.tubes.purry.ui.profile.ProfileViewModelFactory
 import kotlinx.coroutines.launch
 
 class RecommendationDetailActivity : AppCompatActivity() {
     private lateinit var binding: ActivityRecommendationDetailBinding
-    private lateinit var adapter: RecommendationSongAdapter
+//    private lateinit var adapter: SongListAdapter
+private lateinit var adapter: RecommendationSongAdapter
     private lateinit var nowPlayingViewModel: NowPlayingViewModel
+//    private lateinit var profileViewModel: ProfileViewModel
     private var currentSongs: List<Song> = emptyList()
     private lateinit var sessionManager: SessionManager
 
@@ -40,10 +50,24 @@ class RecommendationDetailActivity : AppCompatActivity() {
 
         sessionManager = SessionManager(this)
         nowPlayingViewModel = (application as PurrytifyApplication).nowPlayingViewModel
-
+//        setupViewModels()
         setupUI()
         loadRecommendations()
     }
+
+//    private fun setupViewModels() {
+//        val db = AppDatabase.getDatabase(applicationContext)
+//        val likedSongDao = db.LikedSongDao()
+//        val songDao = db.songDao()
+//
+//        // Create ProfileViewModel using its proper factory
+//        val profileViewModelFactory = ProfileViewModelFactory(application)
+//        profileViewModel = ViewModelProvider(this, profileViewModelFactory)[ProfileViewModel::class.java]
+//
+//        // Create NowPlayingViewModel with ProfileViewModel
+//        val factory = NowPlayingViewModelFactory(application, likedSongDao, songDao, profileViewModel)
+//        nowPlayingViewModel = ViewModelProvider(this, factory)[NowPlayingViewModel::class.java]
+//    }
 
     private fun setupUI() {
         setSupportActionBar(binding.toolbar)
@@ -51,11 +75,19 @@ class RecommendationDetailActivity : AppCompatActivity() {
         supportActionBar?.setDisplayShowTitleEnabled(false)
         binding.toolbar.setNavigationOnClickListener { onBackPressed() }
 
+        // Setup adapter
+//        adapter = SongListAdapter(
+//            onClick = { song -> onSongClicked(song) },
+//            onEdit = { /* Not needed for recommendations */ },
+//            onDelete = { /* Not needed for recommendations */ },
+//            showEditDelete = false
+//        )
+
         adapter = RecommendationSongAdapter(
             songs = emptyList(),
             context = this,
             onClick = { song -> onSongClicked(song) },
-            country = "ID" // Bisa diganti dengan dari profile jika perlu
+            country = "ID" // TODO
         )
 
         binding.rvRecommendationSongs.apply {
@@ -72,10 +104,12 @@ class RecommendationDetailActivity : AppCompatActivity() {
         val description = intent.getStringExtra("description") ?: ""
         val imageRes = intent.getIntExtra("image_res", R.drawable.cov_playlist_global)
 
+        // Set UI
         binding.ivRecommendationCover.setImageResource(imageRes)
         binding.tvRecommendationTitle.text = title
         binding.tvRecommendationDescription.text = description
 
+        // Load songs based on type
         when (recommendationType) {
             RecommendationType.DAILY_MIX -> loadDailyMix()
             RecommendationType.RECENTLY_PLAYED_MIX -> loadRecentlyPlayedMix()
@@ -85,6 +119,9 @@ class RecommendationDetailActivity : AppCompatActivity() {
     }
 
     private fun loadDailyMix() {
+//        currentSongs = emptyList()
+//        adapter.submitList(emptyList())
+//        Toast.makeText(this, "Daily mix is not available", Toast.LENGTH_SHORT).show()
         lifecycleScope.launch {
             try {
                 val onlineSongs = ApiClient.apiService.getTopSongsGlobal()
@@ -107,25 +144,90 @@ class RecommendationDetailActivity : AppCompatActivity() {
             lifecycleScope.launch {
                 try {
                     val recentSongs = localRecentSongs.take(20)
+//                    currentSongs = recentSongs
+//                    adapter.submitList(recentSongs)
+
                     val onlineSongs = ApiClient.apiService.getTopSongsGlobal()
                     val additionalSongs = onlineSongs.shuffled().take(10).map { it.toTemporarySong() }
-
                     val mixedSongs = (recentSongs + additionalSongs).distinctBy { it.id }
                     currentSongs = mixedSongs
                     adapter.updateSongs(mixedSongs)
                     adapter.checkDownloadedStatus()
 
-                    Log.d("RecommendationDetail", "Recently played mix loaded: ${mixedSongs.size} songs")
+                    Log.d("RecommendationDetail", "Loaded ${recentSongs.size} recently played songs")
                 } catch (e: Exception) {
                     Log.e("RecommendationDetail", "Error loading recently played songs", e)
                     currentSongs = localRecentSongs
                     adapter.updateSongs(localRecentSongs)
                     adapter.checkDownloadedStatus()
+//                    adapter.submitList(localRecentSongs)
                 }
             }
         }
     }
 
+    // Audio-routing-new
+//    private fun loadLikedSongsMix() {
+//        val db = AppDatabase.getDatabase(applicationContext)
+//        val userId = sessionManager.getUserId()
+//
+//        if (userId != null) {
+//            db.LikedSongDao().getLikedSongsByUser(userId).asLiveData().observe(this) { likedSongs ->
+//                songViewModel.allSongs.observe(this) { allLocalSongs ->
+//                    lifecycleScope.launch {
+//                        try {
+//                            val onlineSongs = ApiClient.apiService.getTopSongsGlobal()
+//
+//                            val similarSongs = mutableListOf<Song>()
+//
+//                            for (likedSong in likedSongs) {
+//                                // Search in online songs
+//                                val matchingOnlineSongs = onlineSongs.filter { onlineSong ->
+//                                    val titleMatch = onlineSong.title.contains(likedSong.title, ignoreCase = true) ||
+//                                            likedSong.title.contains(onlineSong.title, ignoreCase = true)
+//                                    val artistMatch = onlineSong.artist.contains(likedSong.artist, ignoreCase = true) ||
+//                                            likedSong.artist.contains(onlineSong.artist, ignoreCase = true)
+//                                    titleMatch || artistMatch
+//                                }
+//
+//                                // Search in local songs (exclude already liked songs)
+//                                val likedSongIds = likedSongs.map { it.id }.toSet()
+//                                val matchingLocalSongs = allLocalSongs.filter { localSong ->
+//                                    localSong.id !in likedSongIds && (
+//                                            (localSong.title.contains(likedSong.title, ignoreCase = true) ||
+//                                                    likedSong.title.contains(localSong.title, ignoreCase = true)) ||
+//                                                    (localSong.artist.contains(likedSong.artist, ignoreCase = true) ||
+//                                                            likedSong.artist.contains(localSong.artist, ignoreCase = true))
+//                                            )
+//                                }
+//
+//                                similarSongs.addAll(matchingOnlineSongs.map { it.toTemporarySong() })
+//                                similarSongs.addAll(matchingLocalSongs)
+//                            }
+//
+//                            val uniqueSimilarSongs = similarSongs.distinctBy { it.id }
+//                            val mixedSongs = (likedSongs + uniqueSimilarSongs).distinctBy {
+//                                "${it.title.lowercase()}-${it.artist.lowercase()}"
+//                            }.take(25)
+//
+//                            currentSongs = mixedSongs
+//                            adapter.submitList(mixedSongs)
+//
+//                            Log.d("RecommendationDetail",
+//                                "Loaded ${likedSongs.size} liked songs + ${uniqueSimilarSongs.size} similar songs (online + local)")
+//
+//                        } catch (e: Exception) {
+//                            Log.e("RecommendationDetail", "Error loading similar songs", e)
+//                            currentSongs = likedSongs
+//                            adapter.submitList(likedSongs)
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
+
+    // rec-tomini
     private fun loadLikedSongsMix() {
         val db = AppDatabase.getDatabase(applicationContext)
         val userId = sessionManager.getUserId()
@@ -180,7 +282,8 @@ class RecommendationDetailActivity : AppCompatActivity() {
                         }.shuffled().take(15)
 
                         val onlineSongs = ApiClient.apiService.getTopSongsGlobal()
-                        val randomOnlineSongs = onlineSongs.shuffled().take(15).map { it.toTemporarySong() }
+                        val randomOnlineSongs = onlineSongs.shuffled().take(15)
+                            .map { it.toTemporarySong() }
 
                         val discoveryMix = (unplayedLocalSongs + randomOnlineSongs)
                             .distinctBy { it.id }
@@ -190,41 +293,80 @@ class RecommendationDetailActivity : AppCompatActivity() {
                         currentSongs = discoveryMix
                         adapter.updateSongs(discoveryMix)
                         adapter.checkDownloadedStatus()
+//                        adapter.submitList(discoveryMix)
 
-                        Log.d("RecommendationDetail", "Discovery mix loaded: ${discoveryMix.size} songs")
+                        Log.d("RecommendationDetail",
+                            "Discovery mix: ${unplayedLocalSongs.size} unplayed local + ${randomOnlineSongs.size} random online")
 
                     } catch (e: Exception) {
                         Log.e("RecommendationDetail", "Error loading discovery mix", e)
                         val recentlyPlayedIds = recentlyPlayedSongs.map { it.id }.toSet()
-                        val fallbackSongs = allLocalSongs.filter {
+                        val unplayedLocalSongs = allLocalSongs.filter {
                             it.id !in recentlyPlayedIds
                         }.shuffled().take(30)
 
-                        currentSongs = fallbackSongs
-                        adapter.updateSongs(fallbackSongs)
+                        currentSongs = unplayedLocalSongs
+//                        adapter.submitList(unplayedLocalSongs)
+                        adapter.updateSongs(unplayedLocalSongs)
                         adapter.checkDownloadedStatus()
-                        Toast.makeText(this@RecommendationDetailActivity, "Discovery mix using local songs only", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@RecommendationDetailActivity,
+                            "Discovery mix using unplayed local songs only", Toast.LENGTH_SHORT).show()
                     }
                 }
             }
         }
     }
 
+    private fun getCountryCodeFromLocation(location: String): String {
+        return when {
+            location.contains("Indonesia", ignoreCase = true) -> "ID"
+            location.contains("United States", ignoreCase = true) ||
+                    location.contains("USA", ignoreCase = true) -> "US"
+            location.contains("United Kingdom", ignoreCase = true) ||
+                    location.contains("UK", ignoreCase = true) -> "GB"
+            location.contains("Canada", ignoreCase = true) -> "CA"
+            location.contains("Australia", ignoreCase = true) -> "AU"
+            location.contains("Germany", ignoreCase = true) -> "DE"
+            location.contains("France", ignoreCase = true) -> "FR"
+            location.contains("Japan", ignoreCase = true) -> "JP"
+            location.contains("Korea", ignoreCase = true) -> "KR"
+            location.contains("Brazil", ignoreCase = true) -> "BR"
+            location.contains("India", ignoreCase = true) -> "IN"
+            location.contains("China", ignoreCase = true) -> "CN"
+            else -> ""
+        }
+    }
+
     private fun onSongClicked(song: Song) {
         Log.d("RecommendationDetail", "Song clicked: ${song.title}")
-        Log.d("RecommendationDetail", "Song ID: ${song.id}")
-        Log.d("RecommendationDetail", "Song isLocal: ${song.isLocal}")
-        Log.d("RecommendationDetail", "Song serverId: ${song.serverId}")
-        Log.d("RecommendationDetail", "Current songs count: ${currentSongs.size}")
+        nowPlayingViewModel.setQueueFromClickedSong(song, currentSongs, this)
+        nowPlayingViewModel.playSong(song, this)
 
         if (currentSongs.isNotEmpty()) {
             try {
                 nowPlayingViewModel.setQueueFromClickedSong(song, currentSongs, this)
                 nowPlayingViewModel.playSong(song, this)
 
-                if (song.isLocal) {
-                    songViewModel.markAsPlayed(song)
-                }
+//                if (song.isLocal) {
+//                    songViewModel.markAsPlayed(song)
+//                }
+                songViewModel.markAsPlayed(song)
+
+                // Show mini player
+//                val fragmentManager = supportFragmentManager
+//                val existingFragment = fragmentManager.findFragmentById(R.id.miniPlayerContainer)
+//                if (existingFragment == null) {
+//                    fragmentManager.beginTransaction()
+//                        .replace(R.id.miniPlayerContainer, MiniPlayerFragment())
+//                        .commit()
+//                }
+
+//                val container = findViewById<FrameLayout>(R.id.miniPlayerContainer)
+//                if (container.visibility != View.VISIBLE) {
+//                    container.alpha = 0f
+//                    container.visibility = View.VISIBLE
+//                    container.animate().alpha(1f).setDuration(250).start()
+//                }
 
                 Log.d("RecommendationDetail", "Song playback initiated successfully")
                 Toast.makeText(this, "Playing: ${song.title}", Toast.LENGTH_SHORT).show()
@@ -237,5 +379,10 @@ class RecommendationDetailActivity : AppCompatActivity() {
             Log.e("RecommendationDetail", "No songs in current queue")
             Toast.makeText(this, "No songs available to play", Toast.LENGTH_SHORT).show()
         }
+
+    }
+
+    private fun getUserId(): Int? {
+        return sessionManager.getUserId()
     }
 }

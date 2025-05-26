@@ -94,6 +94,17 @@
           <theme>@style/Theme.Purrytify</theme>
         </config>
       </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout-land/activity_login.xml">
+        <config>
+          <state>Landscape</state>
+          <theme>@style/Theme.Purrytify</theme>
+        </config>
+      </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/activity_edit_profile.xml">
+        <config>
+          <theme>@style/Theme.Purrytify</theme>
+        </config>
+      </layout>
       <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/activity_login.xml">
         <config>
           <theme>@style/Theme.Purrytify</theme>
@@ -139,6 +150,11 @@
           <theme>@style/Theme.Purrytify</theme>
         </config>
       </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/bottom_sheet_audio_device.xml">
+        <config>
+          <theme>@style/Theme.Purrytify</theme>
+        </config>
+      </layout>
       <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/fragment_add_song_bottom_sheet.xml">
         <config>
           <theme>@style/Theme.Purrytify</theme>
@@ -175,6 +191,11 @@
         </config>
       </layout>
       <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/fragment_trending_songs.xml">
+        <config>
+          <theme>@style/Theme.Purrytify</theme>
+        </config>
+      </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/item_audio_device.xml">
         <config>
           <theme>@style/Theme.Purrytify</theme>
         </config>
@@ -278,6 +299,7 @@
         <option value="Kotlin Data Class" />
         <option value="Kotlin File" />
         <option value="Kotlin Data Class" />
+        <option value="Class" />
         <option value="layoutResourceFile" />
         <option value="layoutResourceFile" />
         <option value="Kotlin Data Class" />
@@ -285,6 +307,7 @@
         <option value="Class" />
         <option value="Kotlin Object" />
         <option value="layoutResourceFile" />
+        <option value="Kotlin Class" />
         <option value="resourceFile" />
         <option value="Kotlin Class" />
       </list>
@@ -337,12 +360,14 @@
     "cidr.known.project.marker": "true",
     "com.google.services.firebase.aqiPopupShown": "true",
     "git-widget-placeholder": "feat/rec-tomini",
+    "git-widget-placeholder": "feat/audio-routing-new",
     "ignore.virus.scanning.warn.message": "true",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "D:/College/Semester 6/Mobile/Tugas Besar 1/app/src/main/res/layout-land",
     "project.structure.last.edited": "Modules",
     "project.structure.proportion": "0.17",
     "project.structure.side.proportion": "0.2",
+    "last_opened_file_path": "/Users/shazyataufik/Documents/ITB/Semester6/MADTubes2/app/src/main/res/layout-land",
     "run.code.analysis.last.selected.profile": "pProject Default",
     "settings.build.tools.auto.reload": "ALL",
     "settings.editor.selected.configurable": "reference.settingsdialog.project.gradle",
@@ -351,12 +376,17 @@
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/app/src/main/res/layout-land" />
+      <recent name="$PROJECT_DIR$/app/src/main/res/layout" />
+      <recent name="$PROJECT_DIR$/app/src/main/res" />
+      <recent name="$PROJECT_DIR$/app/src/main/res/drawable" />
       <recent name="D:\College\Semester 6\Mobile\Tugas Besar 1\app\src\main\res\layout-land" />
       <recent name="D:\College\Semester 6\Mobile\Tugas Besar 1\app\src\main\res\drawable" />
       <recent name="D:\College\Semester 6\Mobile\Tugas Besar 1\app" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="D:\College\Semester 6\Mobile\Tugas Besar 1\app\src\main\res\drawable" />
+      <recent name="$PROJECT_DIR$/app/src/main/res/layout-land" />
       <recent name="D:\College\Semester 6\Mobile\Tugas Besar 1\app\src\main\java\com\tubes\purry\ui\chart" />
       <recent name="C:\Users\edarr\Downloads\if3210-tubes-mad-2025-if3210-2025-mad-dhs\app\src\main\res\drawable" />
     </key>
@@ -637,6 +667,71 @@
       <updated>1748191313689</updated>
     </task>
     <option name="localTasksCounter" value="24" />
+    <task id="LOCAL-00018" summary="feat: edit profile maps">
+      <option name="closed" value="true" />
+      <created>1748095058735</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1748095058735</updated>
+    </task>
+    <task id="LOCAL-00019" summary="feat: export to pdf">
+      <option name="closed" value="true" />
+      <created>1748098990677</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1748098990677</updated>
+    </task>
+    <task id="LOCAL-00020" summary="fix: chart by country">
+      <option name="closed" value="true" />
+      <created>1748104305777</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1748104305777</updated>
+    </task>
+    <task id="LOCAL-00021" summary="fix: back buttons">
+      <option name="closed" value="true" />
+      <created>1748105261304</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1748105261304</updated>
+    </task>
+    <task id="LOCAL-00022" summary="feat: responsive login">
+      <option name="closed" value="true" />
+      <created>1748106589967</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1748106589967</updated>
+    </task>
+    <task id="LOCAL-00023" summary="feat: modified sound capsule and profile layouts">
+      <option name="closed" value="true" />
+      <created>1748142801980</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1748142801980</updated>
+    </task>
+    <task id="LOCAL-00024" summary="fix: recommendation algo for liked">
+      <option name="closed" value="true" />
+      <created>1748154015693</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1748154015693</updated>
+    </task>
+    <task id="LOCAL-00025" summary="feat: audio routing">
+      <option name="closed" value="true" />
+      <created>1748164775271</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1748164775271</updated>
+    </task>
+    <option name="localTasksCounter" value="26" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -670,6 +765,15 @@
     <MESSAGE value="feat: minor design fix" />
     <MESSAGE value="fix: liked songs bug" />
     <MESSAGE value="feat: init analytics" />
+    <MESSAGE value="feat: edit profile maps" />
+    <MESSAGE value="feat: export to pdf" />
+    <MESSAGE value="fix: chart by country" />
+    <MESSAGE value="fix: back buttons" />
+    <MESSAGE value="feat: responsive login" />
+    <MESSAGE value="feat: modified sound capsule and profile layouts" />
+    <MESSAGE value="fix: recommendation algo for liked" />
+    <MESSAGE value="feat: audio routing" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat: audio routing" />
     <MESSAGE value="fix: share via url" />
     <MESSAGE value="feat: view notification" />
     <MESSAGE value="fix: notification play, prev, and next" />
@@ -684,11 +788,13 @@
         <entry key="com.tubes.purry">
           <value>
             <CheckInfo lastCheckTimestamp="1748171306588" />
+            <CheckInfo lastCheckTimestamp="1748218120705" />
           </value>
         </entry>
         <entry key="com.tubes.purry.test">
           <value>
             <CheckInfo lastCheckTimestamp="1748171306589" />
+            <CheckInfo lastCheckTimestamp="1748218120703" />
           </value>
         </entry>
       </map>

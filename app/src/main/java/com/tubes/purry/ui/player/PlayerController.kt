@@ -41,7 +41,6 @@ object PlayerController {
             }
         }
 
-
         if (isPreparing) {
             Log.d("PlayerController", "Masih mempersiapkan lagu sebelumnya")
             return false
@@ -129,7 +128,6 @@ object PlayerController {
         }
     }
 
-
     fun pause() {
         if (isPlaying()) {
             mediaPlayer?.pause()
@@ -146,18 +144,18 @@ object PlayerController {
 
     fun stop() {
         try {
-            mediaPlayer?.apply {
-                if (isPlaying) {
-                    stop()
+            if (mediaPlayer != null) {
+                if (isPlaying()) {
+                    mediaPlayer?.stop()
                 }
-                reset()
-                release()
+                Log.d("PlayerController", "Playback stopped")
             }
             mediaPlayer = null
             currentlyPlaying = null
-            Log.d("PlayerController", "MediaPlayer stopped and released")
+            isPrepared = false
+            isPreparing = false
         } catch (e: Exception) {
-            Log.e("PlayerController", "Error stopping MediaPlayer: ${e.message}")
+            Log.e("PlayerController", "Stop error: ${e.message}")
         }
     }
 
