@@ -264,27 +264,31 @@ class NowPlayingViewModel(
         viewModelScope.launch {
             val userId = profileViewModel.profileData.value?.id
             if (userId == null) {
-                Log.e("NowPlayingViewModel", "User not logged in.")
+                Log.e("NowPlayingViewModel", "❌ User not logged in.")
                 return@launch
             }
 
-            val db = AppDatabase.getDatabase(getApplication())
-            val songExists = db.songDao().getById(song.id) != null
-
-            if (!songExists) {
-                db.songDao().insert(song)
+            val existingSong = songDao.getById(song.id)
+            if (existingSong == null) {
+                // Tambahkan lagu ke DB sebagai non-local jika belum ada
+                val insertableSong = song.copy(isLocal = false)
+                songDao.insert(insertableSong)
+                Log.d("NowPlayingViewModel", "✅ Inserted song ${song.id} into DB before like.")
             }
 
-            val isLiked = db.LikedSongDao().isSongLiked(userId, song.id)
-            if (!isLiked) {
-                db.LikedSongDao().likeSong(LikedSong(userId = userId, songId = song.id))
+            val isCurrentlyLiked = likedSongDao.isSongLiked(userId, song.id)
+            if (!isCurrentlyLiked) {
+                likedSongDao.likeSong(LikedSong(userId = userId, songId = song.id))
                 _isLiked.postValue(true)
+                Log.d("NowPlayingViewModel", "👍 Liked song ${song.id}")
             } else {
-                db.LikedSongDao().unlikeSong(userId, song.id)
+                likedSongDao.unlikeSong(userId, song.id)
                 _isLiked.postValue(false)
+                Log.d("NowPlayingViewModel", "👎 Unliked song ${song.id}")
             }
         }
     }
+
 
     private suspend fun getUserIdBlocking(): Int? {
         return profileViewModel.profileData.value?.id ?: suspendCoroutine { cont ->
@@ -444,6 +448,8 @@ class NowPlayingViewModel(
             songDao.insert(updatedSong)
         }
     }
+
+
 
     fun restartMediaPlayerForAudioRouting(context: Context) {
         val currentSong = _currSong.value
