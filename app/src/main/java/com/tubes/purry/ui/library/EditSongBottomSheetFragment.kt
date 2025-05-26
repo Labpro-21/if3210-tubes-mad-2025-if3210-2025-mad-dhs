@@ -15,8 +15,8 @@ import com.tubes.purry.R
 import com.tubes.purry.data.model.Song
 import com.tubes.purry.databinding.FragmentAddSongBottomSheetBinding
 import com.tubes.purry.utils.extractAudioMetadata
-import androidx.core.net.toUri
 import com.tubes.purry.utils.parseDuration
+import androidx.core.net.toUri
 
 class EditSongBottomSheetFragment(private val song: Song) : BottomSheetDialogFragment() {
 
@@ -29,32 +29,30 @@ class EditSongBottomSheetFragment(private val song: Song) : BottomSheetDialogFra
     private var duration: String = ""
     private var imageUri: Uri? = null
 
-    private val pickImage =
-        registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
-            uri?.let {
-                imageUri = it
-                requireContext().contentResolver.takePersistableUriPermission(
-                    it,
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION
-                )
-                binding.imgUpload.setImageURI(it)
-            }
+    private val pickImage = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        uri?.let {
+            imageUri = it
+            requireContext().contentResolver.takePersistableUriPermission(
+                it,
+                Intent.FLAG_GRANT_READ_URI_PERMISSION
+            )
+            binding.imgUpload.setImageURI(it)
+        }
     }
 
-    private val pickAudio =
-        registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
-            uri?.let {
-                audioUri = it
-                requireContext().contentResolver.takePersistableUriPermission(
-                    it,
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION
-                )
-                val metadata = extractAudioMetadata(requireContext(), it)
-                binding.inputTitle.setText(metadata.title ?: song.title)
-                binding.inputArtist.setText(metadata.artist ?: song.artist)
-                duration = duration.ifBlank { "0:00" }
-            }
+    private val pickAudio = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        uri?.let {
+            audioUri = it
+            requireContext().contentResolver.takePersistableUriPermission(
+                it,
+                Intent.FLAG_GRANT_READ_URI_PERMISSION
+            )
+            val metadata = extractAudioMetadata(requireContext(), it)
+            binding.inputTitle.setText(metadata.title ?: song.title)
+            binding.inputArtist.setText(metadata.artist ?: song.artist)
+            duration = metadata.duration ?: "0:00"
         }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -112,6 +110,7 @@ class EditSongBottomSheetFragment(private val song: Song) : BottomSheetDialogFra
         val title = binding.inputTitle.text.toString()
         val artist = binding.inputArtist.text.toString()
         val filePath = audioUri?.toString() ?: song.filePath
+        val finalDuration = parseDuration(duration)
 
         if (filePath.isNullOrBlank()) {
             Toast.makeText(requireContext(), "Please select an audio file", Toast.LENGTH_SHORT).show()
@@ -132,8 +131,8 @@ class EditSongBottomSheetFragment(private val song: Song) : BottomSheetDialogFra
             title = title,
             artist = artist,
             filePath = filePath,
-            coverPath = imageUri?.toString(),
-            duration = parseDuration(duration)
+            coverPath = imageUri?.toString() ?: song.coverPath,
+            duration = finalDuration
         )
 
         viewModel.updateSong(updatedSong)

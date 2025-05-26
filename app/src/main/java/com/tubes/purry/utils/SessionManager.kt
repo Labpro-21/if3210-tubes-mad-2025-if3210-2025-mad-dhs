@@ -150,4 +150,61 @@ class SessionManager(context: Context) {
         }
         Log.d("SessionManager", "Auth data cleared")
     }
+
+    // Add these methods to your SessionManager class
+
+    fun isLoggedIn(): Boolean {
+        try {
+            val token = fetchAuthToken()
+            val userId = getUserId()
+            val result = !token.isNullOrEmpty() && userId != null && userId != -1
+            Log.d("SessionManager", "isLoggedIn check - token exists: ${!token.isNullOrEmpty()}, userId: $userId, result: $result")
+            return result
+        } catch (e: Exception) {
+            Log.e("SessionManager", "Error checking login status: ${e.message}")
+            return false
+        }
+    }
+
+    fun isTokenValid(): Boolean {
+        try {
+            val token = fetchAuthToken() ?: return false
+
+            val parts = token.split(".")
+            if (parts.size != 3) {
+                Log.d("SessionManager", "Invalid token format")
+                return false
+            }
+
+            val payload = parts[1]
+            val decodedBytes = Base64.decode(payload, Base64.URL_SAFE)
+            val json = JSONObject(String(decodedBytes))
+
+
+            val exp = json.optLong("exp", 0)
+            if (exp > 0) {
+                val currentTime = System.currentTimeMillis() / 1000
+                val isExpired = currentTime > exp
+                Log.d("SessionManager", "Token expiration check - current: $currentTime, exp: $exp, expired: $isExpired")
+                return !isExpired
+            }
+
+            return true
+        } catch (e: Exception) {
+            Log.e("SessionManager", "Error validating token: ${e.message}")
+            return false
+        }
+    }
+
+    fun clearAllData() {
+        try {
+            val editor = prefs.edit()
+            editor.clear()
+            val result = editor.commit()
+            Log.d("SessionManager", "All data cleared result: $result")
+        } catch (e: Exception) {
+            Log.e("SessionManager", "Error clearing all data: ${e.message}")
+        }
+    }
+
 }

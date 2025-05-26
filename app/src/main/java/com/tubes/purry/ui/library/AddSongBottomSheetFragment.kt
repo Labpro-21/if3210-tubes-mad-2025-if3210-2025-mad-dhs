@@ -8,8 +8,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.tubes.purry.PurrytifyApplication
 import com.tubes.purry.data.model.Song
 import com.tubes.purry.databinding.FragmentAddSongBottomSheetBinding
 import com.tubes.purry.ui.player.NowPlayingViewModel
@@ -17,6 +17,7 @@ import com.tubes.purry.utils.SessionManager
 import com.tubes.purry.utils.extractAudioMetadata
 import com.tubes.purry.utils.parseDuration
 import java.util.UUID
+import androidx.lifecycle.ViewModelProvider
 
 class AddSongBottomSheetFragment : BottomSheetDialogFragment() {
 
@@ -27,44 +28,42 @@ class AddSongBottomSheetFragment : BottomSheetDialogFragment() {
     private lateinit var viewModel: SongViewModel
     private lateinit var nowPlayingViewModel: NowPlayingViewModel
 
-
     private var audioUri: Uri? = null
-    private var duration: String = null.toString()
+    private var duration: String = "0:00"
     private var imageUri: Uri? = null
 
-    private val pickImage =
-        registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
-            uri?.let {
-                try {
-                    requireContext().contentResolver.takePersistableUriPermission(
-                        it, Intent.FLAG_GRANT_READ_URI_PERMISSION
-                    )
-                    imageUri = it
-                } catch (_: SecurityException) {}
-                binding.imgUpload.setImageURI(it)
-            }
-        }
-
-    private val pickAudio =
-        registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
-            uri?.let {
-                audioUri = it
+    private val pickImage = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        uri?.let {
+            try {
                 requireContext().contentResolver.takePersistableUriPermission(
-                    it,
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    it, Intent.FLAG_GRANT_READ_URI_PERMISSION
                 )
-                val metadata = extractAudioMetadata(requireContext(), it)
-
-                if (binding.inputTitle.text.isNullOrBlank() && !metadata.title.isNullOrBlank()) {
-                    binding.inputTitle.setText(metadata.title)
-                }
-
-                if (binding.inputArtist.text.isNullOrBlank() && !metadata.artist.isNullOrBlank()) {
-                    binding.inputArtist.setText(metadata.artist)
-                }
-                duration = metadata.duration ?: "0:00"
-            }
+                imageUri = it
+                binding.imgUpload.setImageURI(it)
+            } catch (_: SecurityException) {}
         }
+    }
+
+    private val pickAudio = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        uri?.let {
+            audioUri = it
+            requireContext().contentResolver.takePersistableUriPermission(
+                it,
+                Intent.FLAG_GRANT_READ_URI_PERMISSION
+            )
+            val metadata = extractAudioMetadata(requireContext(), it)
+
+            if (binding.inputTitle.text.isNullOrBlank() && !metadata.title.isNullOrBlank()) {
+                binding.inputTitle.setText(metadata.title)
+            }
+
+            if (binding.inputArtist.text.isNullOrBlank() && !metadata.artist.isNullOrBlank()) {
+                binding.inputArtist.setText(metadata.artist)
+            }
+
+            duration = metadata.duration ?: "0:00"
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -86,8 +85,7 @@ class AddSongBottomSheetFragment : BottomSheetDialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        nowPlayingViewModel = ViewModelProvider(requireActivity())[NowPlayingViewModel::class.java]
+        nowPlayingViewModel = (requireActivity().application as PurrytifyApplication).nowPlayingViewModel
         setupListeners()
     }
 
@@ -114,7 +112,6 @@ class AddSongBottomSheetFragment : BottomSheetDialogFragment() {
         val artist = binding.inputArtist.text.toString()
         val filePath = audioUri?.toString() ?: ""
 
-        // Validation
         if (audioUri == null) {
             Toast.makeText(requireContext(), "Please select an audio file", Toast.LENGTH_SHORT).show()
             return
@@ -131,7 +128,6 @@ class AddSongBottomSheetFragment : BottomSheetDialogFragment() {
         }
 
         val userId = sessionManager.getUserId()
-
         if (userId == null) {
             Toast.makeText(requireContext(), "User not logged in", Toast.LENGTH_SHORT).show()
             return
@@ -153,7 +149,6 @@ class AddSongBottomSheetFragment : BottomSheetDialogFragment() {
 
         viewModel.insertSong(song)
         nowPlayingViewModel.addToQueue(song, requireContext())
-
         Toast.makeText(requireContext(), "Song added", Toast.LENGTH_SHORT).show()
         dismiss()
     }

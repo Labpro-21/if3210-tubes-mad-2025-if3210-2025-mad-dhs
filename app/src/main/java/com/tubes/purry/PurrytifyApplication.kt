@@ -3,6 +3,7 @@ package com.tubes.purry
 import android.app.Application
 import android.content.IntentFilter
 import android.net.ConnectivityManager
+import android.util.Log
 import com.tubes.purry.data.remote.ApiClient
 import com.tubes.purry.utils.NetworkStateReceiver
 import com.tubes.purry.utils.NetworkUtil
@@ -37,6 +38,16 @@ class PurrytifyApplication : Application() {
             songRepository,
             authRepository
         )
+
+        // FIXED: Load profile data when app starts if user is logged in
+        val authToken = sessionManager.fetchAuthToken()
+        val userId = sessionManager.getUserId()
+        if (!authToken.isNullOrEmpty() && userId != null) {
+            Log.d("PurrytifyApplication", "User is logged in (userId: $userId), loading profile")
+            profileViewModel.getProfileData()
+        } else {
+            Log.d("PurrytifyApplication", "User not logged in - token: ${authToken != null}, userId: $userId")
+        }
 
         nowPlayingViewModel = com.tubes.purry.ui.player.NowPlayingViewModel(
             this,

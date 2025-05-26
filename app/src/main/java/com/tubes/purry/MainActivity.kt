@@ -299,11 +299,11 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
     }
 
     private fun hideBottomNav() {
-        binding.navView!!.visibility = View.GONE
+        binding.navView?.visibility = View.GONE
     }
 
     private fun showBottomNav() {
-        binding.navView!!.visibility = View.VISIBLE
+        binding.navView?.visibility = View.VISIBLE
     }
 
     override fun onStart() {

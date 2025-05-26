@@ -67,6 +67,7 @@ class SongDetailFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        Log.d("SongDetailFragment", "🎵 onViewCreated masuk")
         super.onViewCreated(view, savedInstanceState)
         nowPlayingViewModel = (requireActivity().application as PurrytifyApplication).nowPlayingViewModel
         handleArguments()
@@ -352,6 +353,7 @@ class SongDetailFragment : Fragment() {
     private fun setupObservers() {
         nowPlayingViewModel.currSong.observe(viewLifecycleOwner) { song ->
             song?.let {
+                Log.d("SongDetailFragment", "🎧 Observed song: $song")
                 binding.tvTitle?.text = it.title
                 binding.tvTitle?.isSelected = true
                 binding.tvArtist?.text = it.artist

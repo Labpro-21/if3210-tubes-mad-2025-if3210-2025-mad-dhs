@@ -288,7 +288,16 @@ class AudioRoutingManager(private val context: Context) {
     }
     private fun getAllPairedBluetoothDevices(): List<AudioDevice> {
         val bluetoothAdapter: BluetoothAdapter? = BluetoothAdapter.getDefaultAdapter()
-        val pairedDevices: Set<BluetoothDevice>? = bluetoothAdapter?.bondedDevices
+//        val pairedDevices: Set<BluetoothDevice>? = bluetoothAdapter?.bondedDevices
+        val pairedDevices: Set<BluetoothDevice>? = if (
+            Build.VERSION.SDK_INT < Build.VERSION_CODES.S ||
+            context.checkSelfPermission(android.Manifest.permission.BLUETOOTH_CONNECT) == android.content.pm.PackageManager.PERMISSION_GRANTED
+        ) {
+            bluetoothAdapter?.bondedDevices
+        } else {
+            null // atau emptySet()
+        }
+
         val result = mutableListOf<AudioDevice>()
 
         pairedDevices?.forEach { device ->

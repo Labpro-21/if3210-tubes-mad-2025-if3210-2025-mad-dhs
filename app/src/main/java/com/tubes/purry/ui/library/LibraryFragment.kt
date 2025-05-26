@@ -9,7 +9,7 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.FrameLayout
+import androidx.core.graphics.toColorInt
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -18,10 +18,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.tubes.purry.R
 import com.tubes.purry.data.model.Song
 import com.tubes.purry.databinding.FragmentLibraryBinding
-import com.tubes.purry.ui.player.MiniPlayerFragment
 import com.tubes.purry.ui.player.NowPlayingViewModel
 import com.tubes.purry.utils.SessionManager
-import androidx.core.graphics.toColorInt
 import com.tubes.purry.PurrytifyApplication
 
 class LibraryFragment : Fragment() {
@@ -35,6 +33,7 @@ class LibraryFragment : Fragment() {
     }
     private lateinit var nowPlayingViewModel: NowPlayingViewModel
     private lateinit var sessionManager: SessionManager
+
     private var allSongs: List<Song> = emptyList()
     private var likedSongs: List<Song> = emptyList()
 
@@ -52,6 +51,7 @@ class LibraryFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         nowPlayingViewModel = (requireActivity().application as PurrytifyApplication).nowPlayingViewModel
         sessionManager = SessionManager(requireContext())
 
@@ -72,7 +72,7 @@ class LibraryFragment : Fragment() {
             applyFilters()
         }
 
-        enableSwipeToAddToQueue(binding.rvLibrarySongs, songListAdapter, nowPlayingViewModel)
+        enableSwipeToAddToQueue(binding.rvLibrarySongs)
 
         binding.btnAddSong.setOnClickListener {
             showAddSongBottomSheet()
@@ -144,12 +144,13 @@ class LibraryFragment : Fragment() {
     }
 
     private fun updateButtonAppearance() {
+        val context = requireContext()
         if (isShowingLikedOnly) {
-            binding.btnAll.backgroundTintList = requireContext().getColorStateList(R.color.dark_gray)
-            binding.btnLiked.backgroundTintList = requireContext().getColorStateList(R.color.green)
+            binding.btnAll.backgroundTintList = context.getColorStateList(R.color.dark_gray)
+            binding.btnLiked.backgroundTintList = context.getColorStateList(R.color.green)
         } else {
-            binding.btnAll.backgroundTintList = requireContext().getColorStateList(R.color.green)
-            binding.btnLiked.backgroundTintList = requireContext().getColorStateList(R.color.dark_gray)
+            binding.btnAll.backgroundTintList = context.getColorStateList(R.color.green)
+            binding.btnLiked.backgroundTintList = context.getColorStateList(R.color.dark_gray)
         }
     }
 
@@ -158,11 +159,14 @@ class LibraryFragment : Fragment() {
         val baseList = if (isShowingLikedOnly) likedSongs else allSongs
         val filteredList = if (searchText.isNotEmpty()) {
             binding.btnClearSearch.visibility = View.VISIBLE
-            baseList.filter { it.title.lowercase().contains(searchText) || it.artist.lowercase().contains(searchText) }
+            baseList.filter {
+                it.title.lowercase().contains(searchText) || it.artist.lowercase().contains(searchText)
+            }
         } else {
             binding.btnClearSearch.visibility = View.GONE
             baseList
         }
+
         songListAdapter.submitList(filteredList)
         updateEmptyState(filteredList)
     }
@@ -190,7 +194,7 @@ class LibraryFragment : Fragment() {
 
     private fun onEditSong(song: Song) {
         val editSongBottomSheet = EditSongBottomSheetFragment(song)
-        editSongBottomSheet.show(childFragmentManager, "AddSongBottomSheet")
+        editSongBottomSheet.show(childFragmentManager, "EditSongBottomSheet")
     }
 
     private fun onDeleteSong(song: Song) {
@@ -205,49 +209,27 @@ class LibraryFragment : Fragment() {
             .show()
     }
 
-    private fun enableSwipeToAddToQueue(
-        recyclerView: RecyclerView,
-        adapter: SongListAdapter,
-        nowPlayingViewModel: NowPlayingViewModel
-    ) {
+    private fun enableSwipeToAddToQueue(recyclerView: RecyclerView) {
         val paint = Paint().apply { color = "#4CAF50".toColorInt() }
 
         val itemTouchHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
-            override fun onMove(
-                recyclerView: RecyclerView,
-                viewHolder: RecyclerView.ViewHolder,
-                target: RecyclerView.ViewHolder
-            ) = false
-
-            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                val position = viewHolder.adapterPosition
-                val song = adapter.getSongAt(position)
+            override fun onMove(rv: RecyclerView, vh: RecyclerView.ViewHolder, tgt: RecyclerView.ViewHolder) = false
+            override fun onSwiped(vh: RecyclerView.ViewHolder, dir: Int) {
+                val position = vh.adapterPosition
+                val song = songListAdapter.getSongAt(position)
                 nowPlayingViewModel.addToQueue(song, requireContext())
-                adapter.notifyItemChanged(position)
+                songListAdapter.notifyItemChanged(position)
             }
 
-            override fun onChildDraw(
-                c: Canvas,
-                recyclerView: RecyclerView,
-                viewHolder: RecyclerView.ViewHolder,
-                dX: Float,
-                dY: Float,
-                actionState: Int,
-                isCurrentlyActive: Boolean
-            ) {
-                if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
-                    val itemView: View = viewHolder.itemView
-                    c.drawRect(
-                        itemView.right.toFloat() + dX,
-                        itemView.top.toFloat(),
-                        itemView.right.toFloat(),
-                        itemView.bottom.toFloat(),
-                        paint
-                    )
+            override fun onChildDraw(c: Canvas, rv: RecyclerView, vh: RecyclerView.ViewHolder, dX: Float, dY: Float, state: Int, active: Boolean) {
+                if (state == ItemTouchHelper.ACTION_STATE_SWIPE) {
+                    val itemView: View = vh.itemView
+                    c.drawRect(itemView.right.toFloat() + dX, itemView.top.toFloat(), itemView.right.toFloat(), itemView.bottom.toFloat(), paint)
                 }
-                super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
+                super.onChildDraw(c, rv, vh, dX, dY, state, active)
             }
         })
+
         itemTouchHelper.attachToRecyclerView(recyclerView)
     }
 

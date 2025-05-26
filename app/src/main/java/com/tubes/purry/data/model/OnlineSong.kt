@@ -3,6 +3,7 @@ package com.tubes.purry.data.model
 import com.tubes.purry.utils.parseDuration
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
+import java.util.UUID
 
 data class OnlineSong(
     val id: Int,
@@ -15,18 +16,21 @@ data class OnlineSong(
     val rank: Int,
 )
 
-fun OnlineSong.toLocalSong(localPath: String): Song {
+fun OnlineSong.toLocalSong(filePath: String): Song {
     return Song(
-        id = "srv-${this.id}",
+        id = UUID.randomUUID().toString(),
         serverId = this.id,
         title = this.title,
         artist = this.artist,
-        filePath = localPath,
+        filePath = filePath,
         coverPath = this.artwork,
-        duration = parseDuration(this.duration),
-        isLocal = true
+        duration = 0,
+        isLiked = false,
+        isLocal = true,
+        lastPlayedAt = 0L
     )
 }
+
 
 fun OnlineSong.toTemporarySong(): Song {
 

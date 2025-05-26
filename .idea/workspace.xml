@@ -11,6 +11,12 @@
           <theme>@style/Theme.Purrytify</theme>
         </config>
       </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout-land/activity_login.xml">
+        <config>
+          <state>Landscape</state>
+          <theme>@style/Theme.Purrytify</theme>
+        </config>
+      </layout>
       <layout url="file://$PROJECT_DIR$/app/src/main/res/layout-land/activity_main.xml">
         <config>
           <state>Landscape</state>
@@ -84,17 +90,6 @@
         </config>
       </layout>
       <layout url="file://$PROJECT_DIR$/app/src/main/res/layout-land/fragment_top_chart_detail.xml">
-        <config>
-          <state>Landscape</state>
-          <theme>@style/Theme.Purrytify</theme>
-        </config>
-      </layout>
-      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/activity_edit_profile.xml">
-        <config>
-          <theme>@style/Theme.Purrytify</theme>
-        </config>
-      </layout>
-      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout-land/activity_login.xml">
         <config>
           <state>Landscape</state>
           <theme>@style/Theme.Purrytify</theme>
@@ -256,10 +251,26 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fb2d9b52-b320-4578-a27c-b77d399ccfa2" name="Changes" comment="fix: recommendation-song">
+    <list default="true" id="fb2d9b52-b320-4578-a27c-b77d399ccfa2" name="Changes" comment="merge audio &amp; rec">
+      <change afterPath="$PROJECT_DIR$/.idea/deploymentTargetSelector.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/navEditor.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/navEditor.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/MainActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/MainActivity.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/PurrytifyApplication.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/PurrytifyApplication.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/local/AppDatabase.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/local/AppDatabase.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/local/SongDao.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/local/SongDao.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/model/OnlineSong.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/model/OnlineSong.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/detail/SongDetailFragment.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/detail/SongDetailFragment.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/player/MiniPlayerFragment.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/player/MiniPlayerFragment.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/library/AddSongBottomSheetFragment.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/library/AddSongBottomSheetFragment.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/library/EditSongBottomSheetFragment.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/library/EditSongBottomSheetFragment.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/library/LibraryFragment.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/library/LibraryFragment.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/player/NowPlayingFragment.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/player/NowPlayingViewModel.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/player/NowPlayingViewModel.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/profile/ProfileViewModel.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/profile/ProfileViewModel.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/utils/AudioRoutingManager.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/utils/AudioRoutingManager.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/utils/DownloadUtils.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/utils/DownloadUtils.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/utils/SessionManager.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/utils/SessionManager.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/fragment_song_detail.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/fragment_song_detail.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -359,15 +370,13 @@
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
     "com.google.services.firebase.aqiPopupShown": "true",
-    "git-widget-placeholder": "feat/rec-tomini",
-    "git-widget-placeholder": "feat/audio-routing-new",
+    "git-widget-placeholder": "dev",
     "ignore.virus.scanning.warn.message": "true",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "D:/College/Semester 6/Mobile/Tugas Besar 1/app/src/main/res/layout-land",
+    "last_opened_file_path": "/Users/shazyataufik/Documents/ITB/Semester6/MADTubes2/app/src/main/res/layout-land",
     "project.structure.last.edited": "Modules",
     "project.structure.proportion": "0.17",
     "project.structure.side.proportion": "0.2",
-    "last_opened_file_path": "/Users/shazyataufik/Documents/ITB/Semester6/MADTubes2/app/src/main/res/layout-land",
     "run.code.analysis.last.selected.profile": "pProject Default",
     "settings.build.tools.auto.reload": "ALL",
     "settings.editor.selected.configurable": "reference.settingsdialog.project.gradle",
@@ -618,55 +627,6 @@
       <option name="project" value="LOCAL" />
       <updated>1748148802841</updated>
     </task>
-    <task id="LOCAL-00018" summary="fix: notification play, prev, and next">
-      <option name="closed" value="true" />
-      <created>1748159501827</created>
-      <option name="number" value="00018" />
-      <option name="presentableId" value="LOCAL-00018" />
-      <option name="project" value="LOCAL" />
-      <updated>1748159501827</updated>
-    </task>
-    <task id="LOCAL-00019" summary="fix: notification play, prev, and next">
-      <option name="closed" value="true" />
-      <created>1748164310312</created>
-      <option name="number" value="00019" />
-      <option name="presentableId" value="LOCAL-00019" />
-      <option name="project" value="LOCAL" />
-      <updated>1748164310312</updated>
-    </task>
-    <task id="LOCAL-00020" summary="feat: responsiveness">
-      <option name="closed" value="true" />
-      <created>1748174978237</created>
-      <option name="number" value="00020" />
-      <option name="presentableId" value="LOCAL-00020" />
-      <option name="project" value="LOCAL" />
-      <updated>1748174978237</updated>
-    </task>
-    <task id="LOCAL-00021" summary="fix: qr scanner">
-      <option name="closed" value="true" />
-      <created>1748182515629</created>
-      <option name="number" value="00021" />
-      <option name="presentableId" value="LOCAL-00021" />
-      <option name="project" value="LOCAL" />
-      <updated>1748182515630</updated>
-    </task>
-    <task id="LOCAL-00022" summary="fix: qr scanner">
-      <option name="closed" value="true" />
-      <created>1748184697113</created>
-      <option name="number" value="00022" />
-      <option name="presentableId" value="LOCAL-00022" />
-      <option name="project" value="LOCAL" />
-      <updated>1748184697113</updated>
-    </task>
-    <task id="LOCAL-00023" summary="fix: recommendation-song">
-      <option name="closed" value="true" />
-      <created>1748191313689</created>
-      <option name="number" value="00023" />
-      <option name="presentableId" value="LOCAL-00023" />
-      <option name="project" value="LOCAL" />
-      <updated>1748191313689</updated>
-    </task>
-    <option name="localTasksCounter" value="24" />
     <task id="LOCAL-00018" summary="feat: edit profile maps">
       <option name="closed" value="true" />
       <created>1748095058735</created>
@@ -731,7 +691,15 @@
       <option name="project" value="LOCAL" />
       <updated>1748164775271</updated>
     </task>
-    <option name="localTasksCounter" value="26" />
+    <task id="LOCAL-00026" summary="merge audio &amp; rec">
+      <option name="closed" value="true" />
+      <created>1748226834445</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1748226834445</updated>
+    </task>
+    <option name="localTasksCounter" value="27" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -746,8 +714,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="fix: fixed bug on play pause button, fixed bug on duration seeding to ms instead of seconds" />
-    <MESSAGE value="merge feat/profile" />
     <MESSAGE value="migrate feat/integrate-player to feat/library" />
     <MESSAGE value="feat: next, prev, add to queue" />
     <MESSAGE value="fix: add to queue songs removed after play or next" />
@@ -773,28 +739,27 @@
     <MESSAGE value="feat: modified sound capsule and profile layouts" />
     <MESSAGE value="fix: recommendation algo for liked" />
     <MESSAGE value="feat: audio routing" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat: audio routing" />
     <MESSAGE value="fix: share via url" />
     <MESSAGE value="feat: view notification" />
     <MESSAGE value="fix: notification play, prev, and next" />
     <MESSAGE value="feat: responsiveness" />
     <MESSAGE value="fix: qr scanner" />
     <MESSAGE value="fix: recommendation-song" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix: recommendation-song" />
+    <MESSAGE value="revert" />
+    <MESSAGE value="merge audio &amp; rec" />
+    <option name="LAST_COMMIT_MESSAGE" value="merge audio &amp; rec" />
   </component>
   <component name="play_dynamic_filters_status">
     <option name="appIdToCheckInfo">
       <map>
         <entry key="com.tubes.purry">
           <value>
-            <CheckInfo lastCheckTimestamp="1748171306588" />
-            <CheckInfo lastCheckTimestamp="1748218120705" />
+            <CheckInfo lastCheckTimestamp="1748226838902" />
           </value>
         </entry>
         <entry key="com.tubes.purry.test">
           <value>
-            <CheckInfo lastCheckTimestamp="1748171306589" />
-            <CheckInfo lastCheckTimestamp="1748218120703" />
+            <CheckInfo lastCheckTimestamp="1748226838856" />
           </value>
         </entry>
       </map>

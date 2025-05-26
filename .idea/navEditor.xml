@@ -96,25 +96,13 @@
                       </LayoutPositions>
                     </value>
                   </entry>
-                  <entry key="recommendationDetailFragment">
-                    <value>
-                      <LayoutPositions>
-                        <option name="myPosition">
-                          <Point>
-                            <option name="x" value="12" />
-                            <option name="y" value="12" />
-                          </Point>
-                        </option>
-                      </LayoutPositions>
-                    </value>
-                  </entry>
                   <entry key="songDetailFragment">
                     <value>
                       <LayoutPositions>
                         <option name="myPosition">
                           <Point>
-                            <option name="x" value="12" />
-                            <option name="y" value="12" />
+                            <option name="x" value="-201" />
+                            <option name="y" value="341" />
                           </Point>
                         </option>
                       </LayoutPositions>
@@ -125,8 +113,8 @@
                       <LayoutPositions>
                         <option name="myPosition">
                           <Point>
-                            <option name="x" value="12" />
-                            <option name="y" value="12" />
+                            <option name="x" value="-209" />
+                            <option name="y" value="11" />
                           </Point>
                         </option>
                       </LayoutPositions>

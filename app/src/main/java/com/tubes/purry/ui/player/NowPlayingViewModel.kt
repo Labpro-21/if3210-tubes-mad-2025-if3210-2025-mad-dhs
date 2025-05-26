@@ -31,6 +31,7 @@ import kotlin.coroutines.suspendCoroutine
 import com.tubes.purry.data.model.SongInQueue
 import com.tubes.purry.data.remote.ApiClient.apiService
 import com.tubes.purry.utils.parseDuration
+import kotlinx.coroutines.withTimeoutOrNull
 
 class NowPlayingViewModel(
     application: Application,
@@ -38,6 +39,8 @@ class NowPlayingViewModel(
     private val songDao: SongDao,
     private val profileViewModel: ProfileViewModel
 ) : AndroidViewModel(application) {
+
+
 
     val profileData: LiveData<ProfileData> get() = profileViewModel.profileData
     private val _currSong = MutableLiveData<Song?>() // mutable untuk bisa diubah2
@@ -82,7 +85,6 @@ class NowPlayingViewModel(
         return audioRoutingViewModel
     }
 
-    // ===== PERBAIKAN DURASI - TAMBAHAN LIVE DATA =====
     private val _currentPosition = MutableLiveData<Int>(0)
     val currentPosition: LiveData<Int> = _currentPosition
 
@@ -384,47 +386,119 @@ class NowPlayingViewModel(
 
     fun toggleLike(song: Song) {
         viewModelScope.launch {
-//            val userId = getUserIdBlocking()
-            val userId = profileViewModel.profileData.value?.id
+            var userId: Int? = null
+
+            // Method 1: Try to get from profileViewModel
+            userId = profileViewModel.profileData.value?.id
+            if (userId != null) {
+                Log.d("NowPlayingViewModel", "Got userId from profileViewModel: $userId")
+            }
+
+            // Method 2: If not available, try SessionManager
             if (userId == null) {
-                Log.e("NowPlayingViewModel", "User not logged in.")
-                return@launch
+                Log.d("NowPlayingViewModel", "ProfileViewModel userId is null, trying SessionManager")
+                try {
+                    val sessionManager = SessionManager(getApplication())
+                    userId = sessionManager.getUserId()
+                    Log.d("NowPlayingViewModel", "Got userId from SessionManager: $userId")
+
+                    // If we got userId from SessionManager but profileViewModel is empty,
+                    // trigger a profile refresh
+                    if (userId != null && profileViewModel.profileData.value == null) {
+                        Log.d("NowPlayingViewModel", "Triggering profile refresh")
+                        profileViewModel.getProfileData()
+                    }
+                } catch (e: Exception) {
+                    Log.e("NowPlayingViewModel", "Error getting userId from SessionManager: ${e.message}")
+                }
             }
 
-            val existingSong = songDao.getById(song.id)
-            if (existingSong == null) {
-                // Tambahkan lagu ke DB sebagai non-local jika belum ada
-                val insertableSong = song.copy(isLocal = false)
-                songDao.insert(insertableSong)
-                Log.d("NowPlayingViewModel", "✅ Inserted song ${song.id} into DB before like.")
+            // Method 3: If still null, check if user is actually logged in
+            if (userId == null) {
+                try {
+                    val sessionManager = SessionManager(getApplication())
+                    val authToken = sessionManager.fetchAuthToken()
+                    val storedUserId = sessionManager.getUserId()
+
+                    if (authToken.isNullOrEmpty() || storedUserId == null) {
+                        Log.e("NowPlayingViewModel", "User is not logged in - token: ${authToken != null}, userId: $storedUserId")
+                        _errorMessage.postValue("Please log in to like songs")
+                        return@launch
+                    } else {
+                        Log.e("NowPlayingViewModel", "User has valid session but userId retrieval failed - this shouldn't happen")
+                        userId = storedUserId // Use the stored userId
+
+                        // Trigger profile refresh if needed
+                        if (profileViewModel.profileData.value == null) {
+                            Log.d("NowPlayingViewModel", "Triggering profile refresh due to missing profile data")
+                            profileViewModel.getProfileData()
+                        }
+                    }
+                } catch (e: Exception) {
+                    Log.e("NowPlayingViewModel", "Error checking login status: ${e.message}")
+                    _errorMessage.postValue("Error checking login status")
+                    return@launch
+                }
             }
 
-            val isCurrentlyLiked = likedSongDao.isSongLiked(userId, song.id)
-            if (!isCurrentlyLiked) {
-                likedSongDao.likeSong(LikedSong(userId = userId, songId = song.id))
-                _isLiked.postValue(true)
-                Log.d("NowPlayingViewModel", "👍 Liked song ${song.id}")
-            } else {
-                likedSongDao.unlikeSong(userId, song.id)
-                _isLiked.postValue(false)
-                Log.d("NowPlayingViewModel", "👎 Unliked song ${song.id}")
-            }
+            // Continue with like/unlike logic
+            Log.d("NowPlayingViewModel", "Proceeding with like/unlike for userId: $userId")
 
-//            _currSong.postValue(updatedSong)
+            try {
+                val existingSong = songDao.getById(song.id)
+                if (existingSong == null) {
+                    // Add song to DB as non-local if not exists
+                    val insertableSong = song.copy(isLocal = false)
+                    songDao.insert(insertableSong)
+                    Log.d("NowPlayingViewModel", "✅ Inserted song ${song.id} into DB before like.")
+                }
+
+                val isCurrentlyLiked = likedSongDao.isSongLiked(userId, song.id)
+                if (!isCurrentlyLiked) {
+                    likedSongDao.likeSong(LikedSong(userId = userId, songId = song.id))
+                    _isLiked.postValue(true)
+                    Log.d("NowPlayingViewModel", "👍 Liked song ${song.id}")
+                } else {
+                    likedSongDao.unlikeSong(userId, song.id)
+                    _isLiked.postValue(false)
+                    Log.d("NowPlayingViewModel", "👎 Unliked song ${song.id}")
+                }
+            } catch (e: Exception) {
+                Log.e("NowPlayingViewModel", "Error in like/unlike operation: ${e.message}", e)
+                _errorMessage.postValue("Error updating like status: ${e.message}")
+            }
         }
     }
 
     private suspend fun getUserIdBlocking(): Int? {
-        return profileViewModel.profileData.value?.id ?: suspendCoroutine { cont ->
-            val observer = object : Observer<ProfileData?> {
-                override fun onChanged(value: ProfileData?) {
-                    if (value != null) {
-                        cont.resume(value.id)
-                        profileViewModel.profileData.removeObserver(this)
+        profileViewModel.profileData.value?.let { profile ->
+            Log.d("NowPlayingViewModel", "getUserIdBlocking: Found immediate value: ${profile.id}")
+            return profile.id
+        }
+        return withTimeoutOrNull(5000) {
+            suspendCoroutine { cont ->
+                val observer = object : Observer<ProfileData?> {
+                    override fun onChanged(value: ProfileData?) {
+                        if (value != null) {
+                            Log.d("NowPlayingViewModel", "getUserIdBlocking: Received value after wait: ${value.id}")
+                            cont.resume(value.id)
+                            profileViewModel.profileData.removeObserver(this)
+                        }
                     }
                 }
+                profileViewModel.profileData.observeForever(observer)
+
+                // Also trigger a refresh in case profile wasn't loaded
+                try {
+                    profileViewModel.loadUserProfile() // Sesuaikan dengan method Anda
+                } catch (e: Exception) {
+                    Log.e("NowPlayingViewModel", "Error refreshing profile: ${e.message}")
+                }
             }
-            profileViewModel.profileData.observeForever(observer)
+        }.also { result ->
+            if (result == null) {
+                Log.w("NowPlayingViewModel", "getUserIdBlocking: Timeout waiting for profile data")
+            }
         }
     }
 

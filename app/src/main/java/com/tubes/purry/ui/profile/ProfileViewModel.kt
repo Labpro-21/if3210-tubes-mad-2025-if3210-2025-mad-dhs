@@ -129,6 +129,25 @@ class ProfileViewModel(
         }
     }
 
+    fun loadUserProfile() {
+        if (_profileData.value == null) {
+            Log.d("ProfileViewModel", "Profile not loaded, fetching...")
+            getProfileData()
+        } else {
+            Log.d("ProfileViewModel", "Profile already loaded: ${_profileData.value?.username}")
+        }
+    }
+
+    fun isProfileLoaded(): Boolean {
+        return _profileData.value != null
+    }
+
+    fun ensureProfileLoaded() {
+        if (!isProfileLoaded()) {
+            getProfileData()
+        }
+    }
+
     data class SongStats(
         val totalCount: Int = 0,
         val likedCount: Int = 0,

@@ -46,8 +46,11 @@ interface SongDao {
     @Query("UPDATE songs SET playCount = playCount + 1 WHERE id = :songId")
     suspend fun incrementPlayCount(songId: String)
 
-    @Query("SELECT * FROM songs WHERE isLocal = 1 ORDER BY title ASC")
+    @Query("SELECT * FROM songs WHERE IFNULL(isLocal, 0) = 1 ORDER BY title ASC")
     fun getLibrarySongs(): Flow<List<Song>>
+
+    @Query("SELECT EXISTS(SELECT 1 FROM songs WHERE filePath = :path AND isLocal = 1)")
+    suspend fun isSongDownloaded(path: String): Boolean
 
     @Query("SELECT * FROM songs WHERE title LIKE '%' || :title || '%' AND artist LIKE '%' || :artist || '%' LIMIT 1")
     suspend fun getSongByTitleAndArtist(title: String, artist: String): Song?
