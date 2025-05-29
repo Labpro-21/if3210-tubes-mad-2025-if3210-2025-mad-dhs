@@ -57,4 +57,11 @@ interface SongDao {
 
     @Query("SELECT * FROM songs WHERE artist LIKE '%' || :artist || '%'")
     suspend fun getSongsByArtist(artist: String): List<Song>
+
+    @Query("SELECT filePath FROM songs WHERE IFNULL(isLocal, 0) = 1")
+    fun getDownloadedFilePaths(): Flow<List<String>>
+
+    @Query("SELECT * FROM songs WHERE serverId = :serverId LIMIT 1")
+    suspend fun getSongByServerId(serverId: Int): Song?
 }
+

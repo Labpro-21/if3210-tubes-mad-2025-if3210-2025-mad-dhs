@@ -19,7 +19,7 @@ class PurrytifyApplication : Application() {
 
         val db = com.tubes.purry.data.local.AppDatabase.getDatabase(this)
         val songDao = db.songDao()
-        val likedSongDao = db.LikedSongDao()
+        val likedSongDao = db.likedSongDao()
 
         val sessionManager = com.tubes.purry.utils.SessionManager(this)
 

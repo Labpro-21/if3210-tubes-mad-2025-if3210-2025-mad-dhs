@@ -20,8 +20,8 @@ import com.tubes.purry.data.model.ListeningSession
 abstract class AppDatabase : RoomDatabase() {
     abstract fun songDao(): SongDao
     abstract fun userProfileDao(): UserProfileDao
-    abstract fun LikedSongDao(): LikedSongDao
     abstract fun analyticsDao(): AnalyticsDao
+    abstract fun likedSongDao(): LikedSongDao
 
     companion object {
         @Volatile private var INSTANCE: AppDatabase? = null

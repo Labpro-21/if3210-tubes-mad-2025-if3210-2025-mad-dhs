@@ -11,7 +11,9 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.tubes.purry.R
+import com.tubes.purry.data.local.AppDatabase
 import com.tubes.purry.data.model.OnlineSong
+import kotlinx.coroutines.launch
 import java.io.File
 
 class OnlineSongListAdapter(
@@ -105,16 +107,9 @@ class OnlineSongListAdapter(
         return songs.indexOfFirst { it.url == songUrl }
     }
 
-    fun checkDownloadedStatus(context: Context) {
+    fun setDownloadedSongs(songs: Set<String>) {
         downloadedSongs.clear()
-        songs.forEach {
-            val fileName = "${it.title}_${it.artist}.mp3"
-                .replace("[^a-zA-Z0-9._-]".toRegex(), "_")
-            val file = File(context.getExternalFilesDir(null), "PurryMusic/$fileName")
-            if (file.exists()) {
-                downloadedSongs.add(it.url)
-            }
-        }
+        downloadedSongs.addAll(songs)
         notifyDataSetChanged()
     }
 }

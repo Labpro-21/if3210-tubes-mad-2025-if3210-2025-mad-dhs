@@ -12,7 +12,7 @@ class SongViewModelFactory(context: Context) : ViewModelProvider.Factory {
     init {
         val db = AppDatabase.getDatabase(context)
         val songDao = db.songDao()
-        val likedSongDao = db.LikedSongDao()
+        val likedSongDao = db.likedSongDao()
         repository = SongRepository(songDao, likedSongDao)
     }
 

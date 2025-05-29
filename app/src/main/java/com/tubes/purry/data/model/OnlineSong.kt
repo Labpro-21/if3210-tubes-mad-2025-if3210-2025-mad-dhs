@@ -33,7 +33,6 @@ fun OnlineSong.toLocalSong(filePath: String): Song {
 
 
 fun OnlineSong.toTemporarySong(): Song {
-
     return Song(
         id = "srv-${this.id}",
         serverId = this.id,

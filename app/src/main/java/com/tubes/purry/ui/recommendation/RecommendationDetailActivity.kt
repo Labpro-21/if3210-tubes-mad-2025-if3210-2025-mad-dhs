@@ -233,7 +233,7 @@ private lateinit var adapter: RecommendationSongAdapter
         val userId = sessionManager.getUserId()
 
         if (userId != null) {
-            db.LikedSongDao().getLikedSongsByUser(userId).observe(this) { likedSongs ->
+            db.likedSongDao().getLikedSongsByUser(userId).observe(this) { likedSongs ->
                 lifecycleScope.launch {
                     try {
                         val onlineSongs = ApiClient.apiService.getTopSongsGlobal()

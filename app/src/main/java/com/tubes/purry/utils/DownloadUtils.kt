@@ -5,18 +5,11 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.widget.Toast
-import com.tubes.purry.data.local.AppDatabase
 import com.tubes.purry.data.model.OnlineSong
-import com.tubes.purry.data.model.Song
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import okhttp3.*
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
-import java.util.UUID
 
 object DownloadUtils {
 
@@ -76,26 +69,8 @@ object DownloadUtils {
 
                     Log.d("DownloadUtils", "Download selesai: ${destFile.absolutePath}")
 
-                    val song = Song(
-                        id = UUID.randomUUID().toString(),
-                        serverId = onlineSong.id,
-                        title = onlineSong.title,
-                        artist = onlineSong.artist,
-                        filePath = destFile.absolutePath,
-                        coverPath = onlineSong.artwork,
-                        duration = 0,
-                        isLiked = false,
-                        isLocal = true,
-                        lastPlayedAt = 0L
-                    )
-
-
-                    CoroutineScope(Dispatchers.IO).launch {
-                        AppDatabase.getDatabase(context).songDao().insert(song)
-                        withContext(Dispatchers.Main) {
-                            Toast.makeText(context, "Berhasil disimpan ke: ${destFile.absolutePath}", Toast.LENGTH_SHORT).show()
-                            onComplete(destFile)
-                        }
+                    Handler(Looper.getMainLooper()).post {
+                        onComplete(destFile)
                     }
 
                 } catch (e: Exception) {

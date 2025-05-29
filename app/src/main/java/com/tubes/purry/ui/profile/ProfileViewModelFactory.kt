@@ -18,7 +18,7 @@ class ProfileViewModelFactory(
         if (modelClass.isAssignableFrom(ProfileViewModel::class.java)) {
             val sessionManager = SessionManager(application)
             val db = AppDatabase.getDatabase(application)
-            val songRepository = SongRepository(db.songDao(), db.LikedSongDao())
+            val songRepository = SongRepository(db.songDao(), db.likedSongDao())
             val authRepository = AuthRepository(ApiClient.apiService, sessionManager)
 
             @Suppress("UNCHECKED_CAST")

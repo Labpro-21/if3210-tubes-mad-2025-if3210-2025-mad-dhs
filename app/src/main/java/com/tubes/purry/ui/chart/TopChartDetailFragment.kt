@@ -24,7 +24,11 @@ import com.tubes.purry.utils.DownloadUtils
 import com.tubes.purry.utils.parseDuration
 import com.tubes.purry.utils.SessionManager
 import com.tubes.purry.PurrytifyApplication
+import com.tubes.purry.data.repository.SongRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
 import java.util.UUID
 
 class TopChartDetailFragment : Fragment() {
@@ -86,9 +90,22 @@ class TopChartDetailFragment : Fragment() {
         adapter = OnlineSongListAdapter(
             songs = emptyList(),
             onClick = { clickedOnlineSong ->
+                val context = requireContext()
                 val tempList = currentSongList.map { it.toTemporarySong() }
-                val clickedSong = clickedOnlineSong.toTemporarySong()
-                nowPlayingViewModel.setQueueFromClickedSong(clickedSong, tempList, requireContext())
+
+                lifecycleScope.launch {
+                    val db = AppDatabase.getDatabase(context)
+                    val songDao = db.songDao()
+                    val localSong = songDao.getSongByServerId(clickedOnlineSong.id)
+
+                    val songToPlay = if (localSong?.isLocal == true && !localSong.filePath.isNullOrEmpty()) {
+                        localSong
+                    } else {
+                        clickedOnlineSong.toTemporarySong()
+                    }
+
+                    nowPlayingViewModel.setQueueFromClickedSong(songToPlay, tempList, context)
+                }
             },
             onDownloadClick = { song ->
                 val context = requireContext()
@@ -99,21 +116,19 @@ class TopChartDetailFragment : Fragment() {
                     onlineSong = song,
                     onComplete = { file ->
                         if (file != null) {
-                            Toast.makeText(context, "Berhasil disimpan ke: ${file.absolutePath}", Toast.LENGTH_SHORT).show()
-
-                            val localSong = Song(
-                                id = UUID.randomUUID().toString(),
-                                title = song.title,
-                                artist = song.artist,
-                                filePath = file.absolutePath,
-                                coverPath = song.artwork,
-                                duration = parseDuration(song.duration),
-                                isLiked = false
+                            val repo = SongRepository(
+                                AppDatabase.getDatabase(context).songDao(),
+                                AppDatabase.getDatabase(context).likedSongDao()
                             )
+
                             lifecycleScope.launch {
-                                AppDatabase.getDatabase(context).songDao().insert(localSong)
+                                val tempSong = song.toTemporarySong()
+                                repo.saveDownloadedSong(tempSong, file.absolutePath)
+                                withContext(Dispatchers.Main) {
+                                    Toast.makeText(context, "Berhasil disimpan ke: ${file.absolutePath}", Toast.LENGTH_SHORT).show()
+                                    adapter.markAsDownloaded(song.url)
+                                }
                             }
-                            adapter.markAsDownloaded(song.url)
                         } else {
                             Toast.makeText(context, "Gagal download lagu", Toast.LENGTH_SHORT).show()
                         }
@@ -121,6 +136,7 @@ class TopChartDetailFragment : Fragment() {
                 )
             }
         )
+
 
         var isShuffleMode = false
 
@@ -159,7 +175,21 @@ class TopChartDetailFragment : Fragment() {
         chartViewModel.songs.observe(viewLifecycleOwner) { songs ->
             currentSongList = songs
             adapter.updateSongs(songs)
-            adapter.checkDownloadedStatus(requireContext())
+            lifecycleScope.launch {
+                val dao = AppDatabase.getDatabase(requireContext()).songDao()
+                dao.getDownloadedFilePaths().collect { paths ->
+                    val downloaded = mutableSetOf<String>()
+                    currentSongList.forEach { song ->
+                        val fileName = "${song.title}_${song.artist}.mp3"
+                            .replace("[^a-zA-Z0-9._-]".toRegex(), "_")
+                        val filePath = File(requireContext().getExternalFilesDir(null), "PurryMusic/$fileName").absolutePath
+                        if (filePath in paths) {
+                            downloaded.add(song.url)
+                        }
+                    }
+                    adapter.setDownloadedSongs(downloaded)
+                }
+            }
         }
 
         binding.toolbar.setNavigationOnClickListener {

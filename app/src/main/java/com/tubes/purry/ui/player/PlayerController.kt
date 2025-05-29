@@ -12,6 +12,9 @@ import android.util.Log
 import androidx.core.net.toUri
 import com.tubes.purry.ui.player.NowPlayingViewModel.RepeatMode
 import com.tubes.purry.utils.MusicNotificationService
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileNotFoundException
 
 
 object PlayerController {
@@ -102,9 +105,29 @@ object PlayerController {
                             } ?: throw IllegalArgumentException("AssetFileDescriptor null untuk URI: $uri")
                         }
                         path.isNotBlank() -> {
-                            Log.d("PlayerController", "Memutar dari file lokal: $path")
-                            setDataSource(path)
+                            val file = File(path)
+                            if (!file.exists()) {
+                                Log.e("PlayerController", "❌ File tidak ditemukan: $path")
+                                throw FileNotFoundException("File not found at $path")
+                            }
+                            if (!file.canRead()) {
+                                Log.e("PlayerController", "❌ File tidak bisa dibaca: $path")
+                            }
+                            Log.d("PlayerController", "✅ File ditemukan. Memutar dari lokal: ${file.absolutePath}, size: ${file.length()}")
+
+                            val fis = FileInputStream(file)
+                            try {
+                                setDataSource(fis.fd)
+                                Log.d("PlayerController", "✅ setDataSource berhasil untuk file lokal")
+                            } catch (e: Exception) {
+                                Log.e("PlayerController", "❌ Gagal setDataSource dari file: ${e.message}")
+                                throw e
+                            } finally {
+                                fis.close()
+                            }
+
                         }
+
                         else -> throw IllegalArgumentException("filePath kosong atau tidak valid")
                     }
                 } catch (e: Exception) {
