@@ -252,21 +252,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="fb2d9b52-b320-4578-a27c-b77d399ccfa2" name="Changes" comment="merge audio &amp; rec">
-      <change beforePath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_20_05_25_11_30_[Changes]/shelved.patch" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_20_05_25_11_30__Changes_.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/MainActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/MainActivity.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/PurrytifyApplication.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/PurrytifyApplication.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/local/AppDatabase.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/local/AppDatabase.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/local/SongDao.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/local/SongDao.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/model/OnlineSong.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/model/OnlineSong.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/chart/OnlineSongListAdapter.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/chart/OnlineSongListAdapter.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/chart/TopChartDetailFragment.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/chart/TopChartDetailFragment.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/library/SongViewModelFactory.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/library/SongViewModelFactory.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/player/PlayerController.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/player/PlayerController.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/profile/ProfileViewModelFactory.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/profile/ProfileViewModelFactory.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/recommendation/RecommendationDetailActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/ui/recommendation/RecommendationDetailActivity.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/utils/DownloadUtils.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/utils/DownloadUtils.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/utils/MusicNotificationService.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/tubes/purry/utils/MusicNotificationService.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/fragment_mini_player.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/fragment_mini_player.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/fragment_song_detail.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/fragment_song_detail.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradle/libs.versions.toml" beforeDir="false" afterPath="$PROJECT_DIR$/gradle/libs.versions.toml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -276,7 +270,7 @@
   <component name="ClangdSettings">
     <option name="formatViaClangd" value="false" />
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[DeviceId(pluginId=LocalEmulator, isTemplate=false, identifier=path=C:\Users\HP\.android\avd\Medium_Phone_2.avd)]" />
+  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[DeviceId(pluginId=LocalEmulator, isTemplate=false, identifier=path=C:\Users\edarr\.android\avd\Medium_Phone.avd)]" />
   <component name="ExternalProjectsData">
     <projectState path="$PROJECT_DIR$">
       <ProjectState />
@@ -340,6 +334,9 @@
     &quot;accountId&quot;: &quot;7fc37d1c-ed82-4f3d-8fd0-e1abf17a0517&quot;
   }
 }</component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$USER_HOME$/AppData/Local/Google/AndroidStudio2024.3/device-explorer/Medium Phone API 36/_/data/data/com.tubes.purry/shared_prefs/purrytify_encrypted_prefs.xml" root0="SKIP_INSPECTION" />
+  </component>
   <component name="ProblemsViewState">
     <option name="selectedTabId" value="CurrentFile" />
   </component>
@@ -749,28 +746,17 @@
     <MESSAGE value="merge audio &amp; rec" />
     <option name="LAST_COMMIT_MESSAGE" value="merge audio &amp; rec" />
   </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/app/src/main/java/com/tubes/purry/data/local/AppDatabase.kt</url>
-          <line>33</line>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
-  </component>
   <component name="play_dynamic_filters_status">
     <option name="appIdToCheckInfo">
       <map>
         <entry key="com.tubes.purry">
           <value>
-            <CheckInfo lastCheckTimestamp="1748480908080" />
+            <CheckInfo lastCheckTimestamp="1749364676909" />
           </value>
         </entry>
         <entry key="com.tubes.purry.test">
           <value>
-            <CheckInfo lastCheckTimestamp="1748480908104" />
+            <CheckInfo lastCheckTimestamp="1749364676933" />
           </value>
         </entry>
       </map>

@@ -1,11 +1,14 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/miniPlayerContainer"
     android:layout_width="match_parent"
     android:layout_height="64dp"
     android:background="#222"
     android:padding="8dp"
     android:orientation="horizontal"
-    android:gravity="center_vertical">
+    android:gravity="center_vertical"
+    android:visibility="gone"
+    tools:visibility="visible">
 
     <ImageView
         android:id="@+id/imageCover"

@@ -2,31 +2,34 @@ package com.tubes.purry.ui.player
 
 import android.content.Context
 import android.content.Intent
-import android.content.res.AssetFileDescriptor
 import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.net.Uri
-import android.os.FileUtils
 import com.tubes.purry.data.model.Song
 import android.util.Log
-import androidx.core.net.toUri
-import com.tubes.purry.ui.player.NowPlayingViewModel.RepeatMode
 import com.tubes.purry.utils.MusicNotificationService
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileNotFoundException
-
+import android.os.Handler
+import android.os.Looper
+import java.util.Timer
+import kotlin.concurrent.timerTask
 
 object PlayerController {
     private var mediaPlayer: MediaPlayer? = null
     private var isPreparing = false
     private var isPrepared = false
     private var currentlyPlaying: Song? = null
+    private var progressUpdateTimer: Timer? = null
 
     var onCompletion: (() -> Unit)? = null
     var onPrepared: (() -> Unit)? = null
     var onDurationReady: ((Int) -> Unit)? = null
     var onSeeked: ((Int) -> Unit)? = null
+    var onPlayerProgressChanged: ((Int) -> Unit)? = null // ADD THIS LINE for progress updates
+
+    private const val TAG = "PlayerController" // Define TAG for consistent logging
 
     fun getCurrentSong(): Song? {
         return currentlyPlaying
@@ -74,6 +77,7 @@ object PlayerController {
                     onDurationReady?.invoke(duration)
                     onPrepared?.invoke()
 
+                    startProgressUpdater()
                     context.startService(Intent(context, MusicNotificationService::class.java))
                 }
 
@@ -263,5 +267,29 @@ object PlayerController {
             Log.e("PlayerController", "Error ensuring duration: ${e.message}")
             0
         }
+    }
+
+    // ADD THESE FUNCTIONS FOR PERIODIC PROGRESS UPDATES
+    private fun startProgressUpdater() {
+        stopProgressUpdater() // Ensure only one updater is running
+        val handler = Handler(Looper.getMainLooper())
+        progressUpdateTimer = Timer()
+        progressUpdateTimer?.schedule(timerTask {
+            handler.post {
+                if (mediaPlayer?.isPlaying == true) {
+                    val currentPosition = mediaPlayer?.currentPosition ?: 0
+                    // This callback will now send updates to MusicNotificationService
+                    onPlayerProgressChanged?.invoke(currentPosition)
+                    Log.d(TAG, "Progress update pushed: $currentPosition ms") // ADD THIS LOG
+                }
+            }
+        }, 0, 1000) // Update every 1 second (1000ms)
+        Log.d(TAG, "Progress updater started.") // ADD THIS LOG
+    }
+
+    private fun stopProgressUpdater() {
+        progressUpdateTimer?.cancel()
+        progressUpdateTimer = null
+        Log.d(TAG, "Progress updater stopped.") // ADD THIS LOG
     }
 }

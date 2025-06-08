@@ -41,11 +41,13 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Log.d("MiniPlayerDebug", "MainActivity onCreate started.")
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         nowPlayingViewModel = (application as PurrytifyApplication).nowPlayingViewModel
         NowPlayingManager.setViewModel(nowPlayingViewModel)
+        Log.d("MiniPlayerDebug", "nowPlayingViewModel initialized. Current song: ${nowPlayingViewModel.currSong.value?.title}")
 
         binding.miniPlayerContainer.visibility = View.GONE
         nowPlayingViewModel.currSong.observe(this) { song ->
@@ -135,20 +137,20 @@ class MainActivity : AppCompatActivity(), NetworkStateReceiver.NetworkStateListe
         )[ProfileViewModel::class.java]
         profileViewModel.getProfileData()
 
-        Firebase.dynamicLinks
-            .getDynamicLink(intent)
-            .addOnSuccessListener { pendingDynamicLinkData ->
-                val deepLink: Uri? = pendingDynamicLinkData?.link
-                if (deepLink != null) {
-                    binding.root.post { handleDeepLink(deepLink) }
-                }
-            }
-            .addOnFailureListener {
-                // Optional: log error
-            }
-
-        handleIntentNavigation(intent)
-        binding.root.post { handleDeepLink(intent?.data) }
+//        Firebase.dynamicLinks
+//            .getDynamicLink(intent)
+//            .addOnSuccessListener { pendingDynamicLinkData ->
+//                val deepLink: Uri? = pendingDynamicLinkData?.link
+//                if (deepLink != null) {
+//                    binding.root.post { handleDeepLink(deepLink) }
+//                }
+//            }
+//            .addOnFailureListener {
+//                // Optional: log error
+//            }
+//
+//        handleIntentNavigation(intent)
+//        binding.root.post { handleDeepLink(intent?.data) }
 
         binding.menuHome?.setOnClickListener {
             val navController = findNavController(R.id.nav_host_fragment)

@@ -62,6 +62,30 @@
         android:layout_marginBottom="32dp" />
 
     <!-- Song Info -->
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="8dp">
+
+        <View
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:layout_weight="1" />
+
+        <ImageButton
+            android:id="@+id/btnFavorite"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackground"
+            android:contentDescription="Add to Favorites"
+            android:src="@drawable/ic_heart_outline"
+            app:tint="@android:color/white"
+            android:layout_marginEnd="8dp"/>
+    </LinearLayout>
+
     <TextView
         android:id="@+id/tvTitle"
         android:layout_width="match_parent"
@@ -135,83 +159,66 @@
     <!-- Control Buttons -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:layout_height="60dp"
+        android:layout_marginBottom="30dp"
         android:gravity="center"
-        android:layout_marginBottom="24dp">
+        android:orientation="horizontal">
 
         <!-- Shuffle Button -->
         <ImageButton
             android:id="@+id/btnShuffle"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="30dp"
             android:background="?attr/selectableItemBackground"
-            android:src="@drawable/ic_shuffle"
             android:contentDescription="Shuffle"
-            app:tint="@android:color/white"
-            android:layout_marginEnd="16dp" />
+            android:src="@drawable/ic_shuffle"
+            app:tint="@android:color/white" />
 
         <!-- Previous Button -->
         <ImageButton
             android:id="@+id/btnPrev"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="30dp"
             android:background="?attr/selectableItemBackground"
-            android:src="@drawable/ic_skip_previous"
             android:contentDescription="Previous"
-            app:tint="@android:color/white"
-            android:layout_marginEnd="16dp" />
+            android:src="@drawable/ic_skip_previous"
+            app:tint="@android:color/white" />
 
         <!-- Play/Pause Button -->
         <ImageButton
             android:id="@+id/btnPlayPause"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:background="@drawable/circle_button_background"
-            android:src="@drawable/ic_play_btn"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_marginEnd="30dp"
             android:contentDescription="Play/Pause"
-            android:layout_marginEnd="16dp" />
+            android:src="@drawable/ic_play_btn"
+            android:background="@android:color/transparent"/>
 
         <!-- Next Button -->
         <ImageButton
             android:id="@+id/btnNext"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="30dp"
             android:background="?attr/selectableItemBackground"
-            android:src="@drawable/ic_skip_next"
             android:contentDescription="Next"
-            app:tint="@android:color/white"
-            android:layout_marginEnd="16dp" />
+            android:src="@drawable/ic_skip_next"
+            app:tint="@android:color/white" />
 
         <!-- Repeat Button -->
         <ImageButton
             android:id="@+id/btnRepeat"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:background="?attr/selectableItemBackground"
-            android:src="@drawable/ic_repeat"
             android:contentDescription="Repeat"
+            android:src="@drawable/ic_repeat"
             app:tint="@android:color/white" />
 
     </LinearLayout>
 
     <!-- Bottom Action Buttons -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center">
-
-        <!-- Favorite Button -->
-        <ImageButton
-            android:id="@+id/btnFavorite"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:background="?attr/selectableItemBackground"
-            android:src="@drawable/ic_heart_outline"
-            android:contentDescription="Add to Favorites"
-            app:tint="@android:color/white" />
-
-    </LinearLayout>
 
 </LinearLayout>

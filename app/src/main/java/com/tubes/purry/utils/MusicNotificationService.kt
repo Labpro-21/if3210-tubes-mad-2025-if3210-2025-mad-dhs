@@ -209,9 +209,14 @@ class MusicNotificationService : Service() {
                     .setShowCancelButton(true)
                     .setCancelButtonIntent(dismissPendingIntent)
             )
-            .build()
 
-        startForeground(NOTIFICATION_ID, notification)
+        if (duration > 0) {
+            notification.setProgress(duration, currentPosition, false)
+        } else {
+            notification.setProgress(0, 0, true)
+        }
+
+        startForeground(NOTIFICATION_ID, notification.build()) // Use .build() here
     }
 
     private fun setupMediaMetadata(song: com.tubes.purry.data.model.Song, artworkBitmap: Bitmap) {

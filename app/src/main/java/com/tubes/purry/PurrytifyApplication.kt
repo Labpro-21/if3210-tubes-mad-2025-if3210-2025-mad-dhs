@@ -4,10 +4,7 @@ import android.app.Application
 import android.content.IntentFilter
 import android.net.ConnectivityManager
 import android.util.Log
-import com.tubes.purry.data.remote.ApiClient
-import com.tubes.purry.utils.NetworkStateReceiver
-import com.tubes.purry.utils.NetworkUtil
-import com.tubes.purry.utils.SessionManager
+import com.tubes.purry.ui.player.PlayerController
 
 class PurrytifyApplication : Application() {
     lateinit var nowPlayingViewModel: com.tubes.purry.ui.player.NowPlayingViewModel
@@ -15,6 +12,9 @@ class PurrytifyApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+
+        PlayerController.release() // NEW LINE
+
         com.tubes.purry.data.remote.ApiClient.init(this)
 
         val db = com.tubes.purry.data.local.AppDatabase.getDatabase(this)
